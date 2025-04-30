@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_user_books
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: user_books
+            columns:
+              - column:
+                  name: user_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: user_books_users_fk
+                    referencedTableName: users
+                    referencedColumnNames: user_id
+              - column:
+                  name: book_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: user_books_books_fk
+                    referencedTableName: books
+                    referencedColumnNames: book_id
+              - column:
+                  name: status
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_added
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rating
+                  type: tinyint
+                  constraints:
+                    nullable: true
+        - addPrimaryKey:
+            tableName: user_books
+            columnNames: user_id, book_id
+            constraintName: user_books_pk

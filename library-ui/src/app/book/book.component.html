@@ -1,0 +1,18 @@
+<mat-card>
+  @if (book().coverImageUrl) {
+    <div class="card-image">
+      <img ngSrc="{{book().coverImageUrl}}" width="100" height="140" alt="Book cover"/>
+    </div>
+  }
+  <div class="mat-card-content">
+    <p class="book-title">{{ book().title }}</p>
+    <p class="book-category">{{ book().categoryName }}</p>
+    <p class="authors">
+      @for (entry of authors; track entry[0]) {
+        <span>{{ entry[1] }}</span>
+      }
+    </p>
+  </div>
+
+  <ng-content select="[book-actions]"></ng-content>
+</mat-card>

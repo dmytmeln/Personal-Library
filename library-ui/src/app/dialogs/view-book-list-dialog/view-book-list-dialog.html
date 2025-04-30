@@ -1,0 +1,58 @@
+<h4 mat-dialog-title>Choose book you wish to add to your library!</h4>
+
+<mat-form-field>
+  <mat-label>Пошук</mat-label>
+  <input [(ngModel)]="this.searchText" matInput (keyup)="this.applyFilter($event)" placeholder="Атрибут книги"/>
+</mat-form-field>
+<div class="mat-elevation-z8">
+  <table mat-table matSort [dataSource]="this.dataSource">
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Назва</th>
+      <td mat-cell *matCellDef="let book"> {{ book.title }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="categoryName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Жанр</th>
+      <td mat-cell *matCellDef="let book"> {{ book.categoryName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="publishYear">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">Рік</th>
+      <td mat-cell *matCellDef="let book"> {{ book.publishYear }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="language">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Мова</th>
+      <td mat-cell *matCellDef="let book"> {{ book.language }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="pages">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">Сторінки</th>
+      <td mat-cell *matCellDef="let book"> {{ book.pages }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Дії</th>
+      <td mat-cell *matCellDef="let book">
+        <button mat-button color="accent" [mat-dialog-close]="book.id" [disabled]="this.isBookInLibrary(book)">
+          Додати
+        </button>
+        <button mat-button color="primary" (click)="this.onDetails(book)">Деталі</button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="this.displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: this.displayedColumns;"></tr>
+  </table>
+  <mat-paginator (page)="this.onPageChange($event)"
+                 [length]="this.totalElements"
+                 [pageSizeOptions]="[this.size]"
+                 showFirstLastButtons
+                 hidePageSize
+                 aria-label="Select page of periodic elements">
+  </mat-paginator>
+</div>
+
+<mat-dialog-actions align="start">
+  <button mat-button mat-dialog-close>Закрити</button>
+</mat-dialog-actions>

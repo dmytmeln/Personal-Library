@@ -1,0 +1,7 @@
+<h2 class="collections-title">Мої колекції</h2>
+<button class="btn" mat-flat-button (click)="this.openCreateCollectionDialog()">Створити колекцію</button>
+<div class="collections">
+  @for (collection of collections; track collection.id) {
+    <app-collection-card [collection]="collection"/>
+  }
+</div>

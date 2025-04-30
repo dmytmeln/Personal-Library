@@ -1,0 +1,36 @@
+<button class="btn" mat-flat-button (click)="this.openViewBookListDialog()">Додати книгу</button>
+
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
+
+  <mat-tab label="Всі книги">
+    <div class="mat-tab-content">
+      <app-book-expansion-list
+        [entries]="userBooksByStatus"
+        [getTitle]="getStatusName"
+        (deleteBook)="deleteUserBook($event)"
+        (statusChange)="changeUserBookStatus($event)"
+        (ratingChange)="changeUserBookRating($event)"/>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Жанри">
+    <div class="mat-tab-content">
+      <app-book-expansion-list
+        [entries]="userBooksByCategory"
+        (deleteBook)="deleteUserBook($event)"
+        (statusChange)="changeUserBookStatus($event)"
+        (ratingChange)="changeUserBookRating($event)"/>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Автори">
+    <div class="mat-tab-content">
+      <app-book-expansion-list
+        [entries]="userBooksByAuthor"
+        (deleteBook)="deleteUserBook($event)"
+        (statusChange)="changeUserBookStatus($event)"
+        (ratingChange)="changeUserBookRating($event)"/>
+    </div>
+  </mat-tab>
+
+</mat-tab-group>

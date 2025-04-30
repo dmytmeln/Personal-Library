@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_collection_books
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: collections_book
+            columns:
+              - column:
+                  name: collection_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: collection_books_collections_fk
+                    referencedTableName: collections
+                    referencedColumnNames: collection_id
+              - column:
+                  name: book_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: collection_books_books_fk
+                    referencedTableName: books
+                    referencedColumnNames: book_id
+              - column:
+                  name: date_added
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: collections_book
+            columnNames: book_id, collection_id
+            constraintName: collections_book_pk

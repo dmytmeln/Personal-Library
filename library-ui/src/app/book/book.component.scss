@@ -1,0 +1,32 @@
+mat-card {
+  height: 100%;
+}
+
+.mat-card-content > * {
+  margin: 7px 5px 7px 10px;
+}
+
+.card-image {
+  margin-top: 5px;
+  text-align: center;
+}
+
+.authors {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+
+  span {
+    margin-right: 7px;
+  }
+}
+
+.book-title {
+  font-weight: 600;
+}
+
+.book-category {
+  font-size: 14px;
+  font-weight: 600;
+  color: #b2afaf;
+}

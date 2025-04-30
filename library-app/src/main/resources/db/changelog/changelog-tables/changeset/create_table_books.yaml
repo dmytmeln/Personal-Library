@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_books
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: books
+            columns:
+              - column:
+                  name: book_id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: books_pk
+              - column:
+                  name: title
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: books_categories_fk
+                    referencedTableName: categories
+                    referencedColumnNames: category_id
+              - column:
+                  name: publish_year
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: language
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: pages
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cover_image_url
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: description
+                  type: text
+                  constraints:
+                    nullable: true

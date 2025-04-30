@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_authors.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_categories.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_books.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_book_authors.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_users.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_user_books.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_collections.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_collection_books.yaml

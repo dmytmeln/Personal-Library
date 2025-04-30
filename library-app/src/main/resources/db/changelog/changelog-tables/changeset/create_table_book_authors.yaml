@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_book_authors
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: book_authors_books_fk
+                    referencedTableName: books
+                    referencedColumnNames: book_id
+              - column:
+                  name: author_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: book_authors_authors_fk
+                    referencedTableName: authors
+                    referencedColumnNames: author_id
+        - addPrimaryKey:
+            tableName: book_authors
+            columnNames: book_id, author_id
+            constraintName: book_authors_pk

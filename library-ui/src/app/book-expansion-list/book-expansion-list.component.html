@@ -1,0 +1,25 @@
+<mat-accordion multi>
+  @for (entry of entries(); track entry[0]) {
+    <mat-expansion-panel class="panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ getTitle()(entry[0]) }}
+          <span class="books-number">{{ entry[1].length }}</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="books-list">
+        @for (userBook of entry[1]; track userBook.book.id) {
+          <app-book [book]="userBook.book">
+            <div book-actions>
+              <app-library-book-actions [userBook]="userBook"
+                                        (deleteBook)="deleteBook.emit($event)"
+                                        (statusChange)="statusChange.emit($event)"
+                                        (ratingChange)="ratingChange.emit($event)"/>
+            </div>
+          </app-book>
+        }
+      </div>
+
+    </mat-expansion-panel>
+  }
+</mat-accordion>

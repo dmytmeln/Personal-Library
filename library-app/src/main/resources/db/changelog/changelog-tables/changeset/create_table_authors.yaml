@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_authors
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: authors
+            columns:
+              - column:
+                  name: author_id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: authors_pk
+              - column:
+                  name: full_name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: country
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: birth_year
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: death_year
+                  type: smallint
+                  constraints:
+                    nullable: true
+              - column:
+                  name: biography
+                  type: text
+                  constraints:
+                    nullable: true

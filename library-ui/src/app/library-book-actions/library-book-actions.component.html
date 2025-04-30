@@ -1,0 +1,44 @@
+<button class="more-icon" mat-icon-button [matMenuTriggerFor]="menu"
+        aria-label="Example icon-button with a menu">
+  <mat-icon>more_vert</mat-icon>
+</button>
+
+<mat-menu #menu="matMenu" yPosition="below" xPosition="after">
+  <button mat-menu-item>
+    <mat-icon>info</mat-icon>
+    <span>Деталі книги</span>
+  </button>
+  <button mat-menu-item [matMenuTriggerFor]="status">
+    <mat-icon>label</mat-icon>
+    <span>Змінити статус</span>
+  </button>
+  <button mat-menu-item (click)="this.deleteBook.emit(this.userBook());">
+    <mat-icon>delete</mat-icon>
+    <span>Видалити з бібліотеки</span>
+  </button>
+  <button mat-menu-item>
+    <mat-icon>collections_bookmark</mat-icon>
+    <span>Додати до колекції</span>
+  </button>
+  <button mat-menu-item [matMenuTriggerFor]="rating">
+    <mat-icon>star</mat-icon>
+    <span>Оцінити</span>
+  </button>
+</mat-menu>
+
+<mat-menu #rating="matMenu" yPosition="below" xPosition="after">
+  <app-book-rating [rating]="(this.userBook().rating || 0)"
+                   (ratingChange)="this.ratingChange.emit({bookId: this.userBook().book.id, rating: $event})">
+
+  </app-book-rating>
+</mat-menu>
+
+<mat-menu #status="matMenu" yPosition="below" xPosition="after">
+  @for (userBookStatus of USER_BOOK_STATUSES; track $index) {
+    <button mat-menu-item
+            [disabled]="this.userBook().status === userBookStatus"
+            (click)="this.statusChange.emit([this.userBook(), userBookStatus])">
+      <span>{{ getStatusName(userBookStatus) }}</span>
+    </button>
+  }
+</mat-menu>

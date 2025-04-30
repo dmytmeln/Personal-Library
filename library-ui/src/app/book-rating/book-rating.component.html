@@ -1,0 +1,7 @@
+<div class="rating">
+  @for (star of [1, 2, 3, 4, 5]; track star) {
+    <button mat-icon-button (click)="this.rating.set(star)">
+      <mat-icon [ngClass]="{'filled': star <= this.rating()}">star</mat-icon>
+    </button>
+  }
+</div>

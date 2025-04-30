@@ -1,0 +1,11 @@
+.rating {
+  display: flex;
+}
+
+mat-icon {
+  color: gray;
+
+  &.filled {
+    color: gold;
+  }
+}

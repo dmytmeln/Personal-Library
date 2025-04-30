@@ -1,0 +1,19 @@
+.books-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+app-book {
+  width: 190px;
+  min-height: 200px;
+}
+
+.books-number {
+  margin-left: 20px;
+}
+
+.panel {
+  margin-top: 20px;
+}

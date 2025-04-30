@@ -1,0 +1,32 @@
+<form class="collection-form" (ngSubmit)="createCollection()" [formGroup]="collectionForm">
+  <mat-form-field class="collection-input">
+    <mat-label>Назва колекції</mat-label>
+    <input matInput formControlName="name">
+  </mat-form-field>
+
+  <mat-form-field class="collection-input">
+    <mat-label>Опис колекції</mat-label>
+    <textarea matInput formControlName="description"></textarea>
+  </mat-form-field>
+
+  <div class="color-picker">
+    <label>Колір колекції:</label>
+    <div class="color-options">
+      @for (color of colors; track color) {
+        <button
+          type="button"
+          mat-icon-button
+          [ngStyle]="{'background-color': color}"
+          [class.selected]="color === selectedColor"
+          (click)="selectColor(color)">
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button type="submit" mat-flat-button (click)="createCollection()" [disabled]="collectionForm.invalid">Створити
+    </button>
+    <button mat-stroked-button mat-dialog-close>Скасувати</button>
+  </div>
+</form>
