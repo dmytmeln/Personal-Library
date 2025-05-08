@@ -1,0 +1,52 @@
+.container {
+  margin: 60px;
+}
+
+.author-name {
+  font-size: 28px;
+}
+
+.author-attribute-label {
+  font-weight: 600;
+}
+
+.author-years {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.author-country {
+  margin-top: 10px;
+
+  .author-attribute-label {
+    margin-right: 8px;
+  }
+}
+
+.author-biography {
+  margin-top: 15px;
+
+  .author-attribute-label {
+    font-size: 20px;
+  }
+
+  .author-biography-text {
+    margin-top: 14px;
+    background-color: #1f1c1f;
+    padding: 20px;
+    border-radius: 4px;
+  }
+}
+
+.author-books {
+  margin-top: 20px;
+
+  mat-form-field {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .author-attribute-label {
+    font-size: 20px;
+  }
+}

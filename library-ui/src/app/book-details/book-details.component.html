@@ -1,0 +1,66 @@
+<div class="container">
+  <div class="book-header">
+    @if (book.coverImageUrl) {
+      <div class="card-image">
+        <img ngSrc="{{book.coverImageUrl}}" priority width="200" height="300" alt="Book cover"/>
+      </div>
+    }
+
+    <div class="book-info">
+      <h3 class="book-title">{{ book.title }}</h3>
+      <div class="book-authors">
+        @for (entry of authors; track entry[0]) {
+          <a class="link" (click)="goToAuthorDetails(entry[0])">{{ entry[1] }}</a>
+        }
+      </div>
+      @if (!bookDetails.isInLibrary) {
+        <button mat-flat-button (click)="addBookToLibrary()">Додати до бібліотеки</button>
+      }
+      <div>Моя оцінка:
+        <app-book-rating [rating]="bookDetails.myRating" (ratingChange)="changeRating($event)"/>
+      </div>
+      <div>
+        Середня оцінка
+        <div class="average-rating">
+          <app-book-rating [rating]="bookDetails.averageRating" [disabled]="true"/>
+          <span>Кількість відгуків: {{ bookDetails.ratingsNumber }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="book-details">
+    <h4>Інформація про книгу</h4>
+    <div class="book-details-info">
+      <div class="book-details-group">
+        <div><span class="book-attribute-label">Жанр:</span> {{ book.categoryName }}</div>
+        <div><span class="book-attribute-label">Кількість сторінок:</span> {{ book.pages }}</div>
+        <div><span class="book-attribute-label">Мова:</span> {{ book.language }}</div>
+        <div><span class="book-attribute-label">Рік видання:</span> {{ book.publishYear }}</div>
+        <div>
+          <span class="book-attribute-label">Статус: </span>
+          @if (bookDetails && bookDetails.status) {
+            {{ getStatusName(bookDetails.status) }}
+          } @else {
+            Не в бібліотеці
+          }
+        </div>
+      </div>
+      <div class="book-collections">
+        <span class="book-attribute-label">У колекціях:</span>
+        @for (collection of bookDetails.collections; track collection.id) {
+          <div class="collections">
+            <a mat-button (click)="goToCollection(collection)">{{ collection.name }}</a>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (book.description) {
+    <div class="book-description">
+      <span class="book-attribute-label">Опис:</span>
+      <p class="book-description-text">{{ book.description }}</p>
+    </div>
+  }
+</div>

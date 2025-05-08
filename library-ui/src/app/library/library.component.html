@@ -5,31 +5,31 @@
   <mat-tab label="Всі книги">
     <div class="mat-tab-content">
       <app-book-expansion-list
-        [entries]="userBooksByStatus"
+        [entries]="libraryBooksByStatus"
         [getTitle]="getStatusName"
-        (deleteBook)="deleteUserBook($event)"
-        (statusChange)="changeUserBookStatus($event)"
-        (ratingChange)="changeUserBookRating($event)"/>
+        (deleteBook)="deleteLibraryBook($event)"
+        (statusChange)="changeLibraryBookStatus($event)"
+        (ratingChange)="changeLibraryBookRating($event)"/>
     </div>
   </mat-tab>
 
   <mat-tab label="Жанри">
     <div class="mat-tab-content">
       <app-book-expansion-list
-        [entries]="userBooksByCategory"
-        (deleteBook)="deleteUserBook($event)"
-        (statusChange)="changeUserBookStatus($event)"
-        (ratingChange)="changeUserBookRating($event)"/>
+        [entries]="libraryBooksByCategory"
+        (deleteBook)="deleteLibraryBook($event)"
+        (statusChange)="changeLibraryBookStatus($event)"
+        (ratingChange)="changeLibraryBookRating($event)"/>
     </div>
   </mat-tab>
 
   <mat-tab label="Автори">
     <div class="mat-tab-content">
       <app-book-expansion-list
-        [entries]="userBooksByAuthor"
-        (deleteBook)="deleteUserBook($event)"
-        (statusChange)="changeUserBookStatus($event)"
-        (ratingChange)="changeUserBookRating($event)"/>
+        [entries]="libraryBooksByAuthor"
+        (deleteBook)="deleteLibraryBook($event)"
+        (statusChange)="changeLibraryBookStatus($event)"
+        (ratingChange)="changeLibraryBookRating($event)"/>
     </div>
   </mat-tab>
 

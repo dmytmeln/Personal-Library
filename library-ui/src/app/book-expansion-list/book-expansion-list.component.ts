@@ -7,7 +7,7 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
-import {UserBook, UserBookStatus} from '../interfaces/user-book';
+import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 
 @Component({
   selector: 'app-book-expansion-list',
@@ -24,8 +24,8 @@ import {UserBook, UserBookStatus} from '../interfaces/user-book';
 })
 export class BookExpansionListComponent {
   getTitle = input<(key: any) => string>((key) => String(key));
-  entries = input<Map<string | UserBookStatus, UserBook[]>>(new Map());
-  deleteBook = output<UserBook>();
+  entries = input<Map<string | LibraryBookStatus, LibraryBook[]>>(new Map());
+  deleteBook = output<LibraryBook>();
   ratingChange = output<{ bookId: number, rating: number }>();
-  statusChange = output<[UserBook, UserBookStatus]>();
+  statusChange = output<[LibraryBook, LibraryBookStatus]>();
 }

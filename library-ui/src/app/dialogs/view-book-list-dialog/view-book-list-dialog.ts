@@ -1,14 +1,15 @@
-import {AfterViewInit, Component, Inject, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogTitle,} from '@angular/material/dialog';
-import {UserBook} from '../../interfaces/user-book';
+import {LibraryBook} from '../../interfaces/library-book';
 import {Book} from '../../interfaces/book';
 import {MatButton} from '@angular/material/button';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
-import {BookService} from '../../services/book.service';
 import {FormsModule} from '@angular/forms';
 import {MatSort, MatSortModule} from '@angular/material/sort';
+import {Observable} from 'rxjs';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-view-book-list-dialog',
@@ -28,11 +29,12 @@ import {MatSort, MatSortModule} from '@angular/material/sort';
   templateUrl: './view-book-list-dialog.html',
   styleUrl: './view-book-list-dialog.scss'
 })
-export class ViewBookListDialog implements AfterViewInit {
+export class ViewBookListDialog implements AfterViewInit, OnInit {
+
+  readonly SIZE: number = 10;
 
   totalElements: number = 0;
-  page: number = 0;
-  size: number = 10;
+  private currentPage: number = 0;
   searchText: string = '';
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -40,22 +42,21 @@ export class ViewBookListDialog implements AfterViewInit {
   dataSource = new MatTableDataSource<Book>();
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private readonly userBooks: ReadonlyArray<UserBook>,
-    private bookService: BookService,
+    @Inject(MAT_DIALOG_DATA) private readonly data: ViewBookListDialogData,
+    private router: Router,
   ) {
+  }
+
+  ngOnInit(): void {
+    this.getBooks();
   }
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
-    this.getBooks();
-  }
-
-  onDetails(book: Book): void {
-    // todo: go to book details
   }
 
   isBookInLibrary(book: Book): boolean {
-    return this.userBooks.some(userBook => userBook.book.id === book.id);
+    return this.data.libraryBooks.some(libraryBook => libraryBook.book.id === book.id);
   }
 
   applyFilter(event: Event) {
@@ -64,17 +65,27 @@ export class ViewBookListDialog implements AfterViewInit {
   }
 
   onPageChange(e: PageEvent) {
-    this.page = e.pageIndex;
-    this.size = e.pageSize;
+    this.searchText = '';
+    this.dataSource.filter = '';
+    this.currentPage = e.pageIndex;
     this.getBooks();
   }
 
-  private getBooks() {
-    this.bookService.getAll(this.page, this.size).subscribe(value => {
-      this.totalElements = value.totalElements;
-      this.dataSource.data = value.content;
-      this.searchText = ''
+  goToBookDetails(book: Book) {
+    this.router.navigate(['book-details'], {state: book}).then(() => {
     });
   }
 
+  private getBooks() {
+    this.data.fetchBooksFn(this.currentPage, this.SIZE).subscribe(page => {
+      this.totalElements = page.totalElements;
+      this.dataSource.data = page.content;
+    });
+  }
+
+}
+
+export interface ViewBookListDialogData {
+  libraryBooks: ReadonlyArray<LibraryBook>;
+  fetchBooksFn: (page: number, size: number) => Observable<{ totalElements: number, content: Book[] }>;
 }

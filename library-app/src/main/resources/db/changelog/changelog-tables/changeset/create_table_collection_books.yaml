@@ -4,7 +4,7 @@ databaseChangeLog:
       author: Dmytro Melnyk
       changes:
         - createTable:
-            tableName: collections_book
+            tableName: collection_books
             columns:
               - column:
                   name: collection_id
@@ -15,19 +15,19 @@ databaseChangeLog:
                     referencedTableName: collections
                     referencedColumnNames: collection_id
               - column:
-                  name: book_id
+                  name: library_book_id
                   type: integer
                   constraints:
                     nullable: false
-                    foreignKeyName: collection_books_books_fk
-                    referencedTableName: books
-                    referencedColumnNames: book_id
+                    foreignKeyName: collection_books_library_books_fk
+                    referencedTableName: library_books
+                    referencedColumnNames: library_book_id
               - column:
-                  name: date_added
+                  name: added_at
                   type: timestamp
                   constraints:
                     nullable: false
         - addPrimaryKey:
-            tableName: collections_book
-            columnNames: book_id, collection_id
-            constraintName: collections_book_pk
+            tableName: collection_books
+            columnNames: library_book_id, collection_id
+            constraintName: collection_books_pk

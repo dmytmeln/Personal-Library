@@ -1,12 +1,13 @@
 import {AfterViewInit, Component} from '@angular/core';
-import {UserBookService} from '../services/user-book.service';
-import {getStatusName, UserBook, UserBookStatus} from '../interfaces/user-book';
+import {LibraryBookService} from '../services/library-book.service';
+import {getStatusName, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatButton} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatDialog} from '@angular/material/dialog';
-import {ViewBookListDialog} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
+import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
 import {BookExpansionListComponent} from '../book-expansion-list/book-expansion-list.component';
+import {BookService} from '../services/book.service';
 
 @Component({
   selector: 'app-library',
@@ -24,76 +25,80 @@ export class LibraryComponent implements AfterViewInit {
 
   protected readonly getStatusName = getStatusName;
 
-  private userBooks: UserBook[] = [];
-  public userBooksByStatus: Map<UserBookStatus, UserBook[]> = new Map();
-  public userBooksByCategory: Map<string, UserBook[]> = new Map();
-  public userBooksByAuthor: Map<string, UserBook[]> = new Map();
+  private libraryBooks: LibraryBook[] = [];
+  public libraryBooksByStatus: Map<LibraryBookStatus, LibraryBook[]> = new Map();
+  public libraryBooksByCategory: Map<string, LibraryBook[]> = new Map();
+  public libraryBooksByAuthor: Map<string, LibraryBook[]> = new Map();
 
   constructor(
-    private userBookService: UserBookService,
+    private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
+    private bookService: BookService,
   ) {
   }
 
   ngAfterViewInit(): void {
-    this.userBookService.getAll().subscribe(userBooks => {
-      this.userBooks = userBooks;
+    this.libraryBookService.getAll(0, 1000).subscribe(page => {
+      this.libraryBooks = page.content;
       this.updateBookGroups();
     });
   }
 
-  deleteUserBook(userBook: UserBook): void {
-    this.userBookService.deleteBookFromLibrary(userBook.book.id).subscribe(() => {
-      this.userBooks = this.userBooks.filter(book => book.book.id !== userBook.book.id);
+  deleteLibraryBook(libraryBook: LibraryBook): void {
+    this.libraryBookService.removeBook(libraryBook.book.id).subscribe(() => {
+      this.libraryBooks = this.libraryBooks.filter(book => book.book.id !== libraryBook.book.id);
       this.updateBookGroups();
     });
   }
 
   openViewBookListDialog() {
-    const dialogRef = this.dialog.open(ViewBookListDialog, {
-      ...DIALOG_CONFIG,
-      data: this.userBooks
-    });
+    const data: ViewBookListDialogData = {
+      libraryBooks: this.libraryBooks,
+      fetchBooksFn: (page, size) => this.bookService.getAll(null, page, size),
+    };
+    const dialogRef = this.dialog.open(ViewBookListDialog, {data});
     dialogRef.afterClosed().subscribe((bookId: number | undefined) => {
       if (bookId) {
-        this.addUserBook(bookId);
+        this.addLibraryBook(bookId);
       }
     });
   }
 
-  changeUserBookStatus(bookAndStatus: [UserBook, UserBookStatus]) {
-    this.userBookService.changeStatus(bookAndStatus[0].book.id, bookAndStatus[1]).subscribe((userBook: UserBook) => {
-      this.updateBook(userBook);
+  changeLibraryBookStatus(bookAndStatus: [LibraryBook, LibraryBookStatus]) {
+    this.libraryBookService.changeStatus(bookAndStatus[0].book.id, bookAndStatus[1]).subscribe((libraryBook: LibraryBook) => {
+      this.updateBook(libraryBook);
     });
   }
 
-  changeUserBookRating(ratingChange: { bookId: number; rating: number }) {
-    this.userBookService.changeRating(ratingChange.bookId, ratingChange.rating).subscribe((userBook: UserBook) => {
-      this.updateBook(userBook);
+  changeLibraryBookRating(ratingChange: { bookId: number; rating: number }) {
+    this.libraryBookService.changeRating(ratingChange.bookId, ratingChange.rating).subscribe((libraryBook: LibraryBook) => {
+      this.updateBook(libraryBook);
     });
   }
 
-  private updateBook(userBook: UserBook) {
-    this.userBooks = this.userBooks.filter(book => book.book.id !== userBook.book.id);
-    this.userBooks.push(userBook);
-    this.updateBookGroups();
+  private updateBook(libraryBook: LibraryBook) {
+    const index = this.libraryBooks.findIndex(lb => lb.book.id === libraryBook.book.id);
+    if (index !== -1) {
+      this.libraryBooks.splice(index, 1, libraryBook);
+      this.updateBookGroups();
+    }
   }
 
   private updateBookGroups() {
-    this.userBooksByStatus = this.groupBy((ub) => [ub.status]);
-    this.userBooksByCategory = this.groupBy((ub) => [ub.book.categoryName]);
-    this.userBooksByAuthor = this.groupBy((ub) => Object.values(ub.book.authors));
+    this.libraryBooksByStatus = this.groupBy((ub) => [ub.status]);
+    this.libraryBooksByCategory = this.groupBy((ub) => [ub.book.categoryName]);
+    this.libraryBooksByAuthor = this.groupBy((ub) => Object.values(ub.book.authors));
   }
 
-  private addUserBook(bookId: number) {
-    this.userBookService.addBookToLibrary(bookId).subscribe(userBook => {
-      this.userBooks.push(userBook);
+  private addLibraryBook(bookId: number) {
+    this.libraryBookService.addBook(bookId).subscribe(libraryBook => {
+      this.libraryBooks.push(libraryBook);
       this.updateBookGroups();
     });
   }
 
-  private groupBy(keyFn: (item: UserBook) => string[]): Map<any, UserBook[]> {
-    return this.userBooks.reduce((acc, item) => {
+  private groupBy(keyFn: (item: LibraryBook) => string[]): Map<any, LibraryBook[]> {
+    return this.libraryBooks.reduce((acc, item) => {
       const keys = keyFn(item);
       keys.forEach(key => {
         const group = acc.get(key) || [];
@@ -103,9 +108,4 @@ export class LibraryComponent implements AfterViewInit {
     }, new Map());
   }
 
-}
-
-const DIALOG_CONFIG = {
-  width: '1000px',
-  maxWidth: '1440px',
 }

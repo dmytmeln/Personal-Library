@@ -1,4 +1,4 @@
-import {Component, model} from '@angular/core';
+import {Component, input, model} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {NgClass} from '@angular/common';
 import {MatIconButton} from '@angular/material/button';
@@ -15,4 +15,6 @@ import {MatIconButton} from '@angular/material/button';
 })
 export class BookRatingComponent {
   rating = model<number>(0);
+  disabled = input<boolean>(false);
+  protected readonly Math = Math;
 }

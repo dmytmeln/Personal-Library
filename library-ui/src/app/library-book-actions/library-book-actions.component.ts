@@ -1,10 +1,11 @@
 import {Component, input, output} from '@angular/core';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
 import {MatMenuModule} from '@angular/material/menu';
-import {getStatusName, USER_BOOK_STATUSES, UserBook, UserBookStatus} from '../interfaces/user-book';
+import {getStatusName, LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-library-book-actions',
@@ -19,11 +20,22 @@ import {MatSelectModule} from '@angular/material/select';
   styleUrl: './library-book-actions.component.scss'
 })
 export class LibraryBookActionsComponent {
-  protected readonly USER_BOOK_STATUSES = USER_BOOK_STATUSES;
+  protected readonly USER_BOOK_STATUSES = LIBRARY_BOOK_STATUSES;
   protected readonly getStatusName = getStatusName;
 
-  userBook = input.required<UserBook>();
-  deleteBook = output<UserBook>();
+  constructor(
+    private router: Router,
+  ) {
+  }
+
+  libraryBook = input.required<LibraryBook>();
+  deleteBook = output<LibraryBook>();
   ratingChange = output<{ bookId: number, rating: number }>();
-  statusChange = output<[UserBook, UserBookStatus]>();
+  statusChange = output<[LibraryBook, LibraryBookStatus]>();
+
+  goToBookDetails() {
+    this.router.navigate(['book-details'], {state: this.libraryBook().book}).then(() => {
+    });
+  }
+
 }

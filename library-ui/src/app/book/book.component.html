@@ -1,7 +1,7 @@
 <mat-card>
   @if (book().coverImageUrl) {
     <div class="card-image">
-      <img ngSrc="{{book().coverImageUrl}}" width="100" height="140" alt="Book cover"/>
+      <img ngSrc="{{book().coverImageUrl}}" priority width="100" height="140" alt="Book cover"/>
     </div>
   }
   <div class="mat-card-content">
@@ -9,7 +9,7 @@
     <p class="book-category">{{ book().categoryName }}</p>
     <p class="authors">
       @for (entry of authors; track entry[0]) {
-        <span>{{ entry[1] }}</span>
+        <a class="link" (click)="goToAuthorDetails(entry[0])">{{ entry[1] }}</a>
       }
     </p>
   </div>

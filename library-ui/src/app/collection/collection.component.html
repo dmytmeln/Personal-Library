@@ -1,1 +1,32 @@
-<p>collection works!</p>
+<div class="container">
+  <div class="collection-header" [ngStyle]="{'background-color': collection.color || ''}">
+    <h3 class="collection-name">
+      {{ collection.name }}
+    </h3>
+    <p class="books-number">
+      {{ collectionBooks.length }} книг в колекції
+    </p>
+  </div>
+
+  <div class="collection-actions">
+    <button mat-flat-button (click)="openViewBookListDialog()">Додати книгу</button>
+    <button mat-flat-button (click)="openCreateCollectionDialog()">Редагувати колекцію</button>
+    <button mat-raised-button (click)="goBack()">Повернутися назад</button>
+  </div>
+
+  <div class="collection-books">
+    <h4>Книги в колекції:</h4>
+    <div class="books-list">
+      @for (collectionBook of collectionBooks; track collectionBook.libraryBook.id) {
+        <app-book [book]="collectionBook.libraryBook.book">
+          <div book-actions>
+            <app-library-book-actions [libraryBook]="collectionBook.libraryBook"
+                                      (deleteBook)="deleteBook($event)"
+                                      (statusChange)="statusChange($event)"
+                                      (ratingChange)="ratingChange($event)"/>
+          </div>
+        </app-book>
+      }
+    </div>
+  </div>
+</div>

@@ -30,3 +30,11 @@ mat-card {
   font-weight: 600;
   color: #b2afaf;
 }
+
+.link {
+  color: var(--mat-sys-primary);
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}

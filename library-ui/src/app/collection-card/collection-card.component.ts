@@ -3,7 +3,7 @@ import {Collection} from '../interfaces/collection';
 import {MatCardModule} from '@angular/material/card';
 import {MatButton} from '@angular/material/button';
 import {NgStyle} from '@angular/common';
-import {RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-collection-card',
@@ -11,7 +11,6 @@ import {RouterLink} from '@angular/router';
     MatCardModule,
     MatButton,
     NgStyle,
-    RouterLink,
   ],
   templateUrl: './collection-card.component.html',
   styleUrl: './collection-card.component.scss'
@@ -19,11 +18,25 @@ import {RouterLink} from '@angular/router';
 export class CollectionCardComponent implements OnInit {
 
   collection = input.required<Collection>();
-  updatedAt!: Date;
+  updatedAt!: string;
   defaultColor = '';
 
+  constructor(
+    private router: Router,
+  ) {
+  }
+
   ngOnInit(): void {
-    this.updatedAt = new Date(this.collection().updatedAt);
+    this.updatedAt = new Date(this.collection().updatedAt).toLocaleString('uk', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
+  goToFullData(): void {
+    this.router.navigate(['collection-full-data'], {state: this.collection()}).then(() => {
+    });
   }
 
 }

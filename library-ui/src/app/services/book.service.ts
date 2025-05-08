@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ApiService} from './api.service';
 import {Observable} from 'rxjs';
+import {BookDetails} from '../interfaces/book-details';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,26 @@ export class BookService {
   ) {
   }
 
-  getAll(page: number = 0, size: number = 10): Observable<any> {
-    return this.apiService.get('/books', {params: {page, size}});
+  getAll(authorId: number | null = null, page: number = 0, size: number = 10): Observable<any> {
+    let params: Params = {page, size};
+    if (authorId) {
+      params = {
+        ...params,
+        authorId
+      };
+    }
+    return this.apiService.get('/books', {params});
   }
 
+  getBookDetails(bookId: number): Observable<BookDetails> {
+    return this.apiService.get(`/books/${bookId}/details`, {});
+  }
+
+}
+
+interface Params {
+  page: number,
+  size: number,
+  authorId?: number,
+  categoryId?: number,
 }

@@ -2,10 +2,10 @@
 
 <mat-form-field>
   <mat-label>Пошук</mat-label>
-  <input [(ngModel)]="this.searchText" matInput (keyup)="this.applyFilter($event)" placeholder="Атрибут книги"/>
+  <input [(ngModel)]="searchText" matInput (keyup)="applyFilter($event)" placeholder="Атрибут книги"/>
 </mat-form-field>
 <div class="mat-elevation-z8">
-  <table mat-table matSort [dataSource]="this.dataSource">
+  <table mat-table matSort [dataSource]="dataSource">
     <ng-container matColumnDef="title">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Назва</th>
       <td mat-cell *matCellDef="let book"> {{ book.title }}</td>
@@ -34,22 +34,21 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Дії</th>
       <td mat-cell *matCellDef="let book">
-        <button mat-button color="accent" [mat-dialog-close]="book.id" [disabled]="this.isBookInLibrary(book)">
+        <button mat-button color="accent" [mat-dialog-close]="book.id" [disabled]="isBookInLibrary(book)">
           Додати
         </button>
-        <button mat-button color="primary" (click)="this.onDetails(book)">Деталі</button>
+        <button mat-button color="primary" (click)="goToBookDetails(book)" mat-dialog-close>Деталі</button>
       </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="this.displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: this.displayedColumns;"></tr>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-  <mat-paginator (page)="this.onPageChange($event)"
-                 [length]="this.totalElements"
-                 [pageSizeOptions]="[this.size]"
+  <mat-paginator (page)="onPageChange($event)"
+                 [length]="totalElements"
+                 [pageSizeOptions]="[SIZE]"
                  showFirstLastButtons
-                 hidePageSize
-                 aria-label="Select page of periodic elements">
+                 hidePageSize>
   </mat-paginator>
 </div>
 

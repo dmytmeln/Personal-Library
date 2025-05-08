@@ -1,6 +1,6 @@
-import {Book} from './book';
+import {LibraryBook} from './library-book';
 
 export interface CollectionBook {
-  book: Book;
-  dateAdded: Date;
+  libraryBook: LibraryBook;
+  addedAt: Date;
 }

@@ -1,20 +1,16 @@
 <mat-card>
   <mat-card-header [ngStyle]="{'background-color': collection().color || defaultColor}">
     <mat-card-title>
-      <span>{{ collection().name }}</span>
+      <p>{{ collection().name }}</p>
     </mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <p>Останнє оновлення: {{
-        updatedAt.toLocaleString('default', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric'
-        })
+        updatedAt
       }}
     </p>
   </mat-card-content>
   <mat-card-actions>
-    <button type="button" mat-button [routerLink]="['/collections', collection().id]">Переглянути</button>
+    <button type="button" mat-button (click)="goToFullData()">Переглянути</button>
   </mat-card-actions>
 </mat-card>

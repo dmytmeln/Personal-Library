@@ -8,10 +8,10 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <div class="books-list">
-        @for (userBook of entry[1]; track userBook.book.id) {
-          <app-book [book]="userBook.book">
+        @for (libraryBook of entry[1]; track libraryBook.book.id) {
+          <app-book [book]="libraryBook.book">
             <div book-actions>
-              <app-library-book-actions [userBook]="userBook"
+              <app-library-book-actions [libraryBook]="libraryBook"
                                         (deleteBook)="deleteBook.emit($event)"
                                         (statusChange)="statusChange.emit($event)"
                                         (ratingChange)="ratingChange.emit($event)"/>

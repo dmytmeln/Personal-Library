@@ -4,7 +4,7 @@
 </button>
 
 <mat-menu #menu="matMenu" yPosition="below" xPosition="after">
-  <button mat-menu-item>
+  <button mat-menu-item (click)="goToBookDetails()">
     <mat-icon>info</mat-icon>
     <span>Деталі книги</span>
   </button>
@@ -12,13 +12,9 @@
     <mat-icon>label</mat-icon>
     <span>Змінити статус</span>
   </button>
-  <button mat-menu-item (click)="this.deleteBook.emit(this.userBook());">
+  <button mat-menu-item (click)="this.deleteBook.emit(this.libraryBook());">
     <mat-icon>delete</mat-icon>
-    <span>Видалити з бібліотеки</span>
-  </button>
-  <button mat-menu-item>
-    <mat-icon>collections_bookmark</mat-icon>
-    <span>Додати до колекції</span>
+    <span>Видалити</span>
   </button>
   <button mat-menu-item [matMenuTriggerFor]="rating">
     <mat-icon>star</mat-icon>
@@ -27,18 +23,18 @@
 </mat-menu>
 
 <mat-menu #rating="matMenu" yPosition="below" xPosition="after">
-  <app-book-rating [rating]="(this.userBook().rating || 0)"
-                   (ratingChange)="this.ratingChange.emit({bookId: this.userBook().book.id, rating: $event})">
+  <app-book-rating [rating]="(this.libraryBook().rating || 0)"
+                   (ratingChange)="this.ratingChange.emit({bookId: this.libraryBook().book.id, rating: $event})">
 
   </app-book-rating>
 </mat-menu>
 
 <mat-menu #status="matMenu" yPosition="below" xPosition="after">
-  @for (userBookStatus of USER_BOOK_STATUSES; track $index) {
+  @for (libraryBookStatus of USER_BOOK_STATUSES; track $index) {
     <button mat-menu-item
-            [disabled]="this.userBook().status === userBookStatus"
-            (click)="this.statusChange.emit([this.userBook(), userBookStatus])">
-      <span>{{ getStatusName(userBookStatus) }}</span>
+            [disabled]="this.libraryBook().status === libraryBookStatus"
+            (click)="this.statusChange.emit([this.libraryBook(), libraryBookStatus])">
+      <span>{{ getStatusName(libraryBookStatus) }}</span>
     </button>
   }
 </mat-menu>

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/users/me/collections")
+@RequestMapping("/api/v1/collections")
 @RequiredArgsConstructor
 public class CollectionController {
 
@@ -34,6 +34,15 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.CREATED)
     public CollectionDto create(@AuthenticationPrincipal User user, @RequestBody CreateCollectionRequest dto) {
         return service.createCollection(dto, user);
+    }
+
+    @PutMapping("/{collectionId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CollectionDto update(@AuthenticationPrincipal User user,
+                                @PathVariable Integer collectionId,
+                                @RequestBody CreateCollectionRequest dto
+    ) {
+        return service.updateCollection(collectionId, dto, user.getId());
     }
 
 }

@@ -1,13 +1,14 @@
 package org.example.library.book.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.library.book.dto.BookDetails;
 import org.example.library.book.dto.BookDto;
+import org.example.library.book.service.BookDetailsService;
 import org.example.library.book.service.BookService;
+import org.example.library.user.domain.User;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/books")
@@ -15,12 +16,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
     private final BookService service;
+    private final BookDetailsService bookDetailsService;
 
     @GetMapping
     public Page<BookDto> getAllBooks(@RequestParam(defaultValue = "0") Integer page,
-                                     @RequestParam(defaultValue = "10") Integer size
+                                     @RequestParam(defaultValue = "10") Integer size,
+                                     @RequestParam(required = false) Integer categoryId,
+                                     @RequestParam(required = false) Integer authorId
     ) {
-        return service.getAll(page, size);
+        return service.getAll(page, size, categoryId, authorId);
+    }
+
+    @GetMapping("/{bookId}/details")
+    public BookDetails getById(@AuthenticationPrincipal User user, @PathVariable Integer bookId) {
+        return bookDetailsService.getDetails(bookId, user.getId());
     }
 
 }

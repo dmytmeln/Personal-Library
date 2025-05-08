@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_library_books
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: library_books
+            columns:
+              - column:
+                  name: library_book_id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: library_books_pk
+              - column:
+                  name: user_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: library_books_users_fk
+                    referencedTableName: users
+                    referencedColumnNames: user_id
+              - column:
+                  name: book_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: library_books_books_fk
+                    referencedTableName: books
+                    referencedColumnNames: book_id
+              - column:
+                  name: status
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: added_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rating
+                  type: tinyint
+                  constraints:
+                    nullable: true

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class Collection {
 
     @Id
@@ -26,7 +26,7 @@ public class Collection {
     private String name;
 
     @Column(name = "description")
-    private String description; // todo: remove
+    private String description;
 
     @Column(name = "color")
     private String color;

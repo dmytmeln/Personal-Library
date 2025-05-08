@@ -12,15 +12,15 @@ export class CollectionBookService {
   }
 
   getCollectionBooks(collectionId: number): Observable<CollectionBook[]> {
-    return this.apiService.get(`/api/v1/collections/${collectionId}/books`, {});
+    return this.apiService.get(`/collections/${collectionId}/books`, {});
   }
 
   addBookToCollection(collectionId: number, bookId: number): Observable<CollectionBook> {
-    return this.apiService.post(`/api/v1/collections/${collectionId}/books/${bookId}`, {});
+    return this.apiService.post(`/collections/${collectionId}/books/${bookId}`, {});
   }
 
   removeBookFromCollection(collectionId: number, bookId: number): Observable<void> {
-    return this.apiService.delete(`/api/v1/collections/${collectionId}/books/${bookId}`, {});
+    return this.apiService.delete(`/collections/${collectionId}/books/${bookId}`, {});
   }
 
 }
