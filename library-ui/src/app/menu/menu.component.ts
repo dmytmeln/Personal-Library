@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatAnchor} from '@angular/material/button';
 import {RouterLink, RouterLinkActive} from '@angular/router';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-menu',
@@ -16,10 +17,8 @@ import {RouterLink, RouterLinkActive} from '@angular/router';
 })
 export class MenuComponent {
 
-  private readonly API_URL = 'http://localhost:8080';
-
   login() {
-    window.location.assign(`${this.API_URL}/oauth2/authorization/google`);
+    window.location.assign(`${environment.apiBaseUrl}/oauth2/authorization/google`);
   }
 
 }
