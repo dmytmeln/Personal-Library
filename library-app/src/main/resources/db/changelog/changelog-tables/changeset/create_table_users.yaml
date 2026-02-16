@@ -13,6 +13,26 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: users_pk
               - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: full_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
                   name: provider
                   type: varchar(50)
                   constraints:
@@ -21,7 +41,11 @@ databaseChangeLog:
                   name: provider_id
                   type: varchar(255)
                   constraints:
-                    nullable: false
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: users
+            columnNames: email
+            constraintName: users_email_uq
         - addUniqueConstraint:
             tableName: users
             columnNames: provider, provider_id

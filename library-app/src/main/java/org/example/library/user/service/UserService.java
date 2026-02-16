@@ -1,57 +1,41 @@
 package org.example.library.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.library.auth.dto.UserRegisterRequest;
+import org.example.library.exception.BadRequestException;
+import org.example.library.user.domain.Provider;
 import org.example.library.user.domain.User;
+import org.example.library.user.dto.UserResponse;
+import org.example.library.user.mapper.UserMapper;
 import org.example.library.user.repository.UserRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
+public class UserService {
 
-    private final OAuth2UserService<OidcUserRequest, OidcUser> delegate = new OidcUserService();
     private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper mapper;
 
-    @Override
-    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-        OidcUser oidcUser = delegate.loadUser(userRequest);
-        return processOidcUser(oidcUser, userRequest);
+    public UserResponse register(UserRegisterRequest request) {
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("Email already registered");
+        }
+
+        var user = mapper.toHostUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var savedUser = repository.save(user);
+        return mapper.toResponse(savedUser);
     }
 
-    private OidcUser processOidcUser(OidcUser oidcUser, OidcUserRequest userRequest) {
-        var provider = userRequest.getClientRegistration().getRegistrationId();
-        var providerId = oidcUser.getName();
-        String fullName = oidcUser.getAttribute("name");
-        String pictureUrl = oidcUser.getAttribute("picture");
-        var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-
-        var user = repository.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> create(provider, providerId));
-
-        return user.toBuilder()
-                .attributes(oidcUser.getAttributes())
-                .authorities(authorities)
-                .fullName(fullName)
-                .pictureUrl(pictureUrl)
-                .idToken(userRequest.getIdToken())
-                .userInfo(oidcUser.getUserInfo())
-                .build();
-    }
-
-    private User create(String provider, String providerId) {
-        var user = User.builder()
-                .provider(provider)
-                .providerId(providerId)
-                .build();
-        return repository.save(user);
+    public User syncUser(String email, String fullName, String providerId, Provider provider) {
+        return repository.findUserByEmail(email)
+                .orElseGet(() -> repository.save(
+                        mapper.createProvidedUser(email, fullName, providerId, provider)
+                ));
     }
 
 }

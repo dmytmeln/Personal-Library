@@ -5,7 +5,7 @@
 
 #### Application
 * Java 17
-* Gradle 8.x (optionally, you can use the included Gradle Wrapper)
+* Maven 3.9.x (optionally, you can use the included Maven Wrapper)
 
 #### Database
 * Postgres
@@ -20,8 +20,9 @@ cd Personal-Library
 ```
 
 #### 2) Build the project
-```  
-./gradlew build
+```
+cd library-app
+./mvnw clean package
 ```
 
 #### 3) Set Up the Database with Docker Compose (Optional)
@@ -39,8 +40,9 @@ Port: 5432
 
 
 #### 4) Run the project
-```  
-./gradlew bootRun
+```
+cd library-app
+./mvnw spring-boot:run
 ```
 
 

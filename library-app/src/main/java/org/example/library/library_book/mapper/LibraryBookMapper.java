@@ -24,9 +24,9 @@ public interface LibraryBookMapper {
 
     @Named("authorsToMap")
     default Map<Integer, String> authorsToMap(List<Author> authors) {
-        if (authors == null) {
+        if (authors == null)
             return null;
-        }
+
         return authors.stream()
                 .collect(toMap(Author::getId, Author::getFullName));
     }
