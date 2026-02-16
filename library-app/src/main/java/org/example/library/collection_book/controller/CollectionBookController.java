@@ -3,7 +3,7 @@ package org.example.library.collection_book.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.library.collection_book.dto.CollectionBookDto;
 import org.example.library.collection_book.service.CollectionBookService;
-import org.example.library.user.domain.User;
+import org.example.library.security.UserDetailsImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,26 +19,26 @@ public class CollectionBookController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CollectionBookDto> getCollectionBooks(@AuthenticationPrincipal User user, @PathVariable int collectionId) {
-        return service.getCollectionBooks(user.getId(), collectionId);
+    public List<CollectionBookDto> getCollectionBooks(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable int collectionId) {
+        return service.getCollectionBooks(userDetails.getId(), collectionId);
     }
 
     @PostMapping("/{bookId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public CollectionBookDto addBookToCollection(@AuthenticationPrincipal User user,
-                                                 @PathVariable int collectionId,
-                                                 @PathVariable int bookId
+    public CollectionBookDto addBookToCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  @PathVariable int collectionId,
+                                                  @PathVariable int bookId
     ) {
-        return service.addBookToCollection(user.getId(), collectionId, bookId);
+        return service.addBookToCollection(userDetails.getId(), collectionId, bookId);
     }
 
     @DeleteMapping("/{bookId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeBookFromCollection(@AuthenticationPrincipal User user,
-                                         @PathVariable int collectionId,
-                                         @PathVariable int bookId
+    public void removeBookFromCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                          @PathVariable int collectionId,
+                                          @PathVariable int bookId
     ) {
-        service.removeBookFromCollection(user.getId(), collectionId, bookId);
+        service.removeBookFromCollection(userDetails.getId(), collectionId, bookId);
     }
 
 }

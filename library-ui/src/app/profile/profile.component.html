@@ -1,0 +1,62 @@
+<div class="profile-container">
+  @if (!loading && user) {
+    <mat-card class="profile-card">
+      <mat-card-header>
+        <div mat-card-avatar class="profile-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <mat-card-title>{{ user.fullName }}</mat-card-title>
+        <mat-card-subtitle>{{ user.email }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-divider></mat-divider>
+
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item>
+            <mat-icon matListIcon>email</mat-icon>
+            <div matListItemTitle>Email</div>
+            <div matListItemLine>{{ user.email }}</div>
+          </mat-list-item>
+
+          <mat-list-item>
+            <mat-icon matListIcon>badge</mat-icon>
+            <div matListItemTitle>Full Name</div>
+            <div matListItemLine>{{ user.fullName }}</div>
+          </mat-list-item>
+
+          <mat-list-item>
+            <mat-icon matListIcon>admin_panel_settings</mat-icon>
+            <div matListItemTitle>Role</div>
+            <div matListItemLine>{{ user.role }}</div>
+          </mat-list-item>
+
+          <mat-list-item>
+            <mat-icon matListIcon>login</mat-icon>
+            <div matListItemTitle>Provider</div>
+            <div matListItemLine>{{ user.provider }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-raised-button color="warn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Logout
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  @if (loading) {
+    <div class="loading-message">
+      Loading profile...
+    </div>
+  }
+
+  @if (!loading && errorMessage) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+</div>

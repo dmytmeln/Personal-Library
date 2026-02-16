@@ -20,9 +20,8 @@ public class UserService {
     private final UserMapper mapper;
 
     public UserResponse register(UserRegisterRequest request) {
-        if (repository.existsByEmail(request.getEmail())) {
+        if (repository.existsByEmail(request.getEmail()))
             throw new BadRequestException("Email already registered");
-        }
 
         var user = mapper.toHostUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));

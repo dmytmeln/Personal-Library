@@ -5,5 +5,13 @@
   <a mat-button routerLink="/recomendations" routerLinkActive="active">Рекомендації</a>
   <a mat-button routerLink="/search" routerLinkActive="active">Пошук</a>
   <span class="spacer"></span>
-  <a mat-button (click)="this.login()">Логін</a>
+
+  @if (isAuthenticated) {
+    <a mat-button routerLink="/profile" routerLinkActive="active">Профіль</a>
+    <button mat-button (click)="logout()">Вихід</button>
+  } @else {
+    <a mat-button routerLink="/login" routerLinkActive="active">Логін</a>
+    <a mat-button routerLink="/register" routerLinkActive="active">Реєстрація</a>
+  }
+
 </mat-toolbar>

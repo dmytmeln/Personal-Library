@@ -49,20 +49,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private Optional<String> getJwtTokenFromHeader(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
             return Optional.empty();
-        }
+
         return Optional.of(authHeader.substring(7));
     }
 
     private Optional<String> getJwtTokenFromCookies(HttpServletRequest request) {
         var cookies = request.getCookies();
-        if (cookies == null) {
+        if (cookies == null)
             return Optional.empty();
-        }
+
         return Arrays.stream(cookies)
                 .filter(cookie -> JWT_COOKIE.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }
+
 }

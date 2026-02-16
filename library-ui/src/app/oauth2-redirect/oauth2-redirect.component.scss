@@ -1,0 +1,13 @@
+.redirect-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+}
+
+.message {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #666;
+}

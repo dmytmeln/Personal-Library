@@ -1,5 +1,6 @@
 package org.example.library.security;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -24,6 +24,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     @Value("${frontend.url}")
     private String frontendUrl;
+
+    @Value("${application.security.jwt.cookie-name}")
+    private String cookieName;
+
+    @Value("${application.security.jwt.access-token-expiration}")
+    private int cookieMaxAge;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -38,11 +44,15 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         var token = jwtService.generateToken(user.getEmail());
 
-        var targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/redirect")
-                .queryParam("token", token)
-                .build().toUriString();
+        Cookie cookie = new Cookie(cookieName, token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(cookieMaxAge / 1000);
+        
+        response.addCookie(cookie);
 
-        this.getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        this.getRedirectStrategy().sendRedirect(request, response, frontendUrl + "/oauth2/redirect");
     }
 
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.library.collection.dto.CollectionDto;
 import org.example.library.collection.dto.CreateCollectionRequest;
 import org.example.library.collection.service.CollectionService;
-import org.example.library.user.domain.User;
+import org.example.library.security.UserDetailsImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,29 +20,29 @@ public class CollectionController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CollectionDto> getAll(@AuthenticationPrincipal User user) {
-        return service.getAllByUserId(user.getId());
+    public List<CollectionDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return service.getAllByUserId(userDetails.getId());
     }
 
     @GetMapping("/{collectionId}")
     @ResponseStatus(HttpStatus.OK)
-    public CollectionDto get(@PathVariable Integer collectionId, @AuthenticationPrincipal User user) {
-        return service.getById(user.getId(), collectionId);
+    public CollectionDto get(@PathVariable Integer collectionId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return service.getById(userDetails.getId(), collectionId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CollectionDto create(@AuthenticationPrincipal User user, @RequestBody CreateCollectionRequest dto) {
-        return service.createCollection(dto, user);
+    public CollectionDto create(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CreateCollectionRequest dto) {
+        return service.createCollection(dto, userDetails.user());
     }
 
     @PutMapping("/{collectionId}")
     @ResponseStatus(HttpStatus.OK)
-    public CollectionDto update(@AuthenticationPrincipal User user,
+    public CollectionDto update(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                 @PathVariable Integer collectionId,
                                 @RequestBody CreateCollectionRequest dto
     ) {
-        return service.updateCollection(collectionId, dto, user.getId());
+        return service.updateCollection(collectionId, dto, userDetails.getId());
     }
 
 }

@@ -9,7 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
-public class RestControllerInterceptor extends ResponseEntityExceptionHandler {
+public class RestControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(NOT_FOUND)
@@ -20,12 +20,6 @@ public class RestControllerInterceptor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(BAD_REQUEST)
     public ExceptionResponse handleBadRequestException(BadRequestException exception) {
-        return ExceptionResponse.of(exception.getMessage());
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(BAD_REQUEST)
-    public ExceptionResponse handleIllegalArgumentException(IllegalArgumentException exception) {
         return ExceptionResponse.of(exception.getMessage());
     }
 
