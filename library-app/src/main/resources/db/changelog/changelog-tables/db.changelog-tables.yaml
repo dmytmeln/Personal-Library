@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/changelog-tables/changeset/create_table_collections.yaml
   - include:
       file: db/changelog/changelog-tables/changeset/create_table_collection_books.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/seed_data.yaml

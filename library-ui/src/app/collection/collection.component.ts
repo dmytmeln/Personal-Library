@@ -66,9 +66,9 @@ export class CollectionComponent implements OnInit {
       libraryBooks: this.collectionBooks.map(cd => cd.libraryBook),
       fetchBooksFn: (page, size) =>
         this.libraryBookService.getAll(page, size).pipe(
-          map(result => ({
-            totalElements: result.totalElements,
-            content: result.content.map((lb: LibraryBook): Book => lb.book)
+          map(libraryBookPage => ({
+            content: libraryBookPage.content.map((lb: LibraryBook): Book => lb.book),
+            page: libraryBookPage.page
           }))
         ),
     };

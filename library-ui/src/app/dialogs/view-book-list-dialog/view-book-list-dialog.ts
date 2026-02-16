@@ -10,6 +10,7 @@ import {FormsModule} from '@angular/forms';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
+import {Page} from '../../interfaces/page';
 
 @Component({
   selector: 'app-view-book-list-dialog',
@@ -78,7 +79,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
 
   private getBooks() {
     this.data.fetchBooksFn(this.currentPage, this.SIZE).subscribe(page => {
-      this.totalElements = page.totalElements;
+      this.totalElements = page.page.totalElements;
       this.dataSource.data = page.content;
     });
   }
@@ -87,5 +88,5 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
 
 export interface ViewBookListDialogData {
   libraryBooks: ReadonlyArray<LibraryBook>;
-  fetchBooksFn: (page: number, size: number) => Observable<{ totalElements: number, content: Book[] }>;
+  fetchBooksFn: (page: number, size: number) => Observable<Page<Book>>;
 }

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {ApiService} from './api.service';
 import {Observable} from 'rxjs';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
+import {Page} from '../interfaces/page';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class LibraryBookService {
   ) {
   }
 
-  getAll(page: number = 0, size: number = 10): Observable<any> { // todo: add page type
+  getAll(page: number = 0, size: number = 10): Observable<Page<LibraryBook>> {
     return this.apiService.get('/users/me/library-books', {params: page, size});
   }
 
