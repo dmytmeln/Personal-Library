@@ -1,6 +1,8 @@
 package org.example.library.config;
 
+import org.example.library.pagination.PaginationProperties;
 import org.example.library.security.jwt.JwtTokenProvider;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -20,6 +22,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 @Configuration
 @EnableAspectJAutoProxy
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
+@EnableConfigurationProperties(value = PaginationProperties.class)
 public class AppConfig {
 
     @Bean

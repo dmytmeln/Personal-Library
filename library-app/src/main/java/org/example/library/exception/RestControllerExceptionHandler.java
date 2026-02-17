@@ -29,6 +29,18 @@ public class RestControllerExceptionHandler extends ResponseEntityExceptionHandl
         return ExceptionResponse.of("Invalid username or password");
     }
 
+    @ExceptionHandler(InvalidSortParameterException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ExceptionResponse handleInvalidSortParameterException(InvalidSortParameterException exception) {
+        return ExceptionResponse.of(exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPaginationParameterException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ExceptionResponse handleInvalidPaginationParameterException(InvalidPaginationParameterException exception) {
+        return ExceptionResponse.of(exception.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ExceptionResponse handleAllExceptions() {

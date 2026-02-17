@@ -3,14 +3,15 @@ package org.example.library.book.service;
 import lombok.RequiredArgsConstructor;
 import org.example.library.book.domain.Book;
 import org.example.library.book.dto.BookDto;
+import org.example.library.book.dto.BookSearchParams;
 import org.example.library.book.mapper.BookMapper;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.book.repository.BookSpecification;
 import org.example.library.exception.NotFoundException;
+import org.example.library.pagination.PageRequestBuilder;
+import org.example.library.pagination.PaginationParams;
+import org.example.library.pagination.SortableFields;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,14 +20,14 @@ public class BookService {
 
     private final BookRepository repository;
     private final BookMapper mapper;
+    private final PageRequestBuilder pageRequestBuilder;
 
-    public Page<BookDto> getAll(Integer page, Integer size, Integer categoryId, Integer authorId) {
-        var spec = Specification.where(BookSpecification.hasCategoryId(categoryId))
-                .and(BookSpecification.hasAuthorId(authorId));
-        var pageReq = authorId == null
-                ? PageRequest.of(page, size)
-                : Pageable.unpaged();
-        return repository.findAll(spec, pageReq)
+
+    public Page<BookDto> getAll(PaginationParams paginationParams, BookSearchParams searchParams) {
+        var spec = BookSpecification.fromSearchParams(searchParams);
+        var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.BOOK_FIELDS);
+
+        return repository.findAll(spec, pageable)
                 .map(mapper::toBookDto);
     }
 
