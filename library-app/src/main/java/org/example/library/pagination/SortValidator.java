@@ -9,6 +9,7 @@ import java.util.Set;
 @Component
 public class SortValidator {
 
+    public static final String DELIMITER = ";";
     private static final Set<String> ALLOWED_DIRECTIONS = Set.of("ASC", "DESC");
 
 
@@ -17,7 +18,7 @@ public class SortValidator {
             return;
 
         for (String sortParam : sort) {
-            var parts = sortParam.split(",");
+            var parts = sortParam.split(DELIMITER);
             var field = parts[0].trim();
 
             if (parts.length > 2) {

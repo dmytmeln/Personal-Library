@@ -15,13 +15,22 @@ export class BookService {
   ) {
   }
 
-  getAll(authorId: number | null = null, page: number = 0, size: number = 10): Observable<Page<Book>> {
+  getAll(
+    page: number = 0,
+    size: number = 10,
+    sort?: string[],
+    authorId?: number,
+    categoryId?: number
+  ): Observable<Page<Book>> {
     let params: Params = {page, size};
+    if (sort && sort.length > 0) {
+      params.sort = sort;
+    }
     if (authorId) {
-      params = {
-        ...params,
-        authorId
-      };
+      params.authorId = authorId;
+    }
+    if (categoryId) {
+      params.categoryId = categoryId;
     }
     return this.apiService.get('/books', {params});
   }
@@ -35,6 +44,7 @@ export class BookService {
 interface Params {
   page: number,
   size: number,
+  sort?: string[],
   authorId?: number,
   categoryId?: number,
 }

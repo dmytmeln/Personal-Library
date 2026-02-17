@@ -1,34 +1,28 @@
-package org.example.library.author.controller;
+package org.example.library.category.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.author.dto.AuthorDto;
-import org.example.library.author.service.AuthorService;
+import org.example.library.category.dto.CategoryDto;
+import org.example.library.category.service.CategoryService;
 import org.example.library.pagination.PaginationParams;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/authors")
+@RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
-public class AuthorController {
+public class CategoryController {
 
-    private final AuthorService service;
+    private final CategoryService service;
 
     @GetMapping
-    public Page<AuthorDto> getAll(
+    public Page<CategoryDto> getAll(
             @RequestParam(required = false) String name,
             PaginationParams paginationParams
     ) {
         return service.search(name, paginationParams);
-    }
-
-    @GetMapping("/{authorId}")
-    public AuthorDto getById(@PathVariable Integer authorId) {
-        return service.getById(authorId);
     }
 
 }

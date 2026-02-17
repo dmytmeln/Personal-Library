@@ -1,0 +1,129 @@
+<div class="search-container">
+  <h1 class="page-title">Пошук</h1>
+
+  <mat-tab-group [(selectedIndex)]="activeTabIndex" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
+
+    <mat-tab label="Книги">
+      <div class="tab-content">
+        <div class="filters-section">
+          <div class="filter-row">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Автор</mat-label>
+              <input
+                matInput
+                [(ngModel)]="authorSearchInput"
+                (ngModelChange)="onAuthorSearchInput()"
+                (focus)="onAuthorSearchInput()"
+                [matAutocomplete]="authorAuto"
+                placeholder="Пошук автора...">
+              @if (selectedAuthor) {
+                <button mat-icon-button matSuffix (click)="clearAuthorFilter()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              <mat-autocomplete #authorAuto="matAutocomplete" (optionSelected)="onAuthorSelected($event.option.value)">
+                @for (author of filteredAuthors; track author.id) {
+                  <mat-option [value]="author">{{ author.fullName }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Категорія</mat-label>
+              <input
+                matInput
+                [(ngModel)]="categorySearchInput"
+                (ngModelChange)="onCategorySearchInput()"
+                (focus)="onCategorySearchInput()"
+                [matAutocomplete]="categoryAuto"
+                placeholder="Пошук категорії...">
+              @if (selectedCategory) {
+                <button mat-icon-button matSuffix (click)="clearCategoryFilter()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="onCategorySelected($event.option.value)">
+                @for (category of filteredCategories; track category.id) {
+                  <mat-option [value]="category">{{ category.name }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+            @if (hasActiveFilters()) {
+              <button mat-stroked-button (click)="clearAllFilters()" class="clear-filters-btn" matTooltip="Скинути фільтри">
+                <mat-icon>filter_alt_off</mat-icon>
+                Скинути фільтри
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="sort-section">
+          <span class="sort-label">Сортувати за:</span>
+          <div class="sort-options">
+            @for (option of sortOptions; track option.field) {
+              <div
+                class="sort-option"
+                [class.active]="isIncludedInSorting(option)"
+                (click)="onSortClick(option)">
+                <span class="sort-option-label">{{ option.label }}</span>
+                <div class="sort-arrows">
+                  @if (getSortDirection(option) === 'asc') {
+                    <mat-icon class="sort-arrow active">arrow_upward</mat-icon>
+                  } @else if (getSortDirection(option) === 'desc') {
+                    <mat-icon class="sort-arrow active">arrow_downward</mat-icon>
+                  } @else {
+                    <mat-icon class="sort-arrow">arrow_upward</mat-icon>
+                  }
+                </div>
+                @if (isIncludedInSorting(option)) {
+                  <span class="sort-priority">{{ getSortPriority(option) }}</span>
+                }
+              </div>
+            }
+            @if (hasActiveSorts()) {
+              <button mat-stroked-button (click)="clearAllSorts()" class="clear-sort-btn" matTooltip="Скинути сортування">
+                <mat-icon>clear_all</mat-icon>
+                Скинути
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (isLoading) {
+          <div class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+          </div>
+        } @else {
+          <div class="books-grid">
+            @for (book of books; track book.id) {
+              <app-book [book]="book"></app-book>
+            }
+          </div>
+
+          <mat-paginator
+            [length]="totalElements"
+            [pageSize]="pageSize"
+            [pageIndex]="currentPage"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            aria-label="Вибрати сторінку">
+          </mat-paginator>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Автори">
+      <div class="tab-content placeholder-tab">
+        <p>Функція пошуку авторів буде доступна пізніше</p>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Категорії">
+      <div class="tab-content placeholder-tab">
+        <p>Функція пошуку категорій буде доступна пізніше</p>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>

@@ -64,7 +64,7 @@ public class PageRequestBuilder {
 
         List<Sort.Order> orders = new ArrayList<>();
         for (String sortParam : sort) {
-            String[] parts = sortParam.split(",");
+            String[] parts = sortParam.split(SortValidator.DELIMITER);
             String field = parts[0].trim();
 
             Sort.Direction direction = Sort.Direction.ASC;

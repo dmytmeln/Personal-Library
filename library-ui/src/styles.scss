@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   @include mat.theme((
     color: mat.$azure-palette,
     typography: Roboto,

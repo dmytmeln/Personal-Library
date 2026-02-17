@@ -8,6 +8,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ProfileComponent } from './profile/profile.component';
 import { OAuth2RedirectComponent } from './oauth2-redirect/oauth2-redirect.component';
+import { SearchComponent } from './search/search.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: 'collection-full-data', component: CollectionComponent, canActivate: [AuthGuard] },
   { path: 'book-details', component: BookDetailsComponent },
   { path: 'author-details', component: AuthorDetailsComponent },
+  { path: 'search', component: SearchComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },

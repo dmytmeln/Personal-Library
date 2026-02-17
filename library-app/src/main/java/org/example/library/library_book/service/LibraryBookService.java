@@ -27,9 +27,11 @@ public class LibraryBookService {
     private static final int RATING_LOWER_BOUND = 0;
     private static final int RATING_UPPER_BOUND = 5;
 
+
     private final LibraryBookRepository repository;
     private final LibraryBookMapper mapper;
     private final BookService bookService;
+
 
     public Page<LibraryBookDto> getAllByUserId(Integer userId, Pageable pageable) {
         return repository.findAllByUserId(userId, pageable)
