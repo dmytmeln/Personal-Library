@@ -17,4 +17,8 @@ public class SortableFields {
             "id", "fullName", "country", "birthYear", "deathYear", "booksCount"
     );
 
+    public static final Set<String> CATEGORY_FIELDS = Set.of(
+            "id", "name", "booksCount"
+    );
+
 }

@@ -1,7 +1,7 @@
 package org.example.library.category.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.category.dto.CategoryDto;
+import org.example.library.category.dto.CategoryWithBooksCount;
 import org.example.library.category.service.CategoryService;
 import org.example.library.pagination.PaginationParams;
 import org.springframework.data.domain.Page;
@@ -18,11 +18,11 @@ public class CategoryController {
     private final CategoryService service;
 
     @GetMapping
-    public Page<CategoryDto> getAll(
-            @RequestParam(required = false) String name,
-            PaginationParams paginationParams
+    public Page<CategoryWithBooksCount> getAll(
+            PaginationParams paginationParams,
+            @RequestParam(required = false) String name
     ) {
-        return service.search(name, paginationParams);
+        return service.search(paginationParams, name);
     }
 
 }

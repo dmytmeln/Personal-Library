@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {BookDetails} from '../interfaces/book-details';
 import {Page} from '../interfaces/page';
 import {Book} from '../interfaces/book';
+import {LanguageWithCount} from '../interfaces/language-with-count';
 
 @Injectable({
   providedIn: 'root'
@@ -20,14 +21,26 @@ export class BookService {
     size?: number,
     sort?: string[],
     authorId?: number,
-    categoryId?: number
+    categoryId?: number,
+    title?: string,
+    publishYearMin?: number,
+    publishYearMax?: number,
+    languages?: string[],
+    pagesMin?: number,
+    pagesMax?: number
   } = {}): Observable<Page<Book>> {
     const {
       page = 0,
       size = 10,
       sort,
       authorId,
-      categoryId
+      categoryId,
+      title,
+      publishYearMin,
+      publishYearMax,
+      languages,
+      pagesMin,
+      pagesMax
     } = options;
 
     let params: Params = {page, size};
@@ -40,7 +53,29 @@ export class BookService {
     if (categoryId) {
       params.categoryId = categoryId;
     }
+    if (title) {
+      params.title = title;
+    }
+    if (publishYearMin !== undefined) {
+      params.publishYearMin = publishYearMin;
+    }
+    if (publishYearMax !== undefined) {
+      params.publishYearMax = publishYearMax;
+    }
+    if (languages && languages.length > 0) {
+      params.languages = languages;
+    }
+    if (pagesMin !== undefined) {
+      params.pagesMin = pagesMin;
+    }
+    if (pagesMax !== undefined) {
+      params.pagesMax = pagesMax;
+    }
     return this.apiService.get('/books', {params});
+  }
+
+  getLanguages(): Observable<LanguageWithCount[]> {
+    return this.apiService.get('/books/languages', {});
   }
 
   getBookDetails(bookId: number): Observable<BookDetails> {
@@ -55,4 +90,10 @@ interface Params {
   sort?: string[],
   authorId?: number,
   categoryId?: number,
+  title?: string,
+  publishYearMin?: number,
+  publishYearMax?: number,
+  languages?: string[],
+  pagesMin?: number,
+  pagesMax?: number
 }

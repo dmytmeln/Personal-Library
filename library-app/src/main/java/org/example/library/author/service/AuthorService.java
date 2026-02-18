@@ -5,6 +5,7 @@ import org.example.library.author.domain.Author;
 import org.example.library.author.dto.AuthorDto;
 import org.example.library.author.dto.AuthorSearchParams;
 import org.example.library.author.dto.AuthorWithBooksCount;
+import org.example.library.author.dto.CountryWithCount;
 import org.example.library.author.mapper.AuthorMapper;
 import org.example.library.author.repository.AuthorRepository;
 import org.example.library.exception.NotFoundException;
@@ -13,6 +14,8 @@ import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,15 @@ public class AuthorService {
 
     public Page<AuthorWithBooksCount> search(PaginationParams paginationParams, AuthorSearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
-        return repository.searchWithBooksCount(searchParams.getName(), pageable);
+        return repository.searchWithBooksCount(
+                searchParams.getName(),
+                searchParams.getCountry(),
+                searchParams.getBirthYearMin(),
+                searchParams.getBirthYearMax(),
+                searchParams.getBooksCountMin(),
+                searchParams.getBooksCountMax(),
+                pageable
+        );
     }
 
     public Author getExistingById(Integer authorId) {
@@ -34,6 +45,10 @@ public class AuthorService {
 
     public AuthorDto getById(Integer authorId) {
         return mapper.toDto(getExistingById(authorId));
+    }
+
+    public List<CountryWithCount> getAllCountries() {
+        return repository.findAllCountriesWithCount();
     }
 
 }

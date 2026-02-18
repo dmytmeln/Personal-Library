@@ -24,6 +24,7 @@ public class LibraryApplication {
     //  BE+ FE: recommendations
     //  BE + FE: share library with other users?
     //  FE: use MatSnackBar to show messages to user
+    //  BE: JWT refresh tokens
     //  CI/CD
     //  AWS deployment
 

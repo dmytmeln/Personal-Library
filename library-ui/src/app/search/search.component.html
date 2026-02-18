@@ -7,7 +7,21 @@
       <div class="tab-content">
         <div class="filters-section">
           <div class="filter-row">
-            <mat-form-field appearance="outline" class="filter-field">
+            <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+              <mat-label>Назва книги</mat-label>
+              <input
+                matInput
+                [(ngModel)]="filterState.title"
+                (ngModelChange)="onTitleInput()"
+                placeholder="Пошук за назвою...">
+              @if (filterState.title) {
+                <button mat-icon-button matSuffix (click)="clearTitleFilter()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
               <mat-label>Автор</mat-label>
               <input
                 matInput
@@ -28,7 +42,7 @@
               </mat-autocomplete>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="filter-field">
+            <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
               <mat-label>Категорія</mat-label>
               <input
                 matInput
@@ -48,11 +62,93 @@
                 }
               </mat-autocomplete>
             </mat-form-field>
+          </div>
+
+          <div class="filter-row">
+            <div class="range-filter">
+              <span class="range-label">Рік видання:</span>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic" subscriptSizing="dynamic">
+                <mat-label>Від</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="filterState.publishYearMin"
+                  (ngModelChange)="onPublishYearMinChange()"
+                  placeholder="1900">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic" subscriptSizing="dynamic">
+                <mat-label>До</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="filterState.publishYearMax"
+                  (ngModelChange)="onPublishYearMaxChange()"
+                  placeholder="2026">
+              </mat-form-field>
+              <button mat-icon-button
+                      (click)="clearPublishYearFilters()"
+                      matTooltip="Скинути фільтр року"
+                      [style.visibility]="filterState.publishYearMin !== null || filterState.publishYearMax !== null ? 'visible' : 'hidden'">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <div class="range-filter">
+              <span class="range-label">Кількість сторінок:</span>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>Від</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="filterState.pagesMin"
+                  (ngModelChange)="onPagesMinChange()"
+                  placeholder="0">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>До</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="filterState.pagesMax"
+                  (ngModelChange)="onPagesMaxChange()"
+                  placeholder="5000">
+              </mat-form-field>
+              <button mat-icon-button
+                      (click)="clearPagesFilters()"
+                      matTooltip="Скинути фільтр сторінок"
+                      [style.visibility]="filterState.pagesMin !== null || filterState.pagesMax !== null ? 'visible' : 'hidden'">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
 
             @if (hasActiveFilters()) {
-              <button mat-stroked-button (click)="clearAllFilters()" class="clear-filters-btn" matTooltip="Скинути фільтри">
+              <button mat-stroked-button (click)="clearAllFilters()" class="clear-filters-btn" matTooltip="Скинути всі фільтри">
                 <mat-icon>filter_alt_off</mat-icon>
-                Скинути фільтри
+                Скинути всі
+              </button>
+            }
+          </div>
+
+          <div class="language-filter" *ngIf="languagesState.available.length > 0">
+            <div class="language-filter-header">
+              <span class="range-label">Мови:</span>
+              <button mat-stroked-button (click)="clearLanguageFilters()" class="language-action-btn">
+                Очистити
+              </button>
+            </div>
+            <div class="language-checkboxes">
+              @for (lang of displayedLanguages; track lang.language) {
+                <mat-checkbox
+                  [checked]="isLanguageSelected(lang.language)"
+                  (change)="toggleLanguage(lang.language)"
+                  class="language-checkbox">
+                  {{ lang.language }} <span class="language-count">({{ lang.count }})</span>
+                </mat-checkbox>
+              }
+            </div>
+            @if (hasMoreLanguages) {
+              <button mat-stroked-button (click)="toggleShowAllLanguages()" class="show-more-btn">
+                {{ languagesState.showAll ? 'Показати менше' : 'Показати більше' }}
               </button>
             }
           </div>
@@ -115,20 +211,97 @@
 
     <mat-tab label="Автори">
       <div class="tab-content">
-        <div class="author-search-section">
-          <mat-form-field appearance="outline" class="author-search-field">
-            <mat-label>Пошук за ім'ям</mat-label>
-            <input
-              matInput
-              [(ngModel)]="authorsState.search.name"
-              (ngModelChange)="onAuthorNameSearch()"
-              placeholder="Введіть ім'я автора...">
-            @if (authorsState.search.name) {
-              <button mat-icon-button matSuffix (click)="clearAuthorNameSearch()">
+        <div class="filters-section">
+          <div class="filter-row">
+            <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+              <mat-label>Пошук за ім'ям</mat-label>
+              <input
+                matInput
+                [(ngModel)]="authorsState.search.name"
+                (ngModelChange)="onAuthorNameSearch()"
+                placeholder="Введіть ім'я автора...">
+              @if (authorsState.search.name) {
+                <button mat-icon-button matSuffix (click)="clearAuthorNameSearch()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+              <mat-label>Країна</mat-label>
+              <mat-select
+                [(ngModel)]="authorsState.filter.country"
+                (selectionChange)="onAuthorCountrySelected($event.value)">
+                <mat-option [value]="null">Всі країни</mat-option>
+                @for (country of authorsState.countries; track country.country) {
+                  <mat-option [value]="country.country">{{ country.country }} ({{ country.count }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="range-filter">
+              <span class="range-label">Рік народження:</span>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>Від</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="authorsState.filter.birthYearMin"
+                  (ngModelChange)="onAuthorBirthYearMinChange()"
+                  placeholder="1800">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>До</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="authorsState.filter.birthYearMax"
+                  (ngModelChange)="onAuthorBirthYearMaxChange()"
+                  placeholder="2020">
+              </mat-form-field>
+              <button mat-icon-button
+                      (click)="clearAuthorBirthYearFilters()"
+                      matTooltip="Скинути фільтр року"
+                      [style.visibility]="authorsState.filter.birthYearMin !== null || authorsState.filter.birthYearMax !== null ? 'visible' : 'hidden'">
                 <mat-icon>close</mat-icon>
               </button>
+            </div>
+
+            <div class="range-filter">
+              <span class="range-label">Книг:</span>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>Від</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="authorsState.filter.booksCountMin"
+                  (ngModelChange)="onAuthorBooksCountMinChange()"
+                  placeholder="0">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>До</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="authorsState.filter.booksCountMax"
+                  (ngModelChange)="onAuthorBooksCountMaxChange()"
+                  placeholder="100">
+              </mat-form-field>
+              <button mat-icon-button
+                      (click)="clearAuthorBooksCountFilters()"
+                      matTooltip="Скинути фільтр книг"
+                      [style.visibility]="authorsState.filter.booksCountMin !== null || authorsState.filter.booksCountMax !== null ? 'visible' : 'hidden'">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            @if (hasAuthorFilters() || authorsState.search.name) {
+              <button mat-stroked-button (click)="clearAllAuthorFilters()" class="clear-filters-btn" matTooltip="Скинути всі фільтри">
+                <mat-icon>filter_alt_off</mat-icon>
+                Скинути всі
+              </button>
             }
-          </mat-form-field>
+          </div>
         </div>
 
         <div class="sort-section">
@@ -220,8 +393,99 @@
     </mat-tab>
 
     <mat-tab label="Категорії">
-      <div class="tab-content placeholder-tab">
-        <p>Функція пошуку категорій буде доступна пізніше</p>
+      <div class="tab-content">
+        <div class="author-search-section">
+          <mat-form-field appearance="outline" class="author-search-field" subscriptSizing="dynamic">
+            <mat-label>Пошук за назвою</mat-label>
+            <input
+              matInput
+              [(ngModel)]="categoriesState.search.name"
+              (ngModelChange)="onCategoryNameSearch()"
+              placeholder="Введіть назву категорії...">
+            @if (categoriesState.search.name) {
+              <button mat-icon-button matSuffix (click)="clearCategoryNameSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="sort-section">
+          <span class="sort-label">Сортувати за:</span>
+          <div class="sort-options">
+            @for (option of categoriesState.sorting.options; track option.field) {
+              <div
+                class="sort-option"
+                [class.active]="isCategorySorted(option)"
+                (click)="onCategorySortClick(option)"
+                matTooltip="Натисніть для сортування">
+                <span class="sort-option-label">{{ option.label }}</span>
+                <div class="sort-arrows">
+                  @if (getCategorySortDirection(option) === 'asc') {
+                    <mat-icon class="sort-arrow active">arrow_upward</mat-icon>
+                  } @else if (getCategorySortDirection(option) === 'desc') {
+                    <mat-icon class="sort-arrow active">arrow_downward</mat-icon>
+                  } @else {
+                    <mat-icon class="sort-arrow">arrow_upward</mat-icon>
+                  }
+                </div>
+                @if (isCategorySorted(option)) {
+                  <span class="sort-priority">{{ getCategorySortPriority(option) }}</span>
+                }
+              </div>
+            }
+            @if (hasCategorySorts()) {
+              <button mat-stroked-button (click)="clearCategorySorts()" class="clear-sort-btn" matTooltip="Скинути сортування">
+                <mat-icon>clear_all</mat-icon>
+                Скинути
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (categoriesState.loading) {
+          <div class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+          </div>
+        } @else {
+          <div class="authors-table-container">
+            <table class="authors-table">
+              <thead>
+                <tr>
+                  <th>Назва</th>
+                  <th>Опис</th>
+                  <th>Кількість книг</th>
+                  <th>Дії</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (category of categoriesState.items; track category.id) {
+                  <tr>
+                    <td>{{ category.name }}</td>
+                    <td [matTooltip]="category.description || '-'" matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}</td>
+                    <td>{{ getBooksCountText(category.booksCount || 0) }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button mat-stroked-button (click)="goToCategoryBooks(category)" class="action-btn">
+                          Книги
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="categoriesState.pagination.totalElements"
+            [pageSize]="categoriesState.pagination.pageSize"
+            [pageIndex]="categoriesState.pagination.currentPage"
+            [pageSizeOptions]="[12, 24, 48]"
+            (page)="onCategoryPageChange($event)"
+            aria-label="Вибрати сторінку">
+          </mat-paginator>
+        }
       </div>
     </mat-tab>
 

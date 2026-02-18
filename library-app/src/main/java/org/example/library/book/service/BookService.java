@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.library.book.domain.Book;
 import org.example.library.book.dto.BookDto;
 import org.example.library.book.dto.BookSearchParams;
+import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.book.mapper.BookMapper;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.book.repository.BookSpecification;
@@ -13,6 +14,8 @@ import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,10 @@ public class BookService {
         if (!repository.existsById(bookId)) {
             throw new NotFoundException("Book not found");
         }
+    }
+
+    public List<LanguageWithCount> getAllLanguages() {
+        return repository.findAllLanguagesWithCount();
     }
 
 }
