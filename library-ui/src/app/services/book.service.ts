@@ -15,13 +15,21 @@ export class BookService {
   ) {
   }
 
-  getAll(
-    page: number = 0,
-    size: number = 10,
+  getAll(options: {
+    page?: number,
+    size?: number,
     sort?: string[],
     authorId?: number,
     categoryId?: number
-  ): Observable<Page<Book>> {
+  } = {}): Observable<Page<Book>> {
+    const {
+      page = 0,
+      size = 10,
+      sort,
+      authorId,
+      categoryId
+    } = options;
+
     let params: Params = {page, size};
     if (sort && sort.length > 0) {
       params.sort = sort;

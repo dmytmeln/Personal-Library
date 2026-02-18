@@ -200,3 +200,76 @@
 mat-paginator {
   background: transparent;
 }
+
+.author-search-section {
+  margin-bottom: 20px;
+}
+
+.author-search-field {
+  width: 300px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.authors-table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.authors-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--mat-sys-surface-container);
+  border-radius: 8px;
+  overflow: hidden;
+
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  th {
+    background-color: var(--mat-sys-surface-container-high);
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+
+  tbody tr {
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--mat-sys-surface-container-highest);
+    }
+  }
+
+  td {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.author-link {
+  color: var(--mat-sys-primary);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+}

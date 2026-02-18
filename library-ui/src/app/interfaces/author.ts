@@ -5,4 +5,5 @@ export interface Author {
   birthYear: number;
   deathYear?: number;
   biography?: string;
+  booksCount?: number;
 }

@@ -94,13 +94,14 @@ export class AuthorDetailsComponent implements OnInit, AfterViewInit {
   }
 
   private initAuthors(): void {
+    // todo: author should be fetched together with his books
     this.authorService.getById(this.authorId).subscribe(author => {
       this.author = author;
     });
   }
 
   private initBooks(): void {
-    this.bookService.getAll(this.authorId).subscribe(page => {
+    this.bookService.getAll({authorId: this.authorId}).subscribe(page => {
       this.dataSource.data = page.content;
     });
   }

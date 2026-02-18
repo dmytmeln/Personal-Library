@@ -10,15 +10,20 @@ public class LibraryApplication {
     //  BE + FE: add possibility to update full name and email for HOST provided users
     //  BE: dto validation
     //  BE: logging
+
+    // todo:
+    //  BE + FE: searching and filtering in search page
+    //  FE: rewrite book card to be more compact and to show more info about book
     //  BE + FE: searching and filtering in user library
-    //  FE: searching and filtering in search page
+    //  FE: pagination on author details page
     //  BE + FE: collections
-    //  BE+ FE: recommendations
-    //  BE + FE: statistics
     //  BE + FE: notes
     //  BE + FE: possibility to change book details for library books
-    //  FE: different layout for book searching and for library
-    //  FE: rewrite book card to be more compact and to show more info about book
+    //  BE + FE: statistics
+    //  FE: different ui layouts for searching and for library
+    //  BE+ FE: recommendations
+    //  BE + FE: share library with other users?
+    //  FE: use MatSnackBar to show messages to user
     //  CI/CD
     //  AWS deployment
 

@@ -13,4 +13,8 @@ public class SortableFields {
             "id", "title", "publishYear", "language", "pages", "category.id", "category.name"
     );
 
+    public static final Set<String> AUTHOR_FIELDS = Set.of(
+            "id", "fullName", "country", "birthYear", "deathYear", "booksCount"
+    );
+
 }

@@ -54,7 +54,7 @@ export class LibraryComponent implements AfterViewInit {
   openViewBookListDialog() {
     const data: ViewBookListDialogData = {
       libraryBooks: this.libraryBooks,
-      fetchBooksFn: (page, size) => this.bookService.getAll(page, size),
+      fetchBooksFn: (page, size) => this.bookService.getAll({page, size}),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
     dialogRef.afterClosed().subscribe((bookId: number | undefined) => {
