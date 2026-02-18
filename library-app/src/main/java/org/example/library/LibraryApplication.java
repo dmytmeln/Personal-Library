@@ -12,17 +12,20 @@ public class LibraryApplication {
     //  BE: logging
 
     // todo:
-    //  BE + FE: searching and filtering in search page
-    //  FE: rewrite book card to be more compact and to show more info about book
+    //  FE: enhance book card page. Limit title length
+    //  FE: fix book details page not to use hardcoded colors but use theme colors from angular material
+    //  BE + FE: cant remove library book if it is in collection. Need to remove it from collection first. Maybe add warning about that when trying to remove library book that is in collection?
+    //  FE: rewrite library page
     //  BE + FE: searching and filtering in user library
-    //  FE: pagination on author details page
     //  BE + FE: collections
+    //  BE + FE: collections pagination, sorting and filtering
     //  BE + FE: notes
     //  BE + FE: possibility to change book details for library books
     //  BE + FE: statistics
     //  FE: different ui layouts for searching and for library
     //  BE+ FE: recommendations
     //  BE + FE: share library with other users?
+    //  FE: enhance searching and filtering in search page
     //  FE: use MatSnackBar to show messages to user
     //  BE: JWT refresh tokens
     //  CI/CD

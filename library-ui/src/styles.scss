@@ -46,3 +46,9 @@ button {
   padding: 10px;
   border-radius: 5px;
 }
+
+button[mat-menu-item] {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

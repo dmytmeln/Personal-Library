@@ -8,5 +8,5 @@ export interface Book {
   pages: number,
   description?: string,
   coverImageUrl?: string,
-  authors: Map<number, string>
+  authors: Record<number, string>
 }

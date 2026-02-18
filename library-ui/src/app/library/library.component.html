@@ -1,4 +1,4 @@
-<button class="btn" mat-flat-button (click)="this.openViewBookListDialog()">Додати книгу</button>
+<button class="btn" mat-flat-button (click)="openViewBookListDialog()">Додати книгу</button>
 
 <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
 
@@ -7,30 +7,27 @@
       <app-book-expansion-list
         [entries]="libraryBooksByStatus"
         [getTitle]="getStatusName"
-        (deleteBook)="deleteLibraryBook($event)"
-        (statusChange)="changeLibraryBookStatus($event)"
-        (ratingChange)="changeLibraryBookRating($event)"/>
-    </div>
+        [actionsMenu]="sharedMenu.menu"/> </div>
   </mat-tab>
 
   <mat-tab label="Жанри">
     <div class="mat-tab-content">
       <app-book-expansion-list
         [entries]="libraryBooksByCategory"
-        (deleteBook)="deleteLibraryBook($event)"
-        (statusChange)="changeLibraryBookStatus($event)"
-        (ratingChange)="changeLibraryBookRating($event)"/>
-    </div>
+        [actionsMenu]="sharedMenu.menu"/> </div>
   </mat-tab>
 
   <mat-tab label="Автори">
     <div class="mat-tab-content">
       <app-book-expansion-list
         [entries]="libraryBooksByAuthor"
-        (deleteBook)="deleteLibraryBook($event)"
-        (statusChange)="changeLibraryBookStatus($event)"
-        (ratingChange)="changeLibraryBookRating($event)"/>
-    </div>
+        [actionsMenu]="sharedMenu.menu"/> </div>
   </mat-tab>
 
 </mat-tab-group>
+
+<app-library-book-menu-items #sharedMenu
+  (deleteBook)="deleteLibraryBook($event)"
+  (statusChange)="changeLibraryBookStatus($event)"
+  (ratingChange)="changeLibraryBookRating($event)">
+</app-library-book-menu-items>

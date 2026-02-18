@@ -8,6 +8,7 @@
 
 .author-attribute-label {
   font-weight: 600;
+  margin-bottom: 15px;
 }
 
 .author-years {
@@ -23,7 +24,7 @@
   }
 }
 
-.author-biography {
+.biography-container {
   margin-top: 15px;
 
   .author-attribute-label {
@@ -31,19 +32,16 @@
   }
 
   .author-biography-text {
-    margin-top: 14px;
-    padding: 20px;
-    border-radius: 4px;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: var(--mat-sys-surface-container);
+    margin-top: 8px;
+    line-height: 1.6;
   }
 }
 
 .author-books {
-  margin-top: 20px;
-
-  mat-form-field {
-    margin-top: 10px;
-    width: 100%;
-  }
+  margin-top: 30px;
 
   .author-attribute-label {
     font-size: 20px;

@@ -14,8 +14,9 @@ import {map} from 'rxjs';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {Book} from '../interfaces/book';
 import {BookComponent} from '../book/book.component';
-import {LibraryBookActionsComponent} from '../library-book-actions/library-book-actions.component';
+import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
 import {Router} from '@angular/router';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-collection',
@@ -23,7 +24,9 @@ import {Router} from '@angular/router';
     NgStyle,
     MatButton,
     BookComponent,
-    LibraryBookActionsComponent,
+    LibraryBookMenuItemsComponent,
+    MatMenuModule,
+
   ],
   templateUrl: './collection.component.html',
   styleUrl: './collection.component.scss'
@@ -82,19 +85,19 @@ export class CollectionComponent implements OnInit {
     });
   }
 
-  deleteBook(libraryBook: LibraryBook): void {
-    this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.book.id).subscribe(() => {
-      this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.book.id !== libraryBook.book.id);
+  deleteBook(book: Book): void {
+    this.collectionBookService.removeBookFromCollection(this.collection.id, book.id).subscribe(() => {
+      this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.book.id !== book.id);
     });
   }
 
-  statusChange(bookAndStatus: [LibraryBook, LibraryBookStatus]): void {
-    this.libraryBookService.changeStatus(bookAndStatus[0].book.id, bookAndStatus[1]).subscribe(libraryBook =>
+  statusChange(data: [Book, LibraryBookStatus]): void {
+    this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe(libraryBook =>
       this.updateBook(libraryBook));
   }
 
-  ratingChange(ratingChange: { bookId: number; rating: number }): void {
-    this.libraryBookService.changeRating(ratingChange.bookId, ratingChange.rating).subscribe(libraryBook =>
+  ratingChange(data: { bookId: number; rating: number }): void {
+    this.libraryBookService.changeRating(data.bookId, data.rating).subscribe(libraryBook =>
       this.updateBook(libraryBook));
   }
 

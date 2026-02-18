@@ -1,6 +1,5 @@
-import {Component, input, output} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {BookComponent} from '../book/book.component';
-import {LibraryBookActionsComponent} from '../library-book-actions/library-book-actions.component';
 import {
   MatAccordion,
   MatExpansionPanel,
@@ -8,12 +7,12 @@ import {
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
+import {MatMenuPanel} from '@angular/material/menu';
 
 @Component({
   selector: 'app-book-expansion-list',
   imports: [
     BookComponent,
-    LibraryBookActionsComponent,
     MatAccordion,
     MatExpansionPanel,
     MatExpansionPanelHeader,
@@ -25,7 +24,5 @@ import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 export class BookExpansionListComponent {
   getTitle = input<(key: any) => string>((key) => String(key));
   entries = input<Map<string | LibraryBookStatus, LibraryBook[]>>(new Map());
-  deleteBook = output<LibraryBook>();
-  ratingChange = output<{ bookId: number, rating: number }>();
-  statusChange = output<[LibraryBook, LibraryBookStatus]>();
+  actionsMenu = input<MatMenuPanel<any> | null>(null);
 }

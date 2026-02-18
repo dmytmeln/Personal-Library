@@ -1,7 +1,8 @@
 <div class="search-container">
   <h1 class="page-title">Пошук</h1>
 
-  <mat-tab-group [(selectedIndex)]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
+  <mat-tab-group [(selectedIndex)]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
+                 mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
 
     <mat-tab label="Книги">
       <div class="tab-content">
@@ -56,7 +57,8 @@
                   <mat-icon>close</mat-icon>
                 </button>
               }
-              <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="onCategorySelected($event.option.value)">
+              <mat-autocomplete #categoryAuto="matAutocomplete"
+                                (optionSelected)="onCategorySelected($event.option.value)">
                 @for (category of filterState.category.filtered; track category.id) {
                   <mat-option [value]="category">{{ category.name }}</mat-option>
                 }
@@ -67,7 +69,8 @@
           <div class="filter-row">
             <div class="range-filter">
               <span class="range-label">Рік видання:</span>
-              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic" subscriptSizing="dynamic">
+              <mat-form-field appearance="outline" class="range-input"
+                              subscriptSizing="dynamic">
                 <mat-label>Від</mat-label>
                 <input
                   matInput
@@ -76,7 +79,8 @@
                   (ngModelChange)="onPublishYearMinChange()"
                   placeholder="1900">
               </mat-form-field>
-              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic" subscriptSizing="dynamic">
+              <mat-form-field appearance="outline" class="range-input"
+                              subscriptSizing="dynamic">
                 <mat-label>До</mat-label>
                 <input
                   matInput
@@ -122,7 +126,8 @@
             </div>
 
             @if (hasActiveFilters()) {
-              <button mat-stroked-button (click)="clearAllFilters()" class="clear-filters-btn" matTooltip="Скинути всі фільтри">
+              <button mat-stroked-button (click)="clearAllFilters()" class="clear-filters-btn"
+                      matTooltip="Скинути всі фільтри">
                 <mat-icon>filter_alt_off</mat-icon>
                 Скинути всі
               </button>
@@ -154,58 +159,15 @@
           </div>
         </div>
 
-        <div class="sort-section">
-          <span class="sort-label">Сортувати за:</span>
-          <div class="sort-options">
-            @for (option of booksState.sorting.options; track option.field) {
-              <div
-                class="sort-option"
-                [class.active]="isIncludedInSorting(option)"
-                (click)="onSortClick(option)">
-                <span class="sort-option-label">{{ option.label }}</span>
-                <div class="sort-arrows">
-                  @if (getSortDirection(option) === 'asc') {
-                    <mat-icon class="sort-arrow active">arrow_upward</mat-icon>
-                  } @else if (getSortDirection(option) === 'desc') {
-                    <mat-icon class="sort-arrow active">arrow_downward</mat-icon>
-                  } @else {
-                    <mat-icon class="sort-arrow">arrow_upward</mat-icon>
-                  }
-                </div>
-                @if (isIncludedInSorting(option)) {
-                  <span class="sort-priority">{{ getSortPriority(option) }}</span>
-                }
-              </div>
-            }
-            @if (hasActiveSorts()) {
-              <button mat-stroked-button (click)="clearAllSorts()" class="clear-sort-btn" matTooltip="Скинути сортування">
-                <mat-icon>clear_all</mat-icon>
-                Скинути
-              </button>
-            }
-          </div>
-        </div>
-
-        @if (booksState.loading) {
-          <div class="loading-container">
-            <mat-spinner diameter="50"></mat-spinner>
-          </div>
-        } @else {
-          <div class="books-grid">
-            @for (book of booksState.items; track book.id) {
-              <app-book [book]="book"></app-book>
-            }
-          </div>
-
-          <mat-paginator
-            [length]="booksState.pagination.totalElements"
-            [pageSize]="booksState.pagination.pageSize"
-            [pageIndex]="booksState.pagination.currentPage"
-            [pageSizeOptions]="booksState.pagination.pageSizeOptions"
-            (page)="onPageChange($event)"
-            aria-label="Вибрати сторінку">
-          </mat-paginator>
-        }
+        <app-books-grid
+          [books]="booksState.items"
+          [totalElements]="booksState.pagination.totalElements"
+          [pageSize]="booksState.pagination.pageSize"
+          [pageIndex]="booksState.pagination.currentPage"
+          [loading]="booksState.loading"
+          [actionsMenu]="addBookAction"
+          (pageChange)="onBooksPageChange($event)"
+          (sortChange)="onBooksSortChange($event)"/>
       </div>
     </mat-tab>
 
@@ -296,7 +258,8 @@
             </div>
 
             @if (hasAuthorFilters() || authorsState.search.name) {
-              <button mat-stroked-button (click)="clearAllAuthorFilters()" class="clear-filters-btn" matTooltip="Скинути всі фільтри">
+              <button mat-stroked-button (click)="clearAllAuthorFilters()" class="clear-filters-btn"
+                      matTooltip="Скинути всі фільтри">
                 <mat-icon>filter_alt_off</mat-icon>
                 Скинути всі
               </button>
@@ -329,7 +292,8 @@
               </div>
             }
             @if (hasAuthorSorts()) {
-              <button mat-stroked-button (click)="clearAuthorSorts()" class="clear-sort-btn" matTooltip="Скинути сортування">
+              <button mat-stroked-button (click)="clearAuthorSorts()" class="clear-sort-btn"
+                      matTooltip="Скинути сортування">
                 <mat-icon>clear_all</mat-icon>
                 Скинути
               </button>
@@ -337,22 +301,23 @@
           </div>
         </div>
 
-        @if (authorsState.loading) {
-          <div class="loading-container">
-            <mat-spinner diameter="50"></mat-spinner>
-          </div>
-        } @else {
+        <div class="content-wrapper">
+          @if (authorsState.loading) {
+            <div class="loading-overlay">
+              <mat-spinner diameter="50"></mat-spinner>
+            </div>
+          }
           <div class="authors-table-container">
             <table class="authors-table">
               <thead>
-                <tr>
-                  <th>ПІБ</th>
-                  <th>Країна</th>
-                  <th>Рік народження</th>
-                  <th>Рік смерті</th>
-                  <th>Кількість книг</th>
-                  <th>Дії</th>
-                </tr>
+              <tr>
+                <th>ПІБ</th>
+                <th>Країна</th>
+                <th>Рік народження</th>
+                <th>Рік смерті</th>
+                <th>Кількість книг</th>
+                <th>Дії</th>
+              </tr>
               </thead>
               <tbody>
                 @for (author of authorsState.items; track author.id) {
@@ -388,7 +353,7 @@
             (page)="onAuthorPageChange($event)"
             aria-label="Вибрати сторінку">
           </mat-paginator>
-        }
+        </div>
       </div>
     </mat-tab>
 
@@ -439,7 +404,8 @@
             </div>
 
             @if (hasCategoryFilters() || categoriesState.search.name) {
-              <button mat-stroked-button (click)="clearAllCategoryFilters()" class="clear-filters-btn" matTooltip="Скинути всі фільтри">
+              <button mat-stroked-button (click)="clearAllCategoryFilters()" class="clear-filters-btn"
+                      matTooltip="Скинути всі фільтри">
                 <mat-icon>filter_alt_off</mat-icon>
                 Скинути всі
               </button>
@@ -472,7 +438,8 @@
               </div>
             }
             @if (hasCategorySorts()) {
-              <button mat-stroked-button (click)="clearCategorySorts()" class="clear-sort-btn" matTooltip="Скинути сортування">
+              <button mat-stroked-button (click)="clearCategorySorts()" class="clear-sort-btn"
+                      matTooltip="Скинути сортування">
                 <mat-icon>clear_all</mat-icon>
                 Скинути
               </button>
@@ -480,26 +447,29 @@
           </div>
         </div>
 
-        @if (categoriesState.loading) {
-          <div class="loading-container">
-            <mat-spinner diameter="50"></mat-spinner>
-          </div>
-        } @else {
+        <div class="content-wrapper">
+          @if (categoriesState.loading) {
+            <div class="loading-overlay">
+              <mat-spinner diameter="50"></mat-spinner>
+            </div>
+          }
           <div class="authors-table-container">
             <table class="authors-table">
               <thead>
-                <tr>
-                  <th>Назва</th>
-                  <th>Опис</th>
-                  <th>Кількість книг</th>
-                  <th>Дії</th>
-                </tr>
+              <tr>
+                <th>Назва</th>
+                <th>Опис</th>
+                <th>Кількість книг</th>
+                <th>Дії</th>
+              </tr>
               </thead>
               <tbody>
                 @for (category of categoriesState.items; track category.id) {
                   <tr>
                     <td>{{ category.name }}</td>
-                    <td [matTooltip]="category.description || '-'" matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}</td>
+                    <td [matTooltip]="category.description || '-'"
+                        matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}
+                    </td>
                     <td>{{ getBooksCountText(category.booksCount || 0) }}</td>
                     <td>
                       <div class="action-buttons">
@@ -522,9 +492,18 @@
             (page)="onCategoryPageChange($event)"
             aria-label="Вибрати сторінку">
           </mat-paginator>
-        }
+        </div>
       </div>
     </mat-tab>
 
   </mat-tab-group>
 </div>
+
+<mat-menu #addBookAction="matMenu">
+  <ng-template matMenuContent let-book>
+    <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+      <mat-icon>add</mat-icon>
+      <span>{{ isBookInLibrary(book) ? 'Вже в бібліотеці' : 'Додати до бібліотеки' }}</span>
+    </button>
+  </ng-template>
+</mat-menu>

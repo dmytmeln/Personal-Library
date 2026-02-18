@@ -9,14 +9,10 @@
       </mat-expansion-panel-header>
       <div class="books-list">
         @for (libraryBook of entry[1]; track libraryBook.book.id) {
-          <app-book [book]="libraryBook.book">
-            <div book-actions>
-              <app-library-book-actions [libraryBook]="libraryBook"
-                                        (deleteBook)="deleteBook.emit($event)"
-                                        (statusChange)="statusChange.emit($event)"
-                                        (ratingChange)="ratingChange.emit($event)"/>
-            </div>
-          </app-book>
+          <app-book
+            [book]="libraryBook.book"
+            [actionsMenu]="actionsMenu()"
+            [menuData]="{ libraryBook: libraryBook }"/>
         }
       </div>
 

@@ -13,17 +13,22 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {BookService} from '../services/book.service';
 import {AuthorService} from '../services/author.service';
 import {CategoryService} from '../services/category.service';
+import {LibraryBookService} from '../services/library-book.service';
 import {Book} from '../interfaces/book';
 import {Author} from '../interfaces/author';
 import {Category} from '../interfaces/category';
 import {Page} from '../interfaces/page';
-import {BookComponent} from '../book/book.component';
 import {LanguageWithCount} from '../interfaces/language-with-count';
 import {CountryWithCount} from '../interfaces/country-with-count';
 import {debounceTime, distinctUntilChanged, Subject, switchMap} from 'rxjs';
+import {BooksGridComponent} from '../books-grid/books-grid.component';
+import {MatSnackCommon} from '../common/mat-snack-common';
+import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
+import {MatMenu, MatMenuContent, MatMenuItem} from '@angular/material/menu';
 
 interface SortOption {
   field: string;
@@ -42,10 +47,6 @@ interface BooksState {
     pageSize: number;
     totalElements: number;
     currentPage: number;
-  };
-  sorting: {
-    options: SortOption[];
-    active: ActiveSort[];
   };
   loading: boolean;
 }
@@ -156,7 +157,11 @@ interface UiState {
     MatTooltipModule,
     MatCheckboxModule,
     MatSelectModule,
-    BookComponent,
+    BooksGridComponent,
+    LibraryBookMenuItemsComponent,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
   ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
@@ -167,23 +172,17 @@ export class SearchComponent implements OnInit {
   private readonly SEARCH_DEBOUNCE = 450;
   private readonly SEARCH_PAGE_SIZE = 10;
 
+  private libraryBookIds: Set<number> = new Set<number>();
+  private snackCommon: MatSnackCommon;
+  private booksSort: string[] | undefined;
+
   booksState: BooksState = {
     items: [],
     pagination: {
-      pageSizeOptions: [12, 24, 48] as const,
-      pageSize: 12,
+      pageSizeOptions: [15, 20, 25, 30, 35, 40, 45, 50] as const,
+      pageSize: 15,
       totalElements: 0,
       currentPage: 0,
-    },
-    sorting: {
-      options: [
-        {field: 'title', label: 'Назва'},
-        {field: 'publishYear', label: 'Рік видання'},
-        {field: 'language', label: 'Мова'},
-        {field: 'pages', label: 'Сторінки'},
-        {field: 'category.name', label: 'Категорія'},
-      ],
-      active: [],
     },
     loading: false,
   };
@@ -288,8 +287,11 @@ export class SearchComponent implements OnInit {
     private bookService: BookService,
     private authorService: AuthorService,
     private categoryService: CategoryService,
+    private libraryBookService: LibraryBookService,
+    private matSnackBar: MatSnackBar,
     private router: Router,
   ) {
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
@@ -300,67 +302,46 @@ export class SearchComponent implements OnInit {
 
   //region Books Tab Methods
 
-  onPageChange(event: PageEvent): void {
+  onBooksPageChange(event: PageEvent): void {
     this.booksState.pagination.currentPage = event.pageIndex;
     this.booksState.pagination.pageSize = event.pageSize;
     this.loadBooks();
   }
 
-  onSortClick(option: SortOption): void {
-    const existingIndex = this.booksState.sorting.active.findIndex(s => s.field === option.field);
-
-    if (existingIndex === -1) {
-      this.booksState.sorting.active.push({field: option.field, direction: this.DEFAULT_DIRECTION});
-    } else {
-      this.toggleBookSortDirection(existingIndex);
-    }
-
+  onBooksSortChange(sort: string[] | undefined): void {
+    this.booksSort = sort;
     this.booksState.pagination.currentPage = 0;
     this.loadBooks();
   }
 
-  isIncludedInSorting(option: SortOption): boolean {
-    return this.booksState.sorting.active.some(s => s.field === option.field);
+  addBookToLibrary(book: Book): void {
+    this.libraryBookService.addBook(book.id).subscribe({
+      next: () => {
+        this.libraryBookIds.add(book.id);
+        this.snackCommon.showSuccess('Книгу додано до бібліотеки');
+      },
+      error: err => {
+        this.snackCommon.showError(err);
+        if (err.status === 400) {
+          this.libraryBookIds.add(book.id);
+        }
+      }
+    });
   }
 
-  getSortDirection(option: SortOption): 'asc' | 'desc' | undefined {
-    const sort = this.booksState.sorting.active.find(s => s.field === option.field);
-    return sort?.direction;
-  }
-
-  getSortPriority(option: SortOption): number {
-    return this.booksState.sorting.active.findIndex(s => s.field === option.field) + 1;
-  }
-
-  hasActiveSorts(): boolean {
-    return this.booksState.sorting.active.length > 0;
-  }
-
-  clearAllSorts(): void {
-    this.booksState.sorting.active = [];
-    this.booksState.pagination.currentPage = 0;
-    this.loadBooks();
-  }
-
-  private toggleBookSortDirection(existingIndex: number): void {
-    const existing = this.booksState.sorting.active[existingIndex];
-    if (existing.direction === 'asc') {
-      existing.direction = 'desc';
-    } else {
-      this.booksState.sorting.active.splice(existingIndex, 1);
-    }
+  isBookInLibrary(book: Book): boolean {
+    return this.libraryBookIds.has(book.id);
   }
 
   private loadBooks(): void {
     this.booksState.loading = true;
-    const sort = this.buildSortParam();
     const authorId = this.filterState.author.selected?.id;
     const categoryId = this.filterState.category.selected?.id;
 
     this.bookService.getAll({
       page: this.booksState.pagination.currentPage,
       size: this.booksState.pagination.pageSize,
-      sort: sort,
+      sort: this.booksSort,
       authorId: authorId,
       categoryId: categoryId,
       title: this.filterState.title || undefined,
@@ -387,13 +368,6 @@ export class SearchComponent implements OnInit {
         this.languagesState.available = languages;
       }
     });
-  }
-
-  private buildSortParam(): string[] | undefined {
-    if (this.booksState.sorting.active.length === 0) {
-      return undefined;
-    }
-    return this.booksState.sorting.active.map(s => `${s.field};${s.direction}`);
   }
 
   //endregion

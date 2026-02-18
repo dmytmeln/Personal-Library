@@ -1,0 +1,53 @@
+<div class="sort-section">
+  <span class="sort-label">Сортувати за:</span>
+  <div class="sort-options">
+    @for (option of sortOptions; track option.field) {
+      <div
+        class="sort-option"
+        [class.active]="isIncludedInSorting(option)"
+        (click)="onSortClick(option)">
+        <span class="sort-option-label">{{ option.label }}</span>
+        <div class="sort-arrows">
+          @if (getSortDirection(option) === 'asc') {
+            <mat-icon class="sort-arrow active">arrow_upward</mat-icon>
+          } @else if (getSortDirection(option) === 'desc') {
+            <mat-icon class="sort-arrow active">arrow_downward</mat-icon>
+          } @else {
+            <mat-icon class="sort-arrow">arrow_upward</mat-icon>
+          }
+        </div>
+        @if (isIncludedInSorting(option)) {
+          <span class="sort-priority">{{ getSortPriority(option) }}</span>
+        }
+      </div>
+    }
+    @if (hasActiveSorts()) {
+      <button mat-stroked-button (click)="clearAllSorts()" class="clear-sort-btn">
+        <mat-icon>clear_all</mat-icon>
+        Скинути
+      </button>
+    }
+  </div>
+</div>
+
+<div class="content-wrapper">
+  @if (loading) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+  <div class="books-grid">
+    @for (book of books; track book.id) {
+      <app-book [book]="book" [actionsMenu]="actionsMenu()"/>
+    }
+  </div>
+
+  <mat-paginator
+    [length]="totalElements"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="onPageChange($event)"
+    aria-label="Вибрати сторінку">
+  </mat-paginator>
+</div>
