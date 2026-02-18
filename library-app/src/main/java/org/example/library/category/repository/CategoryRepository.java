@@ -22,7 +22,14 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             LEFT JOIN c.books b
             WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
             GROUP BY c.id, c.name, c.description
+            HAVING (:booksCountMin IS NULL OR COUNT(b) >= :booksCountMin)
+               AND (:booksCountMax IS NULL OR COUNT(b) <= :booksCountMax)
             """)
-    Page<CategoryWithBooksCount> searchWithBooksCount(@Param("name") String name, Pageable pageable);
+    Page<CategoryWithBooksCount> searchWithBooksCount(
+            @Param("name") String name,
+            @Param("booksCountMin") Integer booksCountMin,
+            @Param("booksCountMax") Integer booksCountMax,
+            Pageable pageable
+    );
 
 }

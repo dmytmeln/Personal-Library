@@ -394,20 +394,57 @@
 
     <mat-tab label="Категорії">
       <div class="tab-content">
-        <div class="author-search-section">
-          <mat-form-field appearance="outline" class="author-search-field" subscriptSizing="dynamic">
-            <mat-label>Пошук за назвою</mat-label>
-            <input
-              matInput
-              [(ngModel)]="categoriesState.search.name"
-              (ngModelChange)="onCategoryNameSearch()"
-              placeholder="Введіть назву категорії...">
-            @if (categoriesState.search.name) {
-              <button mat-icon-button matSuffix (click)="clearCategoryNameSearch()">
+        <div class="filters-section">
+          <div class="filter-row">
+            <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+              <mat-label>Пошук за назвою</mat-label>
+              <input
+                matInput
+                [(ngModel)]="categoriesState.search.name"
+                (ngModelChange)="onCategoryNameSearch()"
+                placeholder="Введіть назву категорії...">
+              @if (categoriesState.search.name) {
+                <button mat-icon-button matSuffix (click)="clearCategoryNameSearch()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </mat-form-field>
+
+            <div class="range-filter">
+              <span class="range-label">Книг:</span>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>Від</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="categoriesState.filter.booksCountMin"
+                  (ngModelChange)="onCategoryBooksCountMinChange()"
+                  placeholder="0">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
+                <mat-label>До</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="categoriesState.filter.booksCountMax"
+                  (ngModelChange)="onCategoryBooksCountMaxChange()"
+                  placeholder="100">
+              </mat-form-field>
+              <button mat-icon-button
+                      (click)="clearCategoryBooksCountFilters()"
+                      matTooltip="Скинути фільтр"
+                      [style.visibility]="categoriesState.filter.booksCountMin !== null || categoriesState.filter.booksCountMax !== null ? 'visible' : 'hidden'">
                 <mat-icon>close</mat-icon>
               </button>
+            </div>
+
+            @if (hasCategoryFilters() || categoriesState.search.name) {
+              <button mat-stroked-button (click)="clearAllCategoryFilters()" class="clear-filters-btn" matTooltip="Скинути всі фільтри">
+                <mat-icon>filter_alt_off</mat-icon>
+                Скинути всі
+              </button>
             }
-          </mat-form-field>
+          </div>
         </div>
 
         <div class="sort-section">

@@ -91,6 +91,10 @@ interface CategoriesState {
     name: string;
     loaded: boolean;
   };
+  filter: {
+    booksCountMin: number | null;
+    booksCountMax: number | null;
+  };
   loading: boolean;
 }
 
@@ -125,6 +129,9 @@ interface SearchSubjects {
   authorName: Subject<string>;
   categoryName: Subject<string>;
   titleFilter: Subject<string>;
+  booksRangeFilter: Subject<void>;
+  authorsRangeFilter: Subject<void>;
+  categoriesRangeFilter: Subject<void>;
 }
 
 interface UiState {
@@ -230,6 +237,10 @@ export class SearchComponent implements OnInit {
       name: '',
       loaded: false,
     },
+    filter: {
+      booksCountMin: null,
+      booksCountMax: null,
+    },
     loading: false,
   };
 
@@ -264,6 +275,9 @@ export class SearchComponent implements OnInit {
     authorName: new Subject<string>(),
     categoryName: new Subject<string>(),
     titleFilter: new Subject<string>(),
+    booksRangeFilter: new Subject<void>(),
+    authorsRangeFilter: new Subject<void>(),
+    categoriesRangeFilter: new Subject<void>(),
   };
 
   uiState: UiState = {
@@ -529,23 +543,19 @@ export class SearchComponent implements OnInit {
   }
 
   onAuthorBirthYearMinChange(): void {
-    this.authorsState.pagination.currentPage = 0;
-    this.loadAuthors();
+    this.searchSubjects.authorsRangeFilter.next();
   }
 
   onAuthorBirthYearMaxChange(): void {
-    this.authorsState.pagination.currentPage = 0;
-    this.loadAuthors();
+    this.searchSubjects.authorsRangeFilter.next();
   }
 
   onAuthorBooksCountMinChange(): void {
-    this.authorsState.pagination.currentPage = 0;
-    this.loadAuthors();
+    this.searchSubjects.authorsRangeFilter.next();
   }
 
   onAuthorBooksCountMaxChange(): void {
-    this.authorsState.pagination.currentPage = 0;
-    this.loadAuthors();
+    this.searchSubjects.authorsRangeFilter.next();
   }
 
   clearAuthorBirthYearFilters(): void {
@@ -654,12 +664,14 @@ export class SearchComponent implements OnInit {
     this.categoriesState.loading = true;
     const sort = this.buildCategorySortParam();
 
-    this.categoryService.search(
-      this.categoriesState.search.name,
-      this.categoriesState.pagination.currentPage,
-      this.categoriesState.pagination.pageSize,
-      sort
-    ).subscribe({
+    this.categoryService.search({
+      name: this.categoriesState.search.name,
+      page: this.categoriesState.pagination.currentPage,
+      size: this.categoriesState.pagination.pageSize,
+      sort: sort,
+      booksCountMin: this.categoriesState.filter.booksCountMin ?? undefined,
+      booksCountMax: this.categoriesState.filter.booksCountMax ?? undefined,
+    }).subscribe({
       next: (page: Page<Category>) => {
         this.categoriesState.items = page.content;
         this.categoriesState.pagination.totalElements = page.page.totalElements;
@@ -669,6 +681,34 @@ export class SearchComponent implements OnInit {
         this.categoriesState.loading = false;
       }
     });
+  }
+
+  onCategoryBooksCountMinChange(): void {
+    this.searchSubjects.categoriesRangeFilter.next();
+  }
+
+  onCategoryBooksCountMaxChange(): void {
+    this.searchSubjects.categoriesRangeFilter.next();
+  }
+
+  clearCategoryBooksCountFilters(): void {
+    this.categoriesState.filter.booksCountMin = null;
+    this.categoriesState.filter.booksCountMax = null;
+    this.categoriesState.pagination.currentPage = 0;
+    this.loadCategories();
+  }
+
+  hasCategoryFilters(): boolean {
+    return this.categoriesState.filter.booksCountMin !== null
+      || this.categoriesState.filter.booksCountMax !== null;
+  }
+
+  clearAllCategoryFilters(): void {
+    this.categoriesState.filter.booksCountMin = null;
+    this.categoriesState.filter.booksCountMax = null;
+    this.categoriesState.search.name = '';
+    this.categoriesState.pagination.currentPage = 0;
+    this.loadCategories();
   }
 
   private buildCategorySortParam(): string[] | undefined {
@@ -694,7 +734,7 @@ export class SearchComponent implements OnInit {
     this.searchSubjects.categoryFilter.pipe(
       debounceTime(this.SEARCH_DEBOUNCE),
       distinctUntilChanged(),
-      switchMap(query => this.categoryService.search(query, 0, this.SEARCH_PAGE_SIZE))
+      switchMap(query => this.categoryService.search({name: query, page: 0, size: this.SEARCH_PAGE_SIZE}))
     ).subscribe(page => {
       this.filterState.category.filtered = page.content;
     });
@@ -721,6 +761,27 @@ export class SearchComponent implements OnInit {
     ).subscribe(() => {
       this.booksState.pagination.currentPage = 0;
       this.loadBooks();
+    });
+
+    this.searchSubjects.booksRangeFilter.pipe(
+      debounceTime(this.SEARCH_DEBOUNCE)
+    ).subscribe(() => {
+      this.booksState.pagination.currentPage = 0;
+      this.loadBooks();
+    });
+
+    this.searchSubjects.authorsRangeFilter.pipe(
+      debounceTime(this.SEARCH_DEBOUNCE)
+    ).subscribe(() => {
+      this.authorsState.pagination.currentPage = 0;
+      this.loadAuthors();
+    });
+
+    this.searchSubjects.categoriesRangeFilter.pipe(
+      debounceTime(this.SEARCH_DEBOUNCE)
+    ).subscribe(() => {
+      this.categoriesState.pagination.currentPage = 0;
+      this.loadCategories();
     });
   }
 
@@ -780,23 +841,19 @@ export class SearchComponent implements OnInit {
   }
 
   onPublishYearMinChange(): void {
-    this.booksState.pagination.currentPage = 0;
-    this.loadBooks();
+    this.searchSubjects.booksRangeFilter.next();
   }
 
   onPublishYearMaxChange(): void {
-    this.booksState.pagination.currentPage = 0;
-    this.loadBooks();
+    this.searchSubjects.booksRangeFilter.next();
   }
 
   onPagesMinChange(): void {
-    this.booksState.pagination.currentPage = 0;
-    this.loadBooks();
+    this.searchSubjects.booksRangeFilter.next();
   }
 
   onPagesMaxChange(): void {
-    this.booksState.pagination.currentPage = 0;
-    this.loadBooks();
+    this.searchSubjects.booksRangeFilter.next();
   }
 
   clearTitleFilter(): void {
