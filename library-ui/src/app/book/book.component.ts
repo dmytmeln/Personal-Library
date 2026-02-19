@@ -25,9 +25,11 @@ import {LibraryBook} from '../interfaces/library-book';
 })
 export class BookComponent {
 
+  private readonly TITLE_MAX_LENGTH = 25;
+
   book = input.required<Book>();
-  menuData = input<LibraryBook | null>(null);
-  actionsMenu = input<MatMenuPanel<any> | null>(null);
+  menuData = input<any>(null);
+  actionsMenu = input<MatMenuPanel | null>(null);
 
   constructor(
     private router: Router,
@@ -40,6 +42,17 @@ export class BookComponent {
 
   goToBookDetails(): void {
     this.router.navigate(['/book-details'], {state: this.book()});
+  }
+
+  truncateTitle(title: string): string {
+    if (title.length <= this.TITLE_MAX_LENGTH) {
+      return title;
+    }
+    return title.substring(0, this.TITLE_MAX_LENGTH) + '...';
+  }
+
+  shouldShowTooltip(title: string): boolean {
+    return title.length > this.TITLE_MAX_LENGTH;
   }
 
 }

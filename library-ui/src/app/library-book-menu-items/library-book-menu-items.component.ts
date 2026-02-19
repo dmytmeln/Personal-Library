@@ -3,9 +3,9 @@ import {CommonModule} from '@angular/common';
 import {MatMenuModule, MatMenuPanel} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
-import {Book} from '../interfaces/book';
 import {getStatusName, LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {Router} from '@angular/router';
+import {Book} from '../interfaces/book';
 
 @Component({
   selector: 'app-library-book-menu-items',
@@ -26,9 +26,9 @@ export class LibraryBookMenuItemsComponent {
 
   @ViewChild('rootMenu', {static: true}) menu!: MatMenuPanel<any>;
 
-  deleteBook = output<Book>();
-  statusChange = output<[Book, LibraryBookStatus]>();
-  ratingChange = output<{ bookId: number; rating: number }>();
+  deleteBook = output<LibraryBook>();
+  statusChange = output<[LibraryBook, LibraryBookStatus]>();
+  ratingChange = output<{ libraryBookId: number; rating: number }>();
 
   constructor(
     private router: Router,

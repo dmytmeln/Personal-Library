@@ -28,7 +28,7 @@
   <ng-template matMenuContent let-libraryBook="libraryBook">
     @for (status of LIBRARY_BOOK_STATUSES; track status) {
       <button mat-menu-item
-              [disabled]="libraryBook?.status === status"
+              [disabled]="libraryBook.status === status"
               (click)="statusChange.emit([libraryBook, status])">
         <span>{{ getStatusName(status) }}</span>
       </button>
@@ -39,6 +39,6 @@
 <mat-menu #ratingMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
     <app-book-rating [rating]="libraryBook?.rating ?? 0"
-                     (ratingChange)="ratingChange.emit({bookId: libraryBook?.book.id, rating: $event})"/>
+                     (ratingChange)="ratingChange.emit({libraryBookId: libraryBook?.id, rating: $event})"/>
   </ng-template>
 </mat-menu>

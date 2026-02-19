@@ -24,15 +24,21 @@ public class CollectionBookService {
 
     public List<CollectionBookDto> getCollectionBooks(Integer userId, Integer collectionId) {
         var collection = collectionService.getExistingById(collectionId);
-        collectionService.verifyBelongsToUser(collection, userId);
+        if (!collection.getUser().getId().equals(userId))
+            throw new BadRequestException("Collection does not belong to user");
+
         return mapper.toDto(repository.findByIdCollectionId(collectionId));
     }
 
-    public CollectionBookDto addBookToCollection(Integer userId, Integer collectionId, Integer bookId) {
+    public CollectionBookDto addBookToCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
         var collection = collectionService.getExistingById(collectionId);
-        collectionService.verifyBelongsToUser(collection, userId);
-        var libraryBook = libraryBookService.getExistingById(bookId, userId);
-        verifyNotExists(new CollectionBookId(collection.getId(), libraryBook.getId()));
+        if (!collection.getUser().getId().equals(userId))
+            throw new BadRequestException("Collection does not belong to user");
+
+        var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
+        if (repository.existsById(new CollectionBookId(collection.getId(), libraryBook.getId())))
+            throw new BadRequestException("Book is already added to collection");
+
         var collectionBook = repository.save(CollectionBook.builder()
                 .id(new CollectionBookId(collection.getId(), libraryBook.getId()))
                 .libraryBook(libraryBook)
@@ -41,17 +47,13 @@ public class CollectionBookService {
         return mapper.toDto(collectionBook);
     }
 
-    public void removeBookFromCollection(Integer userId, Integer collectionId, Integer bookId) {
+    public void removeBookFromCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
         var collection = collectionService.getExistingById(collectionId);
-        collectionService.verifyBelongsToUser(collection, userId);
-        var libraryBook = libraryBookService.getExistingById(bookId, userId);
-        repository.deleteById(new CollectionBookId(collection.getId(), libraryBook.getId()));
-    }
+        if (!collection.getUser().getId().equals(userId))
+            throw new BadRequestException("Collection does not belong to user");
 
-    private void verifyNotExists(CollectionBookId collectionBookId) {
-        if (repository.existsById(collectionBookId)) {
-            throw new BadRequestException("Book is already added to collection");
-        }
+        var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
+        repository.deleteById(new CollectionBookId(collection.getId(), libraryBook.getId()));
     }
 
 }

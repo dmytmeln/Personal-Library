@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Видалити книгу</h2>
+
+<div mat-dialog-content>
+  <p class="warning-text">
+    Ви впевнені, що хочете видалити книгу <strong>{{ data.bookTitle }}</strong> з вашої бібліотеки?
+  </p>
+
+  @if (data.collections.length > 0) {
+    <div class="collections-warning">
+      <p class="warning-title">Увага! Ця книга знаходиться в наступних колекціях:</p>
+      <ul class="collections-list">
+        @for (collection of data.collections; track collection.id) {
+          <li [ngStyle]="{'color': collection.color || '#333'}">
+            {{ collection.name }}
+          </li>
+        }
+      </ul>
+      <p class="warning-subtitle">Книга буде видалена з усіх цих колекцій.</p>
+    </div>
+  }
+</div>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancelDelete()">Скасувати</button>
+  <button mat-raised-button color="warn" (click)="confirmDelete()">Видалити</button>
+</mat-dialog-actions>

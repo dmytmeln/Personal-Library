@@ -27,7 +27,6 @@ import {CountryWithCount} from '../interfaces/country-with-count';
 import {debounceTime, distinctUntilChanged, Subject, switchMap} from 'rxjs';
 import {BooksGridComponent} from '../books-grid/books-grid.component';
 import {MatSnackCommon} from '../common/mat-snack-common';
-import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
 import {MatMenu, MatMenuContent, MatMenuItem} from '@angular/material/menu';
 
 interface SortOption {
@@ -158,7 +157,6 @@ interface UiState {
     MatCheckboxModule,
     MatSelectModule,
     BooksGridComponent,
-    LibraryBookMenuItemsComponent,
     MatMenu,
     MatMenuContent,
     MatMenuItem,
@@ -882,6 +880,10 @@ export class SearchComponent implements OnInit {
 
   toggleShowAllLanguages(): void {
     this.languagesState.showAll = !this.languagesState.showAll;
+  }
+
+  hasSelectedLanguage(): boolean {
+    return this.languagesState.selected.length > 0;
   }
 
   get displayedLanguages(): LanguageWithCount[] {

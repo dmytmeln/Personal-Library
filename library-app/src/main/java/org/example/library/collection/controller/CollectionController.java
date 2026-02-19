@@ -20,7 +20,11 @@ public class CollectionController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CollectionDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public List<CollectionDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                      @RequestParam(required = false) Integer libraryBookId) {
+        if (libraryBookId != null)
+            return service.getAllByUserIdAndLibraryBookId(userDetails.getId(), libraryBookId);
+
         return service.getAllByUserId(userDetails.getId());
     }
 

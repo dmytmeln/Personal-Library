@@ -33,28 +33,28 @@ public class LibraryBookController {
         return service.create(bookId, userDetails.user());
     }
 
-    @PutMapping("/{bookId}/rating")
+    @PutMapping("/{libraryBookId}/rating")
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto rate(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                               @PathVariable Integer bookId,
+                               @PathVariable Integer libraryBookId,
                                @RequestParam Integer rating
     ) {
-        return service.rate(bookId, userDetails.getId(), rating);
+        return service.rate(libraryBookId, userDetails.getId(), rating);
     }
 
-    @PutMapping("/{bookId}/status")
+    @PutMapping("/{libraryBookId}/status")
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto updateStatus(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                       @PathVariable Integer bookId,
+                                       @PathVariable Integer libraryBookId,
                                        @RequestParam LibraryBookStatus status
     ) {
-        return service.updateStatus(bookId, userDetails.getId(), status);
+        return service.updateStatus(libraryBookId, userDetails.getId(), status);
     }
 
-    @DeleteMapping("/{bookId}")
+    @DeleteMapping("/{libraryBookId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Integer bookId) {
-        service.delete(bookId, userDetails.getId());
+    public void delete(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Integer libraryBookId) {
+        service.delete(libraryBookId, userDetails.getId());
     }
 
 }

@@ -16,6 +16,10 @@ export class CollectionService {
     return this.apiService.get('/collections', {});
   }
 
+  getCollectionsContainingBook(libraryBookId: number): Observable<Collection[]> {
+    return this.apiService.get('/collections', {params: {libraryBookId}});
+  }
+
   getById(id: number): Observable<Collection> {
     return this.apiService.get(`/collections/${id}`, {});
   }

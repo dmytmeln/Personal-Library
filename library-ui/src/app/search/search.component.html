@@ -137,9 +137,11 @@
           <div class="language-filter" *ngIf="languagesState.available.length > 0">
             <div class="language-filter-header">
               <span class="range-label">Мови:</span>
-              <button mat-stroked-button (click)="clearLanguageFilters()" class="language-action-btn">
-                Очистити
-              </button>
+              @if (hasSelectedLanguage()) {
+                <button mat-stroked-button (click)="clearLanguageFilters()" class="language-action-btn">
+                  Очистити
+                </button>
+              }
             </div>
             <div class="language-checkboxes">
               @for (lang of displayedLanguages; track lang.language) {

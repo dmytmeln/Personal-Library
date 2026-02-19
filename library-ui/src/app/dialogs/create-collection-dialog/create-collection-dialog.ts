@@ -27,7 +27,7 @@ export class CreateCollectionDialog {
     description: FormControl<string | null>
   }>;
 
-  colors: string[] = ['#4285F4', '#34A853', '#EA4335', '#FBBC04', '#A142F4', '#F44292', '#5F6368'];
+  colors: string[] = ['#4285F4', '#34A853', '#EA4335', '#FBBC04', '#A142F4', '#F44292'];
   selectedColor: string;
 
   constructor(

@@ -22,7 +22,7 @@
   margin-top: 10px;
 
   .book-details-info {
-    background-color: #1f1c1f;
+    background-color: var(--mat-sys-surface-container-highest);
     padding: 20px;
     border-radius: 4px;
     margin-top: 14px;
@@ -44,7 +44,7 @@
 
   .book-description-text {
     margin-top: 14px;
-    background-color: #1f1c1f;
+    background-color: var(--mat-sys-surface-container-highest);
     padding: 20px;
     border-radius: 4px;
   }

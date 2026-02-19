@@ -40,7 +40,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
 
   @ViewChild(MatSort) sort!: MatSort;
   displayedColumns: string[] = ['title', 'categoryName', 'publishYear', 'language', 'pages', 'actions'];
-  dataSource = new MatTableDataSource<Book>();
+  dataSource = new MatTableDataSource<LibraryBook | Book>();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private readonly data: ViewBookListDialogData,
@@ -58,6 +58,14 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
 
   isBookInLibrary(book: Book): boolean {
     return this.data.libraryBooks.some(libraryBook => libraryBook.book.id === book.id);
+  }
+
+  getItemId(item: Book | LibraryBook): number {
+    return item.id;
+  }
+
+  getBookFromItem(item: Book | LibraryBook): Book {
+    return 'book' in item ? item.book : item;
   }
 
   applyFilter(event: Event) {
@@ -88,5 +96,5 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
 
 export interface ViewBookListDialogData {
   libraryBooks: ReadonlyArray<LibraryBook>;
-  fetchBooksFn: (page: number, size: number) => Observable<Page<Book>>;
+  fetchBooksFn: (page: number, size: number) => Observable<Page<Book> | Page<LibraryBook>>;
 }

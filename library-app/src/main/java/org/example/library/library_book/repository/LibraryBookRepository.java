@@ -14,9 +14,9 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
 
     Page<LibraryBook> findAllByUserId(Integer userId, Pageable pageable);
 
-    Optional<LibraryBook> findByBookIdAndUserId(Integer bookId, Integer userId);
+    Optional<LibraryBook> findByIdAndUserId(Integer libraryBookId, Integer userId);
 
-    void deleteByBookIdAndUserId(Integer bookId, Integer userId);
+    void deleteByIdAndUserId(Integer libraryBookId, Integer userId);
 
     boolean existsByBookIdAndUserId(Integer bookId, Integer userId);
 

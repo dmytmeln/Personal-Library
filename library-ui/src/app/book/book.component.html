@@ -5,7 +5,7 @@
     }
   </div>
   <div class="content">
-    <p class="title">{{ book().title }}</p>
+    <p class="title" [matTooltip]="book().title" [matTooltipDisabled]="!shouldShowTooltip(book().title)">{{ truncateTitle(book().title) }}</p>
     <p class="authors">
       @for (author of book().authors | keyvalue; track author.key; let last = $last) {
         <a class="link"

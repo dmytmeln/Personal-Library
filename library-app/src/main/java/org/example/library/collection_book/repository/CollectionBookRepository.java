@@ -10,4 +10,6 @@ public interface CollectionBookRepository extends JpaRepository<CollectionBook, 
 
     List<CollectionBook> findByIdCollectionId(Integer collectionId);
 
+    void deleteByLibraryBookId(Integer libraryBookId);
+
 }

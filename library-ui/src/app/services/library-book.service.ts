@@ -22,16 +22,16 @@ export class LibraryBookService {
     return this.apiService.post('/users/me/library-books', {params: {bookId}});
   }
 
-  removeBook(bookId: number): Observable<void> {
-    return this.apiService.delete(`/users/me/library-books/${bookId}`, {});
+  removeBook(libraryBookId: number): Observable<void> {
+    return this.apiService.delete(`/users/me/library-books/${libraryBookId}`, {});
   }
 
-  changeStatus(bookId: number, status: LibraryBookStatus): Observable<LibraryBook> {
-    return this.apiService.put(`/users/me/library-books/${bookId}/status`, {params: {status}});
+  changeStatus(libraryBookId: number, status: LibraryBookStatus): Observable<LibraryBook> {
+    return this.apiService.put(`/users/me/library-books/${libraryBookId}/status`, {params: {status}});
   }
 
-  changeRating(bookId: number, rating: number): Observable<LibraryBook> {
-    return this.apiService.put(`/users/me/library-books/${bookId}/rating`, {params: {rating}});
+  changeRating(libraryBookId: number, rating: number): Observable<LibraryBook> {
+    return this.apiService.put(`/users/me/library-books/${libraryBookId}/rating`, {params: {rating}});
   }
 
 }

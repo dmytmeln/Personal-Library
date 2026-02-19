@@ -28,6 +28,10 @@ public class CollectionService {
         return mapper.toDto(repository.findAllByUserIdAndBookId(userId, bookId));
     }
 
+    public List<CollectionDto> getAllByUserIdAndLibraryBookId(Integer userId, Integer libraryBookId) {
+        return mapper.toDto(repository.findAllByUserIdAndLibraryBookId(userId, libraryBookId));
+    }
+
     public Collection getExistingById(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Collection not found"));
@@ -35,7 +39,9 @@ public class CollectionService {
 
     public CollectionDto getById(Integer userId, Integer collectionId) {
         var collection = getExistingById(collectionId);
-        verifyBelongsToUser(collection, userId);
+        if (!collection.getUser().getId().equals(userId))
+            throw new BadRequestException("Collection does not belong to user");
+
         return mapper.toDto(collection);
     }
 
@@ -47,7 +53,9 @@ public class CollectionService {
 
     public CollectionDto updateCollection(Integer collectionId, CreateCollectionRequest dto, Integer userId) {
         var collection = getExistingById(collectionId);
-        verifyBelongsToUser(collection, userId);
+        if (!collection.getUser().getId().equals(userId))
+            throw new BadRequestException("Collection does not belong to user");
+
         var updatedCollection = repository.save(
                 collection.toBuilder()
                         .name(dto.name())
@@ -55,12 +63,6 @@ public class CollectionService {
                         .color(dto.color())
                         .build());
         return mapper.toDto(updatedCollection);
-    }
-
-    public void verifyBelongsToUser(Collection collection, Integer userId) {
-        if (!collection.getUser().getId().equals(userId)) {
-            throw new BadRequestException("Collection does not belong to user");
-        }
     }
 
 }

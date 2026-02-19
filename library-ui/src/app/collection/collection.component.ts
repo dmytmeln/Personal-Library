@@ -10,9 +10,7 @@ import {CreateCollectionDialog} from '../dialogs/create-collection-dialog/create
 import {CreateCollection} from '../interfaces/create-collection';
 import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
 import {LibraryBookService} from '../services/library-book.service';
-import {map} from 'rxjs';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
-import {Book} from '../interfaces/book';
 import {BookComponent} from '../book/book.component';
 import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
 import {Router} from '@angular/router';
@@ -67,48 +65,41 @@ export class CollectionComponent implements OnInit {
   openViewBookListDialog(): void {
     const data: ViewBookListDialogData = {
       libraryBooks: this.collectionBooks.map(cd => cd.libraryBook),
-      fetchBooksFn: (page, size) =>
-        this.libraryBookService.getAll(page, size).pipe(
-          map(libraryBookPage => ({
-            content: libraryBookPage.content.map((lb: LibraryBook): Book => lb.book),
-            page: libraryBookPage.page
-          }))
-        ),
+      fetchBooksFn: (page, size) => this.libraryBookService.getAll(page, size),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
-    dialogRef.afterClosed().subscribe((bookId: number | undefined) => {
-      if (bookId) {
-        this.collectionBookService.addBookToCollection(this.collection.id, bookId).subscribe(collectionBook => {
+    dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
+      if (libraryBookId) {
+        this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe(collectionBook => {
           this.collectionBooks.push(collectionBook);
         });
       }
     });
   }
 
-  deleteBook(book: Book): void {
-    this.collectionBookService.removeBookFromCollection(this.collection.id, book.id).subscribe(() => {
-      this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.book.id !== book.id);
+  deleteBook(libraryBook: LibraryBook): void {
+    this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe(() => {
+      this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
     });
   }
 
-  statusChange(data: [Book, LibraryBookStatus]): void {
+  statusChange(data: [LibraryBook, LibraryBookStatus]): void {
     this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe(libraryBook =>
       this.updateBook(libraryBook));
   }
 
-  ratingChange(data: { bookId: number; rating: number }): void {
-    this.libraryBookService.changeRating(data.bookId, data.rating).subscribe(libraryBook =>
+  ratingChange(data: { libraryBookId: number; rating: number }): void {
+    this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe(libraryBook =>
       this.updateBook(libraryBook));
   }
 
   goBack() {
-    this.router.navigate(['collections']).then(() => {
-    });
+    this.router.navigate(['collections']);
   }
 
   private updateBook(libraryBook: LibraryBook) {
     this.collectionBooks.map(cb =>
-      cb.libraryBook = cb.libraryBook.book.id === libraryBook.book.id
+      cb.libraryBook = cb.libraryBook.id === libraryBook.id
         ? libraryBook
         : cb.libraryBook);
   }

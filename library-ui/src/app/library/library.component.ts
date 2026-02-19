@@ -9,8 +9,9 @@ import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-l
 import {BookExpansionListComponent} from '../book-expansion-list/book-expansion-list.component';
 import {BookService} from '../services/book.service';
 import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
-import {Book} from '../interfaces/book';
-import {MatMenu, MatMenuContent, MatMenuModule} from '@angular/material/menu';
+import {MatMenuModule} from '@angular/material/menu';
+import {CollectionService} from '../services/collection.service';
+import {DeleteLibraryBookDialog} from '../dialogs/delete-library-book-dialog/delete-library-book-dialog';
 
 @Component({
   selector: 'app-library',
@@ -39,6 +40,7 @@ export class LibraryComponent implements AfterViewInit {
     private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
     private bookService: BookService,
+    private collectionService: CollectionService,
   ) {
   }
 
@@ -49,27 +51,45 @@ export class LibraryComponent implements AfterViewInit {
     });
   }
 
-  deleteLibraryBook(book: Book): void {
-    this.libraryBookService.removeBook(book.id).subscribe(() => {
-      this.libraryBooks = this.libraryBooks.filter(lb => lb.book.id !== book.id);
+  deleteLibraryBook(libraryBook: LibraryBook): void {
+    this.collectionService.getCollectionsContainingBook(libraryBook.id).subscribe(collections => {
+      if (collections.length === 0) {
+        this.performDelete(libraryBook);
+        return;
+      }
+
+      const dialogRef = this.dialog.open(DeleteLibraryBookDialog, {
+        data: {
+          bookTitle: libraryBook.book.title,
+          collections
+        }
+      });
+
+      dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.performDelete(libraryBook);
+        }
+      });
+    });
+  }
+
+  private performDelete(libraryBook: LibraryBook): void {
+    this.libraryBookService.removeBook(libraryBook.id).subscribe(() => {
+      this.libraryBooks = this.libraryBooks.filter(lb => lb.id !== libraryBook.id);
       this.updateBookGroups();
     });
   }
 
-  changeLibraryBookStatus(data: [Book, LibraryBookStatus]): void {
+  changeLibraryBookStatus(data: [LibraryBook, LibraryBookStatus]): void {
     this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe((libraryBook: LibraryBook) => {
       this.updateBook(libraryBook);
     });
   }
 
-  changeLibraryBookRating(data: { bookId: number; rating: number }): void {
-    this.libraryBookService.changeRating(data.bookId, data.rating).subscribe((libraryBook: LibraryBook) => {
+  changeLibraryBookRating(data: { libraryBookId: number; rating: number }): void {
+    this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe((libraryBook: LibraryBook) => {
       this.updateBook(libraryBook);
     });
-  }
-
-  getLibraryBookByBookId(bookId: number): LibraryBook | undefined {
-    return this.libraryBooks.find(lb => lb.book.id === bookId);
   }
 
   openViewBookListDialog() {

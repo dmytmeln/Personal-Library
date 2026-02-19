@@ -2,6 +2,7 @@ package org.example.library.library_book.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.library.book.service.BookService;
+import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
 import org.example.library.library_book.domain.LibraryBook;
@@ -31,6 +32,7 @@ public class LibraryBookService {
     private final LibraryBookRepository repository;
     private final LibraryBookMapper mapper;
     private final BookService bookService;
+    private final CollectionBookRepository collectionBookRepository;
 
 
     public Page<LibraryBookDto> getAllByUserId(Integer userId, Pageable pageable) {
@@ -38,8 +40,8 @@ public class LibraryBookService {
                 .map(mapper::toDto);
     }
 
-    public LibraryBook getExistingById(Integer bookId, Integer userId) {
-        return repository.findByBookIdAndUserId(bookId, userId)
+    public LibraryBook getExistingById(Integer libraryBookId, Integer userId) {
+        return repository.findByIdAndUserId(libraryBookId, userId)
                 .orElseThrow(() -> new NotFoundException("There is no such book in your library"));
     }
 
@@ -50,22 +52,23 @@ public class LibraryBookService {
         return mapper.toDto(saved);
     }
 
-    public LibraryBookDto rate(Integer bookId, Integer userId, Integer rating) {
+    public LibraryBookDto rate(Integer libraryBookId, Integer userId, Integer rating) {
         verifyRatingIsValid(rating);
-        var libraryBook = getExistingById(bookId, userId);
+        var libraryBook = getExistingById(libraryBookId, userId);
         libraryBook.setRating(rating.byteValue());
         return mapper.toDto(repository.save(libraryBook));
     }
 
-    public LibraryBookDto updateStatus(Integer bookId, Integer userId, LibraryBookStatus status) {
-        var libraryBook = getExistingById(bookId, userId);
+    public LibraryBookDto updateStatus(Integer libraryBookId, Integer userId, LibraryBookStatus status) {
+        var libraryBook = getExistingById(libraryBookId, userId);
         libraryBook.setStatus(status);
         return mapper.toDto(repository.save(libraryBook));
     }
 
     @Transactional
-    public void delete(Integer bookId, Integer userId) {
-        repository.deleteByBookIdAndUserId(bookId, userId);
+    public void delete(Integer libraryBookId, Integer userId) {
+        collectionBookRepository.deleteByLibraryBookId(libraryBookId);
+        repository.deleteByIdAndUserId(libraryBookId, userId);
     }
 
     public Map.Entry<Double, Integer> getBookAverageRatingAndCount(Integer bookId) {

@@ -23,22 +23,22 @@ public class CollectionBookController {
         return service.getCollectionBooks(userDetails.getId(), collectionId);
     }
 
-    @PostMapping("/{bookId}")
+    @PostMapping("/{libraryBookId}")
     @ResponseStatus(HttpStatus.CREATED)
     public CollectionBookDto addBookToCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @PathVariable int collectionId,
-                                                  @PathVariable int bookId
+                                                  @PathVariable int libraryBookId
     ) {
-        return service.addBookToCollection(userDetails.getId(), collectionId, bookId);
+        return service.addBookToCollection(userDetails.getId(), collectionId, libraryBookId);
     }
 
-    @DeleteMapping("/{bookId}")
+    @DeleteMapping("/{libraryBookId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeBookFromCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                           @PathVariable int collectionId,
-                                          @PathVariable int bookId
+                                          @PathVariable int libraryBookId
     ) {
-        service.removeBookFromCollection(userDetails.getId(), collectionId, bookId);
+        service.removeBookFromCollection(userDetails.getId(), collectionId, libraryBookId);
     }
 
 }

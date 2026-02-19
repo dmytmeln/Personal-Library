@@ -19,4 +19,12 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
             """, nativeQuery = true)
     List<Collection> findAllByUserIdAndBookId(Integer userId, Integer bookId);
 
+    @Query(value = """
+            SELECT c.collection_id, c.user_id, c.name, c.description, c.color, c.created_at, c.updated_at
+            FROM collections c
+            JOIN collection_books cb ON cb.collection_id = c.collection_id
+            WHERE c.user_id = :userId AND cb.library_book_id = :libraryBookId
+            """, nativeQuery = true)
+    List<Collection> findAllByUserIdAndLibraryBookId(Integer userId, Integer libraryBookId);
+
 }
