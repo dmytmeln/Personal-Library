@@ -2,6 +2,7 @@ package org.example.library.collection_book.repository;
 
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
+import org.example.library.library_book.domain.LibraryBook;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -10,6 +11,6 @@ public interface CollectionBookRepository extends JpaRepository<CollectionBook, 
 
     List<CollectionBook> findByIdCollectionId(Integer collectionId);
 
-    void deleteByLibraryBookId(Integer libraryBookId);
+    void deleteByLibraryBook(LibraryBook libraryBook);
 
 }

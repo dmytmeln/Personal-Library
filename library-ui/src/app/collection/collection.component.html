@@ -20,16 +20,41 @@
       @for (collectionBook of collectionBooks; track collectionBook.libraryBook.id) {
         <app-book
           [book]="collectionBook.libraryBook.book"
-          [actionsMenu]="sharedMenu.menu"
+          [actionsMenu]="collectionBookMenu"
           [menuData]="{ libraryBook: collectionBook.libraryBook }"/>
       }
     </div>
   </div>
 </div>
 
+<mat-menu #collectionBookMenu="matMenu">
+  <ng-template matMenuContent let-libraryBook="libraryBook">
+    <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
+      <mat-icon>info</mat-icon>
+      <span>Деталі книги</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+      <mat-icon>label</mat-icon>
+      <span>Змінити статус</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+      <mat-icon>star</mat-icon>
+      <span>Оцінити</span>
+    </button>
+    <button mat-menu-item (click)="removeFromAllCollections(libraryBook)">
+      <mat-icon>folder_delete</mat-icon>
+      <span>Видалити з усіх колекцій</span>
+    </button>
+    <button mat-menu-item (click)="deleteBook(libraryBook)">
+      <mat-icon>remove_circle</mat-icon>
+      <span>Видалити з колекції</span>
+    </button>
+  </ng-template>
+</mat-menu>
+
 <app-library-book-menu-items #sharedMenu
-                             (deleteBook)="deleteBook($event)"
                              (statusChange)="statusChange($event)"
-                             (ratingChange)="ratingChange($event)">
+                             (ratingChange)="ratingChange($event)"
+                             style="display: none;">
 </app-library-book-menu-items>
 

@@ -3,6 +3,7 @@ import {LibraryBookService} from '../services/library-book.service';
 import {getStatusName, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatDialog} from '@angular/material/dialog';
 import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
@@ -11,7 +12,10 @@ import {BookService} from '../services/book.service';
 import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
 import {MatMenuModule} from '@angular/material/menu';
 import {CollectionService} from '../services/collection.service';
+import {CollectionBookService} from '../services/collection-book.service';
 import {DeleteLibraryBookDialog} from '../dialogs/delete-library-book-dialog/delete-library-book-dialog';
+import {MatSnackCommon} from '../common/mat-snack-common';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-library',
@@ -19,6 +23,7 @@ import {DeleteLibraryBookDialog} from '../dialogs/delete-library-book-dialog/del
     MatTabGroup,
     MatTab,
     MatButton,
+    MatIconModule,
     MatExpansionModule,
     BookExpansionListComponent,
     LibraryBookMenuItemsComponent,
@@ -36,12 +41,17 @@ export class LibraryComponent implements AfterViewInit {
   public libraryBooksByCategory: Map<string, LibraryBook[]> = new Map();
   public libraryBooksByAuthor: Map<string, LibraryBook[]> = new Map();
 
+  private snackCommon: MatSnackCommon;
+
   constructor(
     private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
     private bookService: BookService,
     private collectionService: CollectionService,
+    private collectionBookService: CollectionBookService,
+    private matSnackBar: MatSnackBar,
   ) {
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngAfterViewInit(): void {
@@ -89,6 +99,13 @@ export class LibraryComponent implements AfterViewInit {
   changeLibraryBookRating(data: { libraryBookId: number; rating: number }): void {
     this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe((libraryBook: LibraryBook) => {
       this.updateBook(libraryBook);
+    });
+  }
+
+  removeFromAllCollections(libraryBook: LibraryBook): void {
+    this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
+      next: () => this.snackCommon.showSuccess('Книгу видалено з усіх колекцій'),
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 

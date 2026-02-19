@@ -10,6 +10,7 @@ import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.library_book.service.LibraryBookService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -54,6 +55,12 @@ public class CollectionBookService {
 
         var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
         repository.deleteById(new CollectionBookId(collection.getId(), libraryBook.getId()));
+    }
+
+    @Transactional
+    public void removeBookFromAllCollections(Integer userId, Integer libraryBookId) {
+        var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
+        repository.deleteByLibraryBook(libraryBook);
     }
 
 }

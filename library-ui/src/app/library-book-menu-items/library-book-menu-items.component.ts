@@ -24,9 +24,9 @@ export class LibraryBookMenuItemsComponent {
   protected readonly LIBRARY_BOOK_STATUSES = LIBRARY_BOOK_STATUSES;
   protected readonly getStatusName = getStatusName;
 
-  @ViewChild('rootMenu', {static: true}) menu!: MatMenuPanel<any>;
+  @ViewChild('statusMenu', {static: true}) statusMenu!: MatMenuPanel<any>;
+  @ViewChild('ratingMenu', {static: true}) ratingMenu!: MatMenuPanel<any>;
 
-  deleteBook = output<LibraryBook>();
   statusChange = output<[LibraryBook, LibraryBookStatus]>();
   ratingChange = output<{ libraryBookId: number; rating: number }>();
 

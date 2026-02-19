@@ -5,8 +5,11 @@ import {Collection} from '../interfaces/collection';
 import {CollectionBook} from '../interfaces/collection-book';
 import {NgStyle} from '@angular/common';
 import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {CreateCollectionDialog} from '../dialogs/create-collection-dialog/create-collection-dialog';
+import {MatSnackCommon} from '../common/mat-snack-common';
 import {CreateCollection} from '../interfaces/create-collection';
 import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
 import {LibraryBookService} from '../services/library-book.service';
@@ -21,10 +24,10 @@ import {MatMenuModule} from '@angular/material/menu';
   imports: [
     NgStyle,
     MatButton,
+    MatIconModule,
     BookComponent,
     LibraryBookMenuItemsComponent,
     MatMenuModule,
-
   ],
   templateUrl: './collection.component.html',
   styleUrl: './collection.component.scss'
@@ -33,6 +36,7 @@ export class CollectionComponent implements OnInit {
 
   collection!: Collection;
   collectionBooks: CollectionBook[] = [];
+  private snackCommon: MatSnackCommon;
 
   constructor(
     private router: Router,
@@ -40,7 +44,9 @@ export class CollectionComponent implements OnInit {
     private collectionBookService: CollectionBookService,
     private dialog: MatDialog,
     private libraryBookService: LibraryBookService,
+    private matSnackBar: MatSnackBar,
   ) {
+    this.snackCommon = new MatSnackCommon(matSnackBar);
     this.collection = this.router.getCurrentNavigation()?.extras?.state as Collection;
     if (!this.collection) {
       this.goBack();
@@ -91,6 +97,16 @@ export class CollectionComponent implements OnInit {
   ratingChange(data: { libraryBookId: number; rating: number }): void {
     this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe(libraryBook =>
       this.updateBook(libraryBook));
+  }
+
+  removeFromAllCollections(libraryBook: LibraryBook): void {
+    this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
+      next: () => {
+        this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+        this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
   }
 
   goBack() {

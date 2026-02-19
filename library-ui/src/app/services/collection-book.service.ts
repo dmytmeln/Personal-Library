@@ -23,4 +23,10 @@ export class CollectionBookService {
     return this.apiService.delete(`/collections/${collectionId}/books/${libraryBookId}`, {});
   }
 
+  removeFromAllCollections(libraryBookId: number): Observable<void> {
+    return this.apiService.delete('/collections/books', {
+      params: { libraryBookId }
+    });
+  }
+
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.library.collection.dto.CollectionDto;
 import org.example.library.collection.dto.CreateCollectionRequest;
 import org.example.library.collection.service.CollectionService;
+import org.example.library.collection_book.service.CollectionBookService;
 import org.example.library.security.UserDetailsImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +18,7 @@ import java.util.List;
 public class CollectionController {
 
     private final CollectionService service;
+    private final CollectionBookService collectionBookService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -47,6 +49,13 @@ public class CollectionController {
                                 @RequestBody CreateCollectionRequest dto
     ) {
         return service.updateCollection(collectionId, dto, userDetails.getId());
+    }
+
+    @DeleteMapping("/books")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeBookFromAllCollections(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                              @RequestParam Integer libraryBookId) {
+        collectionBookService.removeBookFromAllCollections(userDetails.getId(), libraryBookId);
     }
 
 }

@@ -1,29 +1,3 @@
-<mat-menu #rootMenu="matMenu">
-  <ng-template matMenuContent let-libraryBook="libraryBook">
-
-    <button mat-menu-item (click)="goToBookDetails(libraryBook.book)">
-      <mat-icon>info</mat-icon>
-      <span>Деталі книги</span>
-    </button>
-
-    <button mat-menu-item [matMenuTriggerFor]="statusMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
-      <mat-icon>label</mat-icon>
-      <span>Змінити статус</span>
-    </button>
-
-    <button mat-menu-item (click)="deleteBook.emit(libraryBook)">
-      <mat-icon>delete</mat-icon>
-      <span>Видалити</span>
-    </button>
-
-    <button mat-menu-item [matMenuTriggerFor]="ratingMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
-      <mat-icon>star</mat-icon>
-      <span>Оцінити</span>
-    </button>
-
-  </ng-template>
-</mat-menu>
-
 <mat-menu #statusMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
     @for (status of LIBRARY_BOOK_STATUSES; track status) {

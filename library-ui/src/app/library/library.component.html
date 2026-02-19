@@ -7,27 +7,55 @@
       <app-book-expansion-list
         [entries]="libraryBooksByStatus"
         [getTitle]="getStatusName"
-        [actionsMenu]="sharedMenu.menu"/> </div>
+        [actionsMenu]="libraryBookMenu"/>
+    </div>
   </mat-tab>
 
   <mat-tab label="Жанри">
     <div class="mat-tab-content">
       <app-book-expansion-list
         [entries]="libraryBooksByCategory"
-        [actionsMenu]="sharedMenu.menu"/> </div>
+        [actionsMenu]="libraryBookMenu"/>
+    </div>
   </mat-tab>
 
   <mat-tab label="Автори">
     <div class="mat-tab-content">
       <app-book-expansion-list
         [entries]="libraryBooksByAuthor"
-        [actionsMenu]="sharedMenu.menu"/> </div>
+        [actionsMenu]="libraryBookMenu"/>
+    </div>
   </mat-tab>
 
 </mat-tab-group>
 
+<mat-menu #libraryBookMenu="matMenu">
+  <ng-template matMenuContent let-libraryBook="libraryBook">
+    <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
+      <mat-icon>info</mat-icon>
+      <span>Деталі книги</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+      <mat-icon>label</mat-icon>
+      <span>Змінити статус</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+      <mat-icon>star</mat-icon>
+      <span>Оцінити</span>
+    </button>
+    <button mat-menu-item (click)="removeFromAllCollections(libraryBook)">
+      <mat-icon>folder_delete</mat-icon>
+      <span>Видалити з усіх колекцій</span>
+    </button>
+    <button mat-menu-item (click)="deleteLibraryBook(libraryBook)">
+      <mat-icon>delete</mat-icon>
+      <span>Видалити з бібліотеки</span>
+    </button>
+  </ng-template>
+</mat-menu>
+
 <app-library-book-menu-items #sharedMenu
-  (deleteBook)="deleteLibraryBook($event)"
   (statusChange)="changeLibraryBookStatus($event)"
-  (ratingChange)="changeLibraryBookRating($event)">
+  (ratingChange)="changeLibraryBookRating($event)"
+  style="display: none;">
 </app-library-book-menu-items>

@@ -12,7 +12,6 @@ public class LibraryApplication {
     //  BE: logging
 
     // todo:
-    //  BE + FE: collections - add the possibility to remove from current collection (collection page) and from all collections without removing from library.
     //  BE + FE: collections - add the possibility to move book from one collection to another (remove from one collection and add to another)
     //  BE + FE: collection - add the possibility to add book to collection from library page (without going to collection page). Maybe dialog with list of collections to choose from?
     //  BE + FE: collection - nested collections
@@ -28,7 +27,7 @@ public class LibraryApplication {
     //  FE: enhance searching and filtering in search page
     //  FE: use MatSnackBar to show messages to user
     //  BE: JWT refresh tokens
-    //  CI/CD
+    //  CI/CDю
     //  AWS deployment
 
     public static void main(String[] args) {
