@@ -4,4 +4,6 @@ export interface Collection {
   description?: string;
   color?: string;
   updatedAt: Date;
+  parentId?: number;
+  children: Collection[];
 }

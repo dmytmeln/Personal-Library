@@ -8,16 +8,17 @@ import {MatButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {CreateCollectionDialog} from '../dialogs/create-collection-dialog/create-collection-dialog';
 import {MatSnackCommon} from '../common/mat-snack-common';
-import {CreateCollection} from '../interfaces/create-collection';
 import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
 import {LibraryBookService} from '../services/library-book.service';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {BookComponent} from '../book/book.component';
 import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
+import {CollectionDialogComponent, CollectionDialogData} from '../dialogs/collection-dialog/collection-dialog.component';
+import {UpdateCollection} from '../interfaces/update-collection';
+import {filter} from 'rxjs';
 
 @Component({
   selector: 'app-collection',
@@ -40,6 +41,7 @@ export class CollectionComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private collectionService: CollectionService,
     private collectionBookService: CollectionBookService,
     private dialog: MatDialog,
@@ -47,24 +49,30 @@ export class CollectionComponent implements OnInit {
     private matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
-    this.collection = this.router.getCurrentNavigation()?.extras?.state as Collection;
-    if (!this.collection) {
-      this.goBack();
-    }
   }
 
   ngOnInit(): void {
-    this.initCollectionBooks();
+    this.route.params.subscribe(params => {
+      const collectionId = +params['id'];
+      this.collectionService.getById(collectionId).subscribe(collection => {
+        this.collection = collection;
+        this.initCollectionBooks();
+      });
+    });
   }
 
-  openCreateCollectionDialog(): void {
-    const dialogRef = this.dialog.open(CreateCollectionDialog, {data: this.collection});
-    dialogRef.afterClosed().subscribe((result: CreateCollection | undefined) => {
-      if (result) {
-        this.collectionService.update(this.collection.id, result).subscribe(collection => {
-          this.collection = collection;
-        });
-      }
+  openUpdateDialog(): void {
+    const dialogRef = this.dialog.open(CollectionDialogComponent, {
+      data: {
+        isEdit: true,
+        collection: this.collection
+      } as CollectionDialogData
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((updatedCollection: UpdateCollection) => {
+      this.collectionService.update(this.collection.id, updatedCollection).subscribe(collection => {
+        this.collection = collection;
+      });
     });
   }
 
@@ -103,7 +111,7 @@ export class CollectionComponent implements OnInit {
     this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
       next: () => {
         this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
-        this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
+        this.snackCommon.showSuccess('Book removed from all collections');
       },
       error: (err) => this.snackCommon.showError(err)
     });

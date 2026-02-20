@@ -28,6 +28,10 @@ export class ApiService {
     return this.httpClient.put<T>(this.baseUrl + url, this.getRequestBody(data), this.getRequestOptions(data));
   }
 
+  patch<T>(url: string, data: any): Observable<T> {
+    return this.httpClient.patch<T>(this.baseUrl + url, this.getRequestBody(data), this.getRequestOptions(data));
+  }
+
   delete<T>(url: string, data: any): Observable<T> {
     return this.httpClient.delete<T>(this.baseUrl + url, this.getRequestOptions(data));
   }

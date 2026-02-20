@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: '', redirectTo: '/library', pathMatch: 'full' },
   { path: 'library', component: LibraryComponent, canActivate: [AuthGuard] },
   { path: 'collections', component: CollectionsComponent, canActivate: [AuthGuard] },
-  { path: 'collection-full-data', component: CollectionComponent, canActivate: [AuthGuard] },
+  { path: 'collections/:id', component: CollectionComponent, canActivate: [AuthGuard] },
   { path: 'book-details', component: BookDetailsComponent },
   { path: 'author-details', component: AuthorDetailsComponent },
   { path: 'search', component: SearchComponent },

@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_parent_id_to_collections
+      author: Dmytro Melnyk
+      changes:
+        - addColumn:
+            tableName: collections
+            columns:
+              - column:
+                  name: parent_id
+                  type: integer
+                  constraints:
+                    nullable: true
+                    foreignKeyName: collections_parent_fk
+                    referencedTableName: collections
+                    referencedColumnNames: collection_id
+        - createIndex:
+            indexName: idx_collections_parent
+            tableName: collections
+            columns:
+              - column:
+                  name: parent_id

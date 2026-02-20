@@ -2,11 +2,15 @@ package org.example.library.collection.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.library.book.domain.Book;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "collections")
@@ -42,5 +46,34 @@ public class Collection {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Collection parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Collection> children = new ArrayList<>();
+
+    public void addChildrenCollection(Collection subCollection) {
+        children.add(subCollection);
+        subCollection.setParent(this);
+    }
+
+    public void removeChildrenCollection(Collection subCollection) {
+        children.remove(subCollection);
+        subCollection.setParent(null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Collection collection)) return false;
+        return Objects.equals(id, collection.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
 }

@@ -1,0 +1,37 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 400px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.color-picker {
+  margin: 16px 0;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .color-options {
+    display: flex;
+    gap: 12px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      transition: all .1s;
+
+      &.selected {
+        border-color: #000;
+      }
+    }
+  }
+}

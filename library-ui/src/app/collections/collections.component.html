@@ -1,7 +1,29 @@
-<h2 class="collections-title">Мої колекції</h2>
-<button class="btn" mat-flat-button (click)="this.openCreateCollectionDialog()">Створити колекцію</button>
-<div class="collections">
-  @for (collection of collections; track collection.id) {
-    <app-collection-card [collection]="collection"/>
-  }
+<div class="container">
+  <div class="header">
+    <h1>Collections</h1>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()">New Collection</button>
+  </div>
+
+  <mat-tree cdkDropList (cdkDropListDropped)="drop($event)" [dataSource]="dataSource" [treeControl]="treeControl">
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding cdkDrag [cdkDragData]="node">
+      <button mat-icon-button disabled></button>
+      <a [routerLink]="['/collections', node.id]">{{node.name}}</a>
+    </mat-tree-node>
+    <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding cdkDrag [cdkDragData]="node">
+      <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+        <mat-icon class="mat-icon-rtl-mirror">
+          {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+        </mat-icon>
+      </button>
+      <a [routerLink]="['/collections', node.id]">{{node.name}}</a>
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="openUpdateDialog(node)">Edit</button>
+        <button mat-menu-item (click)="openCreateDialog(node.id)">Add Sub-collection</button>
+        <button mat-menu-item (click)="deleteCollection(node)">Delete</button>
+      </mat-menu>
+    </mat-tree-node>
+  </mat-tree>
 </div>

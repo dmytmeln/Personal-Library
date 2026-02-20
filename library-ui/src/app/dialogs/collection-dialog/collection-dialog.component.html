@@ -1,0 +1,33 @@
+<form class="form" (ngSubmit)="save()" [formGroup]="form">
+  <h1 mat-dialog-title>{{ isEdit ? 'Edit Collection' : 'Create Collection' }}</h1>
+  <div mat-dialog-content>
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+    <div class="color-picker">
+      <label>Color:</label>
+      <div class="color-options">
+        @for (color of colors; track color) {
+          <button
+            type="button"
+            mat-icon-button
+            [ngStyle]="{'background-color': color}"
+            [class.selected]="color === selectedColor"
+            (click)="selectColor(color)">
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+  <div mat-dialog-actions>
+    <button type="button" mat-button (click)="close()">Cancel</button>
+    <button type="submit" mat-flat-button color="primary" [disabled]="form.invalid">{{ isEdit ? 'Save' : 'Create' }}</button>
+  </div>
+</form>
