@@ -4,17 +4,15 @@ import {CollectionService} from '../services/collection.service';
 import {Collection} from '../interfaces/collection';
 import {CreateCollection} from '../interfaces/create-collection';
 import {MatTreeModule} from '@angular/material/tree';
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
-import {CollectionNode} from '../interfaces/collection-node';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {CollectionDialogComponent, CollectionDialogData} from '../dialogs/collection-dialog/collection-dialog.component';
 import {UpdateCollection} from '../interfaces/update-collection';
-import {filter}from 'rxjs';
-import {CdkDragDrop, DragDropModule} from '@angular/cdk/drag-drop';
+import {filter} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
 import {RouterLink} from '@angular/router';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-collections',
@@ -22,38 +20,20 @@ import {RouterLink} from '@angular/router';
     MatTreeModule,
     MatIconModule,
     MatButtonModule,
-    DragDropModule,
     MatMenuModule,
     RouterLink,
+    MatTooltipModule,
   ],
   templateUrl: './collections.component.html',
   styleUrl: './collections.component.scss'
 })
 export class CollectionsComponent implements OnInit {
 
-  private _transformer = (node: Collection, level: number): CollectionNode => {
-    return {
-      id: node.id,
-      name: node.name,
-      expandable: !!node.children && node.children.length > 0,
-      level: level,
-      parentId: node.parentId || null,
-    };
-  };
+  readonly SHOW_DELAY = 500;
 
-  treeControl = new FlatTreeControl<CollectionNode>(
-    node => node.level,
-    node => node.expandable,
-  );
-
-  treeFlattener = new MatTreeFlattener(
-    this._transformer,
-    node => node.level,
-    node => node.expandable,
-    node => node.children,
-  );
-
-  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+  dataSource: Collection[] = [];
+  childrenAccessor = (node: Collection) => node.children;
+  hasChild = (_: number, node: Collection) => !!node.children && node.children.length > 0;
 
   constructor(
     private collectionService: CollectionService,
@@ -67,11 +47,9 @@ export class CollectionsComponent implements OnInit {
 
   private getTree(): void {
     this.collectionService.getTree().subscribe((collections: Collection[]) => {
-      this.dataSource.data = collections;
+      this.dataSource = collections;
     });
   }
-
-  hasChild = (_: number, node: CollectionNode) => node.expandable;
 
   openCreateDialog(parentId?: number): void {
     const dialogRef = this.dialog.open(CollectionDialogComponent, {
@@ -86,7 +64,7 @@ export class CollectionsComponent implements OnInit {
     });
   }
 
-  openUpdateDialog(node: CollectionNode): void {
+  openUpdateDialog(node: Collection): void {
     this.collectionService.getById(node.id).subscribe(collection => {
       const dialogRef = this.dialog.open(CollectionDialogComponent, {
         data: {
@@ -101,28 +79,15 @@ export class CollectionsComponent implements OnInit {
     });
   }
 
-  deleteCollection(node: CollectionNode): void {
-    // This should open a confirmation dialog in a real app
-    this.collectionService.delete(node.id).subscribe(() => this.getTree());
-  }
+  deleteCollection(node: Collection): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: `Ви впевнені, що хочете видалити колекцію "${node.name}"? Це також призведе до видалення всіх її підколекцій та посилань на книги.`
+      }
+    });
 
-  drop(event: CdkDragDrop<CollectionNode[]>): void {
-    // This is a simplified implementation. A real implementation would need to
-    // handle edge cases and provide better user feedback.
-    const nodeToMove = event.item.data as CollectionNode;
-    const dropTargetNode = this.treeControl.dataNodes[event.currentIndex];
-
-    let newParentId: number | null = null;
-    if (dropTargetNode) {
-      newParentId = dropTargetNode.id;
-    }
-
-    if (nodeToMove.parentId === newParentId) {
-      return; // No change
-    }
-
-    this.collectionService.move(nodeToMove.id, newParentId).subscribe(() => {
-      this.getTree();
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
+      this.collectionService.delete(node.id).subscribe(() => this.getTree());
     });
   }
 }

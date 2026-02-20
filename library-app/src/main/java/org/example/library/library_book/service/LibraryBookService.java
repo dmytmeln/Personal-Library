@@ -31,8 +31,8 @@ public class LibraryBookService {
 
     private final LibraryBookRepository repository;
     private final LibraryBookMapper mapper;
-    private final BookService bookService;
     private final CollectionBookRepository collectionBookRepository;
+    private final BookService bookService;
 
 
     public Page<LibraryBookDto> getAllByUserId(Integer userId, Pageable pageable) {
@@ -67,8 +67,7 @@ public class LibraryBookService {
 
     @Transactional
     public void delete(Integer libraryBookId, Integer userId) {
-        var libraryBook = getExistingById(libraryBookId, userId);
-        collectionBookRepository.deleteByLibraryBook(libraryBook);
+        collectionBookRepository.deleteAllByIdLibraryBookIdAndLibraryBookUserId(libraryBookId, userId);
         repository.deleteByIdAndUserId(libraryBookId, userId);
     }
 

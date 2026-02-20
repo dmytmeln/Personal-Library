@@ -27,6 +27,12 @@ public class CollectionController {
         return service.getUserCollectionTree(userDetails.getId());
     }
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<BasicCollectionDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam(required = false) Integer libraryBookId) {
+        return service.getAllCollections(userDetails.getId(), libraryBookId);
+    }
+
     @GetMapping("/{collectionId}")
     @ResponseStatus(HttpStatus.OK)
     public CollectionDetailsDto getDetails(@PathVariable Integer collectionId,

@@ -6,6 +6,7 @@ import org.example.library.collection.domain.Collection;
 import org.example.library.collection.dto.*;
 import org.example.library.collection.mapper.CollectionMapper;
 import org.example.library.collection.repository.CollectionRepository;
+import org.example.library.collection.repository.CollectionSpecification;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
 import org.example.library.collection_book.mapper.CollectionBookMapper;
@@ -14,6 +15,7 @@ import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.repository.UserRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,12 @@ public class CollectionService {
     private final CollectionMapper collectionMapper;
     private final CollectionBookMapper collectionBookMapper;
 
+
+    @Transactional(readOnly = true)
+    public List<BasicCollectionDto> getAllCollections(Integer userId, Integer libraryBookId) {
+        Specification<Collection> spec = CollectionSpecification.withUserIdAndOptionalLibraryBookId(userId, libraryBookId);
+        return collectionMapper.toBasicDto(collectionRepository.findAll(spec));
+    }
 
     @Transactional(readOnly = true)
     public List<BasicCollectionDto> getAllByUserIdAndBookId(Integer userId, Integer bookId) {

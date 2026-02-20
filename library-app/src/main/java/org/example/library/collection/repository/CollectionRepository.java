@@ -2,12 +2,13 @@ package org.example.library.collection.repository;
 
 import org.example.library.collection.domain.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CollectionRepository extends JpaRepository<Collection, Integer> {
+public interface CollectionRepository extends JpaRepository<Collection, Integer>, JpaSpecificationExecutor<Collection> {
 
     List<Collection> findAllByUserId(Integer userId);
 

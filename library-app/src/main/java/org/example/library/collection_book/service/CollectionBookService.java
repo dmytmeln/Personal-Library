@@ -59,8 +59,7 @@ public class CollectionBookService {
 
     @Transactional
     public void removeBookFromAllCollections(Integer userId, Integer libraryBookId) {
-        var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
-        repository.deleteByLibraryBook(libraryBook);
+        repository.deleteAllByIdLibraryBookIdAndLibraryBookUserId(libraryBookId, userId);
     }
 
 }

@@ -3,10 +3,12 @@ package org.example.library.library_book.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.library.book.domain.Book;
+import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity

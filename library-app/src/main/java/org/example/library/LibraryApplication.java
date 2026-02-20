@@ -12,12 +12,11 @@ public class LibraryApplication {
     //  BE: logging
 
     // todo:
-    //  BE + FE: delete collection
-    //  BE + FE: collection - nested collections
     //  BE + FE: collections - add the possibility to move book from one collection to another (remove from one collection and add to another)
     //  BE + FE: collection - add the possibility to add book to collection from library page (without going to collection page). Maybe dialog with list of collections to choose from?
     //  BE + FE: collection - collections pagination, sorting and filtering
     //  BE + FE: library - searching and filtering in user library
+    //  BE + FE: collection - create collection filled with books
     //  BE + FE: library - possibility to change book details for library books
     //  BE + FE: library - notes
     //  BE + FE: library - statistics

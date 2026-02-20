@@ -30,6 +30,7 @@ public interface CollectionMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "parent", ignore = true)
     @Mapping(target = "children", ignore = true)
+    @Mapping(target = "collectionBooks", ignore = true)
     Collection toEntity(CreateCollectionRequest createCollectionRequest);
 
     @Mapping(target = "id", ignore = true)
@@ -38,6 +39,7 @@ public interface CollectionMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "parent", ignore = true)
     @Mapping(target = "children", ignore = true)
+    @Mapping(target = "collectionBooks", ignore = true)
     void updateFromDto(UpdateCollectionDto updateCollectionDto, @MappingTarget Collection collection);
 
 }

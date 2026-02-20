@@ -1,0 +1,29 @@
+<div class="selector-container">
+  <div class="path-list">
+    <div class="selection-row root-row"
+         (click)="select(null, 'Root')"
+         [class.active]="selectedId === null">
+      <mat-icon>home</mat-icon> <span>Root (No Parent)</span>
+    </div>
+
+    @for (path of leafPaths; track path) {
+      <div class="breadcrumb-path">
+        @for (segment of path; track segment.id; let last = $last) {
+          <span class="segment"
+                (click)="select(segment.id, segment.name)"
+                [class.active]="selectedId === segment.id">
+            {{ segment.name }}
+          </span>
+          @if (!last) { <mat-icon>chevron_right</mat-icon> }
+          @if (last) {
+            <button type="button" mat-icon-button color="primary"
+                    (click)="select(segment.id, segment.name)"
+                    matTooltip="Add to this collection">
+              <mat-icon>add_circle_outline</mat-icon>
+            </button>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>

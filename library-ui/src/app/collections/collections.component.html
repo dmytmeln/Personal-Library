@@ -1,29 +1,51 @@
 <div class="container">
   <div class="header">
     <h1>Collections</h1>
-    <button mat-flat-button color="primary" (click)="openCreateDialog()">New Collection</button>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()">Створити колекцію</button>
   </div>
 
-  <mat-tree cdkDropList (cdkDropListDropped)="drop($event)" [dataSource]="dataSource" [treeControl]="treeControl">
-    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding cdkDrag [cdkDragData]="node">
-      <button mat-icon-button disabled></button>
-      <a [routerLink]="['/collections', node.id]">{{node.name}}</a>
+  <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+      <li class="mat-tree-node">
+        <button mat-icon-button disabled></button>
+        <div [routerLink]="['/collections', node.id]" matTooltip="Перейти до колекції"
+             [matTooltipShowDelay]="this.SHOW_DELAY" (click)="$event.stopPropagation()">
+          <mat-icon>{{ 'folder' }}</mat-icon>
+          <span>{{ node.name }}</span>
+        </div>
+        <button mat-icon-button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{node: node}"
+                (click)="$event.stopPropagation()">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </li>
     </mat-tree-node>
-    <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding cdkDrag [cdkDragData]="node">
-      <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
-        <mat-icon class="mat-icon-rtl-mirror">
-          {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-        </mat-icon>
-      </button>
-      <a [routerLink]="['/collections', node.id]">{{node.name}}</a>
-      <button mat-icon-button [matMenuTriggerFor]="menu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="openUpdateDialog(node)">Edit</button>
-        <button mat-menu-item (click)="openCreateDialog(node.id)">Add Sub-collection</button>
-        <button mat-menu-item (click)="deleteCollection(node)">Delete</button>
-      </mat-menu>
+
+    <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding matTreeNodeToggle
+                   [cdkTreeNodeTypeaheadLabel]="node.name">
+      <div class="mat-tree-node">
+        <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ tree.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+          </mat-icon>
+        </button>
+        <div [routerLink]="['/collections', node.id]" matTooltip="Перейти до колекції"
+             [matTooltipShowDelay]="this.SHOW_DELAY" (click)="$event.stopPropagation()">
+          <mat-icon>{{ tree.isExpanded(node) ? 'folder_open' : 'folder' }}</mat-icon>
+          <span>{{ node.name }}</span>
+        </div>
+        <button mat-icon-button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{node: node}"
+                (click)="$event.stopPropagation()">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
     </mat-tree-node>
   </mat-tree>
+
+  <mat-menu #menu="matMenu">
+    <ng-template matMenuContent let-node="node">
+      <button mat-menu-item (click)="openUpdateDialog(node)">Оновити колекцію</button>
+      <button mat-menu-item (click)="openCreateDialog(node.id)">Створити підколекцію</button>
+      <button mat-menu-item (click)="deleteCollection(node)">Видалити колекцію</button>
+    </ng-template>
+  </mat-menu>
 </div>

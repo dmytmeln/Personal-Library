@@ -1,6 +1,19 @@
 <form class="form" (ngSubmit)="save()" [formGroup]="form">
   <h1 mat-dialog-title>{{ isEdit ? 'Edit Collection' : 'Create Collection' }}</h1>
   <div mat-dialog-content>
+    @if (!isEdit) {
+      <div class="parent-selector-info">
+        <label>Parent Collection:</label>
+        <div class="selection-display">
+          <mat-icon>{{ selectedParent.id === null ? 'home' : 'folder' }}</mat-icon>
+          <strong>{{ selectedParent.name }}</strong>
+          <button type="button" mat-stroked-button color="primary" (click)="openSelector()">
+            Change
+          </button>
+        </div>
+      </div>
+    }
+
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input matInput formControlName="name">

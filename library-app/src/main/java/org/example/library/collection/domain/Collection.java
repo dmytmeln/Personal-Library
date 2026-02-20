@@ -2,7 +2,7 @@ package org.example.library.collection.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.library.book.domain.Book;
+import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -39,6 +39,10 @@ public class Collection {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CollectionBook> collectionBooks = new ArrayList<>();
+
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -51,7 +55,7 @@ public class Collection {
     @JoinColumn(name = "parent_id")
     private Collection parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     @Builder.Default
     private List<Collection> children = new ArrayList<>();
 
