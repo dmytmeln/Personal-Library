@@ -19,14 +19,6 @@
             {{ segment.name }}
           </span>
           @if (!last) { <mat-icon>chevron_right</mat-icon> }
-          @if (last) {
-            <button type="button" mat-icon-button color="primary"
-                    (click)="select(segment.id, segment.name)"
-                    [disabled]="isDisabled(segment.id)"
-                    matTooltip="Add to this collection">
-              <mat-icon>add_circle_outline</mat-icon>
-            </button>
-          }
         }
       </div>
     }

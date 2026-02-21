@@ -237,12 +237,71 @@ export class CollectionComponent implements OnInit {
   }
 
   removeFromAllCollections(libraryBook: LibraryBook): void {
-    this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
-      next: () => {
-        this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
-        this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
-      },
-      error: (err) => this.snackCommon.showError(err)
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: `Ви впевнені, що хочете видалити книгу "${libraryBook.book.title}" з усіх колекцій?`
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
+      this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
+        next: () => {
+          this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+          this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
+    });
+  }
+
+  addToCollection(libraryBook: LibraryBook): void {
+    this.collectionService.getCollectionsContainingBook(libraryBook.id).subscribe(collections => {
+      const disabledIds = collections.map(c => c.id);
+
+      const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+        data: {
+          initialSelectionId: null,
+          disabledIds: disabledIds,
+          showRoot: false
+        }
+      });
+
+      dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+        if (selection.id) {
+          this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
+            next: () => {
+              this.snackCommon.showSuccess('Книгу додано до колекції');
+            },
+            error: (err) => this.snackCommon.showError(err)
+          });
+        }
+      });
+    });
+  }
+
+  moveBookToOtherCollection(libraryBook: LibraryBook): void {
+    this.collectionService.getCollectionsContainingBook(libraryBook.id).subscribe(collections => {
+      const disabledIds = collections.map(c => c.id);
+
+      const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+        data: {
+          initialSelectionId: null,
+          disabledIds: disabledIds,
+          showRoot: false
+        }
+      });
+
+      dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+        if (selection.id) {
+          this.collectionBookService.moveBookToOtherCollection(this.collection.id, libraryBook.id, selection.id).subscribe({
+            next: () => {
+              this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+              this.snackCommon.showSuccess('Книгу переміщено до іншої колекції');
+            },
+            error: (err) => this.snackCommon.showError(err)
+          });
+        }
+      });
     });
   }
 

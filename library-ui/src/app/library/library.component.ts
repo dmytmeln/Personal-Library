@@ -16,6 +16,13 @@ import {CollectionBookService} from '../services/collection-book.service';
 import {DeleteLibraryBookDialog} from '../dialogs/delete-library-book-dialog/delete-library-book-dialog';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {
+  CollectionSelectorDialogComponent,
+  CollectionSelectorDialogData
+} from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
+import {filter} from 'rxjs';
+import {SelectedCollection} from '../interfaces/selected-collection';
+import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-library',
@@ -49,7 +56,7 @@ export class LibraryComponent implements AfterViewInit {
     private bookService: BookService,
     private collectionService: CollectionService,
     private collectionBookService: CollectionBookService,
-    private matSnackBar: MatSnackBar,
+    matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
@@ -115,10 +122,42 @@ export class LibraryComponent implements AfterViewInit {
   }
 
   removeFromAllCollections(libraryBook: LibraryBook): void {
-    // todo confirmation
-    this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
-      next: () => this.snackCommon.showSuccess('Книгу видалено з усіх колекцій'),
-      error: (err) => this.snackCommon.showError(err)
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: `Ви впевнені, що хочете видалити книгу "${libraryBook.book.title}" з усіх колекцій?`
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
+      this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
+        next: () => this.snackCommon.showSuccess('Книгу видалено з усіх колекцій'),
+        error: (err) => this.snackCommon.showError(err)
+      });
+    });
+  }
+
+  addToCollection(libraryBook: LibraryBook): void {
+    this.collectionService.getCollectionsContainingBook(libraryBook.id).subscribe(collections => {
+      const disabledIds = collections.map(c => c.id);
+
+      const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+        data: {
+          initialSelectionId: null,
+          disabledIds: disabledIds,
+          showRoot: false
+        } as CollectionSelectorDialogData
+      });
+
+      dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+        if (selection.id) {
+          this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
+            next: () => {
+              this.snackCommon.showSuccess('Книгу додано до колекції');
+            },
+            error: (err) => this.snackCommon.showError(err)
+          });
+        }
+      });
     });
   }
 

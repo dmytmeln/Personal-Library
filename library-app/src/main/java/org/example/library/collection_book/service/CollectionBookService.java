@@ -62,4 +62,10 @@ public class CollectionBookService {
         repository.deleteAllByIdLibraryBookIdAndLibraryBookUserId(libraryBookId, userId);
     }
 
+    @Transactional
+    public CollectionBookDto moveBook(Integer userId, Integer libraryBookId, Integer fromCollectionId, Integer toCollectionId) {
+        removeBookFromCollection(userId, fromCollectionId, libraryBookId);
+        return addBookToCollection(userId, toCollectionId, libraryBookId);
+    }
+
 }

@@ -35,6 +35,10 @@
       <mat-icon>info</mat-icon>
       <span>Деталі книги</span>
     </button>
+    <button mat-menu-item (click)="addToCollection(libraryBook)">
+      <mat-icon>playlist_add</mat-icon>
+      <span>Додати до колекції</span>
+    </button>
     <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
       <mat-icon>label</mat-icon>
       <span>Змінити статус</span>

@@ -41,4 +41,13 @@ public class CollectionBookController {
         service.removeBookFromCollection(userDetails.getId(), collectionId, libraryBookId);
     }
 
+    @PostMapping("/{libraryBookId}/move/{toCollectionId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CollectionBookDto moveBook(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                      @PathVariable int collectionId,
+                                      @PathVariable int libraryBookId,
+                                      @PathVariable int toCollectionId) {
+        return service.moveBook(userDetails.getId(), libraryBookId, collectionId, toCollectionId);
+    }
+
 }
