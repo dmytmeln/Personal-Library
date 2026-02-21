@@ -1,12 +1,14 @@
 import {BasicCollection} from './basic-collection';
+import {CollectionBook} from './collection-book';
 
-export interface Collection {
+export interface CollectionDetails {
   id: number;
   name: string;
   description?: string;
   color?: string;
-  updatedAt: Date;
   parentId?: number;
+  createdAt: Date;
+  ancestors: BasicCollection[];
   children: BasicCollection[];
-  ancestors?: BasicCollection[];
+  books: CollectionBook[];
 }

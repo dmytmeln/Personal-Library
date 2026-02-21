@@ -5,7 +5,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {NgStyle} from '@angular/common';
 import {CreateCollection} from '../../interfaces/create-collection';
-import {Collection} from '../../interfaces/collection';
+import {CollectionDetails} from '../../interfaces/collection-details';
 import {UpdateCollection} from '../../interfaces/update-collection';
 import {CollectionService} from '../../services/collection.service';
 import {MatIconModule} from '@angular/material/icon';
@@ -15,7 +15,7 @@ import {filter} from 'rxjs';
 
 export interface CollectionDialogData {
   isEdit: boolean;
-  collection?: Collection;
+  collection?: CollectionDetails;
   parentId?: number;
 }
 

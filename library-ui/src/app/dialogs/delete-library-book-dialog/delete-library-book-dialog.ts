@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
-import {Collection} from '../../interfaces/collection';
+import {BasicCollection} from '../../interfaces/basic-collection';
 import {NgStyle} from '@angular/common';
 
 @Component({
@@ -34,5 +34,5 @@ export class DeleteLibraryBookDialog {
 
 export interface DeleteLibraryBookDialogData {
   bookTitle: string;
-  collections: Collection[];
+  collections: BasicCollection[];
 }

@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CollectionService {
 
+    private static final int MAX_ALLOWED_DEPTH = 4;
+
+
     private final CollectionRepository collectionRepository;
     private final CollectionBookRepository collectionBookRepository;
     private final LibraryBookRepository libraryBookRepository;
@@ -84,8 +87,19 @@ public class CollectionService {
 
         var detailsDto = collectionMapper.toDetailsDto(collection);
         detailsDto.setBooks(bookDtos);
+        detailsDto.setAncestors(getAncestors(collection));
 
         return detailsDto;
+    }
+
+    private List<BasicCollectionDto> getAncestors(Collection collection) {
+        List<BasicCollectionDto> ancestors = new ArrayList<>(MAX_ALLOWED_DEPTH - 1);
+        Collection current = collection.getParent();
+        while (current != null) {
+            ancestors.add(0, collectionMapper.toBasicDto(current));
+            current = current.getParent();
+        }
+        return ancestors;
     }
 
     @Transactional
@@ -100,8 +114,8 @@ public class CollectionService {
             var parent = collectionRepository.findByIdAndUserId(dto.getParentId(), userId)
                     .orElseThrow(() -> new NotFoundException("Parent collection not found with id: " + dto.getParentId()));
 
-            if (getDepthFromRoot(parent) >= 4) {
-                throw new IllegalArgumentException("Maximum collection depth of 4 would be exceeded.");
+            if (getDepthFromRoot(parent) >= MAX_ALLOWED_DEPTH) {
+                throw new BadRequestException("Maximum collection depth of %d would be exceeded.".formatted(MAX_ALLOWED_DEPTH));
             }
             parent.addChildrenCollection(newCollection);
         }
@@ -124,7 +138,7 @@ public class CollectionService {
     @Transactional
     public void moveCollection(Integer collectionId, Integer newParentId, Integer userId) {
         if (Objects.equals(collectionId, newParentId))
-            throw new IllegalArgumentException("A collection cannot be its own parent.");
+            throw new BadRequestException("A collection cannot be its own parent.");
 
         var collectionToMove = collectionRepository.findByIdAndUserId(collectionId, userId)
                 .orElseThrow(() -> new NotFoundException("Collection to move not found with id: " + collectionId));
@@ -254,8 +268,8 @@ public class CollectionService {
     private void validateMove(Collection toMove, Collection newParent) {
         checkForCircularDependency(toMove, newParent);
 
-        if (getDepthFromRoot(newParent) + getSubtreeDepth(toMove) > 4)
-            throw new IllegalArgumentException("Hierarchy would exceed maximum depth of 4.");
+        if (getDepthFromRoot(newParent) + getSubtreeDepth(toMove) > MAX_ALLOWED_DEPTH)
+            throw new BadRequestException("Hierarchy would exceed maximum depth of " + MAX_ALLOWED_DEPTH);
     }
 
     private void checkForCircularDependency(Collection toMove, Collection newParent) {

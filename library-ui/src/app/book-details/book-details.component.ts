@@ -8,7 +8,7 @@ import {BookService} from '../services/book.service';
 import {getStatusName} from '../interfaces/library-book';
 import {MatAnchor, MatButton} from '@angular/material/button';
 import {LibraryBookService} from '../services/library-book.service';
-import {Collection} from '../interfaces/collection';
+import {BasicCollection} from '../interfaces/basic-collection';
 
 @Component({
   selector: 'app-book-details',
@@ -51,9 +51,8 @@ export class BookDetailsComponent implements OnInit {
     });
   }
 
-  goToCollection(collection: Collection): void {
-    this.router.navigate(['/collection-full-data'], {state: collection}).then(() => {
-    });
+  goToCollection(collection: BasicCollection): void {
+    this.router.navigate(['/collections', collection.id]);
   }
 
   goToAuthorDetails(id: number): void {

@@ -25,6 +25,7 @@ public interface CollectionMapper {
 
     @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "books", ignore = true)
+    @Mapping(target = "ancestors", ignore = true)
     CollectionDetailsDto toDetailsDto(Collection collection);
 
     @Mapping(target = "id", ignore = true)

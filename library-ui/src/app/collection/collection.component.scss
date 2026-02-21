@@ -1,40 +1,141 @@
 .container {
-  margin-left: 30px;
-  margin-right: 30px;
+  padding: 24px;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+  color: var(--mat-sys-on-surface-variant);
+
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s;
+
+    &:hover:not(.active) {
+      color: var(--mat-sys-primary);
+    }
+
+    &.active {
+      color: var(--mat-sys-on-surface);
+      font-weight: 500;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .separator {
+    margin: 0 4px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.5;
+  }
 }
 
 .collection-header {
-  border-radius: 4px;
-  color: white;
-  margin-top: 30px;
-  padding: 15px;
+  border-radius: 8px;
+  color: var(--mat-sys-on-primary);
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 4px var(--mat-sys-outline-variant);
+
+  .header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .collection-name {
+    font-size: 32px;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+  }
+
+  .collection-description {
+    margin: 0 0 16px 0;
+    opacity: 0.9;
+    max-width: 600px;
+  }
+
+  .books-number {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .more-btn {
+      display: flex;
+      align-items: center;
+      color: var(--mat-sys-on-primary);
+      background-color: var(--mat-sys-primary);
+    }
+  }
 }
 
-.collection-name {
-  font-size: 28px;
-  margin-bottom: 6px;
-}
+.sub-collections-section {
+  margin-bottom: 32px;
 
-.collection-actions {
-  margin-top: 30px;
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
 
-  button {
-    margin-right: 10px;
+  .sub-collections-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .sub-collection-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--mat-sys-surface-container-low);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--mat-sys-on-surface);
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--mat-sys-state-hover-state-layer-color, rgba(0, 0, 0, 0.04));
+      border-color: var(--mat-sys-primary);
+      transform: translateY(-2px);
+    }
+
+    mat-icon {
+      color: var(--mat-sys-primary);
+    }
   }
 }
 
 .collection-books {
-  margin-top: 30px;
-
   h4 {
-    font-size: 20px;
-    margin-bottom: 10px;
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    color: var(--mat-sys-on-surface-variant);
   }
 }
 
 .books-list {
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
 }

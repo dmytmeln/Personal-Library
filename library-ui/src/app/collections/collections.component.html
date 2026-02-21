@@ -57,6 +57,10 @@
 
   <mat-menu #menu="matMenu">
     <ng-template matMenuContent let-node="node">
+      <button mat-menu-item (click)="openAddBookDialog(node)">
+        <mat-icon>library_add</mat-icon>
+        <span>Додати книгу</span>
+      </button>
       <button mat-menu-item (click)="openUpdateDialog(node)">
         <mat-icon>edit</mat-icon>
         <span>Оновити колекцію</span>

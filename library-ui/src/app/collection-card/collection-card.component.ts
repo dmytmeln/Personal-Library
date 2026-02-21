@@ -1,5 +1,5 @@
 import {Component, input, OnInit} from '@angular/core';
-import {Collection} from '../interfaces/collection';
+import {BasicCollection} from '../interfaces/basic-collection';
 import {MatCardModule} from '@angular/material/card';
 import {MatButton} from '@angular/material/button';
 import {NgStyle} from '@angular/common';
@@ -17,7 +17,7 @@ import {Router} from '@angular/router';
 })
 export class CollectionCardComponent implements OnInit {
 
-  collection = input.required<Collection>();
+  collection = input.required<BasicCollection>();
   updatedAt!: string;
   defaultColor = '';
 
@@ -27,16 +27,17 @@ export class CollectionCardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.updatedAt = new Date(this.collection().updatedAt).toLocaleString('uk', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    if (this.collection().updatedAt) {
+      this.updatedAt = new Date(this.collection().updatedAt!).toLocaleString('uk', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
   }
 
   goToFullData(): void {
-    this.router.navigate(['collection-full-data'], {state: this.collection()}).then(() => {
-    });
+    this.router.navigate(['collections', this.collection().id]);
   }
 
 }

@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {CollectionService} from '../services/collection.service';
-import {Collection} from '../interfaces/collection';
+import {CollectionNode} from '../interfaces/collection-node';
 import {CreateCollection} from '../interfaces/create-collection';
 import {MatTreeModule} from '@angular/material/tree';
 import {MatIconModule} from '@angular/material/icon';
@@ -19,6 +19,9 @@ import {
 } from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {CollectionBookService} from '../services/collection-book.service';
+import {LibraryBookService} from '../services/library-book.service';
+import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
 
 @Component({
   selector: 'app-collections',
@@ -37,14 +40,16 @@ export class CollectionsComponent implements OnInit {
 
   readonly SHOW_DELAY = 100;
 
-  dataSource: Collection[] = [];
-  childrenAccessor = (node: Collection) => node.children;
-  hasChild = (_: number, node: Collection) => !!node.children && node.children.length > 0;
+  dataSource: CollectionNode[] = [];
+  childrenAccessor = (node: CollectionNode) => node.children;
+  hasChild = (_: number, node: CollectionNode) => !!node.children && node.children.length > 0;
 
   private snackCommon: MatSnackCommon;
 
   constructor(
     private collectionService: CollectionService,
+    private collectionBookService: CollectionBookService,
+    private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
     private matSnackBar: MatSnackBar,
   ) {
@@ -56,7 +61,7 @@ export class CollectionsComponent implements OnInit {
   }
 
   private getTree(): void {
-    this.collectionService.getTree().subscribe((collections: Collection[]) => {
+    this.collectionService.getTree().subscribe((collections: CollectionNode[]) => {
       this.dataSource = collections;
     });
   }
@@ -80,7 +85,7 @@ export class CollectionsComponent implements OnInit {
     });
   }
 
-  openUpdateDialog(node: Collection): void {
+  openUpdateDialog(node: CollectionNode): void {
     this.collectionService.getById(node.id).subscribe(collection => {
       const dialogRef = this.dialog.open(CollectionDialogComponent, {
         data: {
@@ -101,7 +106,7 @@ export class CollectionsComponent implements OnInit {
     });
   }
 
-  deleteCollection(node: Collection): void {
+  deleteCollection(node: CollectionNode): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         message: `Ви впевнені, що хочете видалити колекцію "${node.name}"? Це також призведе до видалення всіх її підколекцій та посилань на книги.`
@@ -119,59 +124,80 @@ export class CollectionsComponent implements OnInit {
     });
   }
 
-    addChildCollection(targetParent: Collection): void {
-      const disabledIds = [
-        targetParent.id,
-        ...this.getAncestorIds(targetParent, this.dataSource),
-        ...this.getSubtreeIds(targetParent)
-      ];
+  addChildCollection(targetParent: CollectionNode): void {
+    const disabledIds = [
+      targetParent.id,
+      ...this.getAncestorIds(targetParent.id, this.dataSource),
+      ...this.getSubtreeIds(targetParent)
+    ];
 
-      const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
-        data: {
-          initialSelectionId: null,
-          disabledIds: disabledIds,
-          showRoot: false
-        } as CollectionSelectorDialogData
+    const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+      data: {
+        initialSelectionId: null,
+        disabledIds: disabledIds,
+        showRoot: false
+      } as CollectionSelectorDialogData
+    });
+
+    dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+      if (selection.id) {
+        this.collectionService.move(selection.id, targetParent.id).subscribe({
+          next: () => {
+            this.getTree();
+            this.snackCommon.showSuccess('Колекцію додано успішно');
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  moveCollection(collectionToMove: CollectionNode): void {
+    const disabledIds = [collectionToMove.id, ...this.getSubtreeIds(collectionToMove)];
+    if (collectionToMove.parentId) {
+      disabledIds.push(collectionToMove.parentId);
+    }
+
+    const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+      data: {
+        initialSelectionId: collectionToMove.parentId || null,
+        disabledIds: disabledIds,
+        showRoot: true
+      } as CollectionSelectorDialogData
+    });
+
+    dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+      this.collectionService.move(collectionToMove.id, selection.id).subscribe({
+        next: () => {
+          this.getTree();
+          this.snackCommon.showSuccess('Колекцію переміщено успішно');
+        },
+        error: (err) => this.snackCommon.showError(err)
       });
+    });
+  }
 
-      dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
-        if (selection.id) {
-          this.collectionService.move(selection.id, targetParent.id).subscribe({
+  openAddBookDialog(node: CollectionNode): void {
+    this.collectionService.getById(node.id).subscribe(collection => {
+      const data: ViewBookListDialogData = {
+        libraryBooks: collection.books.map(cd => cd.libraryBook),
+        fetchBooksFn: (page, size) => this.libraryBookService.getAll(page, size),
+      };
+      const dialogRef = this.dialog.open(ViewBookListDialog, {data});
+      dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
+        if (libraryBookId) {
+          this.collectionBookService.addBookToCollection(node.id, libraryBookId).subscribe({
             next: () => {
-              this.getTree();
-              this.snackCommon.showSuccess('Колекцію додано успішно');
+              this.snackCommon.showSuccess('Книгу додано до колекції');
             },
             error: (err) => this.snackCommon.showError(err)
           });
         }
       });
-    }
+    });
+  }
 
-    moveCollection(collectionToMove: Collection): void {
-      const disabledIds = [collectionToMove.id, ...this.getSubtreeIds(collectionToMove)];
-      if (collectionToMove.parentId) {
-        disabledIds.push(collectionToMove.parentId);
-      }
-
-      const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
-        data: {
-          initialSelectionId: collectionToMove.parentId || null,
-          disabledIds: disabledIds,
-          showRoot: true
-        } as CollectionSelectorDialogData
-      });
-
-      dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
-        this.collectionService.move(collectionToMove.id, selection.id).subscribe({
-          next: () => {
-            this.getTree();
-            this.snackCommon.showSuccess('Колекцію переміщено успішно');
-          },
-          error: (err) => this.snackCommon.showError(err)
-        });
-      });
-    }
-    private getSubtreeIds(node: Collection): number[] {
+  private getSubtreeIds(node: CollectionNode): number[] {
     let ids: number[] = [];
     if (node.children) {
       for (const child of node.children) {
@@ -182,15 +208,15 @@ export class CollectionsComponent implements OnInit {
     return ids;
   }
 
-  private getAncestorIds(target: Collection, tree: Collection[]): number[] {
-    const path = this.findPath(target.id, tree);
+  private getAncestorIds(targetId: number, tree: CollectionNode[]): number[] {
+    const path = this.findPath(targetId, tree);
     if (path) {
-      return path.map(c => c.id).filter(id => id !== target.id);
+      return path.map(c => c.id).filter(id => id !== targetId);
     }
     return [];
   }
 
-  private findPath(targetId: number, currentLevel: Collection[], path: Collection[] = []): Collection[] | null {
+  private findPath(targetId: number, currentLevel: CollectionNode[], path: CollectionNode[] = []): CollectionNode[] | null {
     for (const col of currentLevel) {
       const newPath = [...path, col];
       if (col.id === targetId) return newPath;

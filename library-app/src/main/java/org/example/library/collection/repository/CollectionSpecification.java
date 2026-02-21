@@ -4,7 +4,6 @@ import jakarta.persistence.criteria.JoinType;
 import org.example.library.collection.domain.Collection;
 import org.example.library.collection.domain.Collection_;
 import org.example.library.collection_book.domain.CollectionBook_;
-import org.example.library.library_book.domain.LibraryBook_;
 import org.example.library.user.domain.User_;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -20,9 +19,12 @@ public class CollectionSpecification {
     public static Specification<Collection> containsLibraryBook(Integer libraryBookId) {
         return (root, query, cb) -> {
             if (libraryBookId == null) return null;
-            return cb.equal(root.join(Collection_.COLLECTION_BOOKS, JoinType.INNER)
-                    .get(CollectionBook_.LIBRARY_BOOK)
-                    .get(LibraryBook_.ID), libraryBookId);
+            return cb.equal(
+                    root.join(Collection_.COLLECTION_BOOKS, JoinType.INNER)
+                            .get(CollectionBook_.ID)
+                            .get("libraryBookId"),
+                    libraryBookId
+            );
         };
     }
 

@@ -13,7 +13,7 @@ public class LibraryApplication {
 
     // todo:
     //  BE + FE: collections - add the possibility to move book from one collection to another (remove from one collection and add to another)
-    //  BE + FE: collection - add the possibility to add book to collection from library page (without going to collection page). Maybe dialog with list of collections to choose from?
+    //  BE + FE: collection - add the possibility to add book to collection from library page (without going to specific collection page). Maybe dialog with list of collections to choose from?
     //  BE + FE: collection - collections pagination, sorting and filtering
     //  BE + FE: library - searching and filtering in user library
     //  BE + FE: collection - create collection filled with books

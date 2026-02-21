@@ -1,18 +1,59 @@
 <div class="container">
-  <div class="collection-header" [ngStyle]="{'background-color': collection.color || ''}">
-    <h3 class="collection-name">
-      {{ collection.name }}
-    </h3>
-    <p class="books-number">
-      {{ collectionBooks.length }} книг в колекції
-    </p>
+  <div class="breadcrumbs">
+    <a routerLink="/collections" class="breadcrumb-item">
+      <mat-icon>home</mat-icon>
+      <span>Колекції</span>
+    </a>
+    @for (ancestor of collection.ancestors; track ancestor.id) {
+      <mat-icon class="separator">chevron_right</mat-icon>
+      <a [routerLink]="['/collections', ancestor.id]" class="breadcrumb-item">
+        {{ ancestor.name }}
+      </a>
+    }
+    <mat-icon class="separator">chevron_right</mat-icon>
+    <span class="breadcrumb-item active">{{ collection.name }}</span>
   </div>
 
-  <div class="collection-actions">
-    <button mat-flat-button (click)="openViewBookListDialog()">Додати книгу</button>
-    <button mat-flat-button (click)="openUpdateDialog()">Редагувати колекцію</button>
-    <button mat-raised-button (click)="goBack()">Повернутися назад</button>
+  <div class="collection-header" [ngStyle]="{'background-color': collection.color || ''}">
+    <div class="header-main">
+      <div>
+        <h3 class="collection-name">
+          {{ collection.name }}
+        </h3>
+        @if (collection.description) {
+          <p class="collection-description">{{ collection.description }}</p>
+        }
+        <p class="books-number">
+          {{ collectionBooks.length }} книг, {{ collection.children.length }} підколекцій
+        </p>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
+          <mat-icon>add</mat-icon>
+          Додати книгу
+        </button>
+        
+        <button mat-icon-button [matMenuTriggerFor]="collectionMenu" class="more-btn">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
   </div>
+
+  @if (collection.children.length > 0) {
+    <div class="sub-collections-section">
+      <h4>Підколекції:</h4>
+      <div class="sub-collections-list">
+        @for (child of collection.children; track child.id) {
+          <a [routerLink]="['/collections', child.id]" class="sub-collection-card">
+            <mat-icon>folder</mat-icon>
+            <span>{{ child.name }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
 
   <div class="collection-books">
     <h4>Книги в колекції:</h4>
@@ -26,6 +67,30 @@
     </div>
   </div>
 </div>
+
+<mat-menu #collectionMenu="matMenu">
+  <button mat-menu-item (click)="openUpdateDialog()">
+    <mat-icon>edit</mat-icon>
+    <span>Редагувати</span>
+  </button>
+  <button mat-menu-item (click)="openCreateSubDialog()">
+    <mat-icon>add</mat-icon>
+    <span>Створити підколекцію</span>
+  </button>
+  <button mat-menu-item (click)="addChildCollection()">
+    <mat-icon>playlist_add</mat-icon>
+    <span>Додати існуючу колекцію</span>
+  </button>
+  <button mat-menu-item (click)="moveCollection()">
+    <mat-icon>drive_file_move</mat-icon>
+    <span>Перемістити</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="deleteCollection()">
+    <mat-icon color="warn">delete</mat-icon>
+    <span>Видалити</span>
+  </button>
+</mat-menu>
 
 <mat-menu #collectionBookMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
@@ -47,7 +112,7 @@
     </button>
     <button mat-menu-item (click)="deleteBook(libraryBook)">
       <mat-icon>remove_circle</mat-icon>
-      <span>Видалити з колекції</span>
+      <span>Видалити з цієї колекції</span>
     </button>
   </ng-template>
 </mat-menu>

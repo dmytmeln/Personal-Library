@@ -115,6 +115,7 @@ export class LibraryComponent implements AfterViewInit {
   }
 
   removeFromAllCollections(libraryBook: LibraryBook): void {
+    // todo confirmation
     this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
       next: () => this.snackCommon.showSuccess('Книгу видалено з усіх колекцій'),
       error: (err) => this.snackCommon.showError(err)

@@ -1,5 +1,5 @@
 import {Component, input, OnInit, output} from '@angular/core';
-import {Collection} from '../../interfaces/collection';
+import {CollectionNode} from '../../interfaces/collection-node';
 import {CollectionService} from '../../services/collection.service';
 import {SelectedCollection} from '../../interfaces/selected-collection';
 import {MatIconModule} from '@angular/material/icon';
@@ -23,7 +23,7 @@ export class CollectionSelectorComponent implements OnInit {
   showRoot = input<boolean>(true);
   onSelect = output<SelectedCollection>();
 
-  leafPaths: Collection[][] = [];
+  leafPaths: CollectionNode[][] = [];
   selectedId: number | null = null;
 
   constructor(private collectionService: CollectionService) {
@@ -45,7 +45,7 @@ export class CollectionSelectorComponent implements OnInit {
     });
   }
 
-  private generateLeafPaths(collections: Collection[], currentPath: Collection[] = []) {
+  private generateLeafPaths(collections: CollectionNode[], currentPath: CollectionNode[] = []) {
     for (const col of collections) {
       const newPath = [...currentPath, col];
       if (!col.children || col.children.length === 0) {
@@ -56,8 +56,8 @@ export class CollectionSelectorComponent implements OnInit {
     }
   }
 
-  private flatten(cols: Collection[]): Collection[] {
-    let res: Collection[] = [];
+  private flatten(cols: CollectionNode[]): CollectionNode[] {
+    let res: CollectionNode[] = [];
     for (const c of cols) {
       res.push(c);
       if (c.children) res = res.concat(this.flatten(c.children));
