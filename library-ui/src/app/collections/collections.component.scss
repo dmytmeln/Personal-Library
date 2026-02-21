@@ -3,13 +3,25 @@
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 
   h1 {
     margin: 0;
+  }
+}
+
+.tree-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  button:not([mat-flat-button]) {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  button mat-icon {
+    margin-right: 4px;
   }
 }
 
@@ -22,7 +34,7 @@
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--mat-sys-state-hover-state-layer-color, rgba(0, 0, 0, 0.04));
   }
 
   mat-icon {

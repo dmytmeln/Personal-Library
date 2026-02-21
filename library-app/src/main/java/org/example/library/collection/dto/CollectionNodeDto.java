@@ -11,7 +11,9 @@ import java.util.List;
 public class CollectionNodeDto {
     private Integer id;
     private String name;
-    
+
+    private Integer parentId;
+
     @Builder.Default
     private List<CollectionNodeDto> children = new ArrayList<>();
 }

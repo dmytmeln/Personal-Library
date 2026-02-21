@@ -55,7 +55,7 @@ public class Collection {
     @JoinColumn(name = "parent_id")
     private Collection parent;
 
-    @OneToMany(mappedBy = "parent", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Collection> children = new ArrayList<>();
 

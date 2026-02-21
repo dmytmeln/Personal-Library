@@ -15,6 +15,7 @@ public class CollectionDetailsDto {
     private String name;
     private String description;
     private String color;
+    private Integer parentId;
     private LocalDateTime createdAt;
     private List<BasicCollectionDto> children;
     private List<CollectionBookDto> books;

@@ -6,6 +6,8 @@ import {SelectedCollection} from '../../interfaces/selected-collection';
 
 export interface CollectionSelectorDialogData {
   initialSelectionId: number | null;
+  disabledIds?: number[];
+  showRoot?: boolean;
 }
 
 @Component({
@@ -20,6 +22,7 @@ export interface CollectionSelectorDialogData {
   styleUrl: './collection-selector-dialog.component.scss'
 })
 export class CollectionSelectorDialogComponent {
+
   tempSelection: SelectedCollection = { id: null, name: 'Root' };
 
   constructor(
@@ -31,7 +34,15 @@ export class CollectionSelectorDialogComponent {
     this.tempSelection = selection;
   }
 
+  isSelectionValid(): boolean {
+    if (this.tempSelection.id === null) {
+      return this.data.showRoot !== false;
+    }
+    return !this.data.disabledIds?.includes(this.tempSelection.id);
+  }
+
   onCancel(): void {
     this.dialogRef.close();
   }
+
 }

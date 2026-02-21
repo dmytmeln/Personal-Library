@@ -55,7 +55,7 @@ public class CollectionController {
         return service.updateCollection(collectionId, dto, userDetails.getId());
     }
 
-    @PatchMapping("/{collectionId}/parent")
+    @PatchMapping("/{collectionId}/move")
     @ResponseStatus(HttpStatus.OK)
     public void moveCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                @PathVariable Integer collectionId,

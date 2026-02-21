@@ -9,4 +9,5 @@ import lombok.Data;
 public class BasicCollectionDto {
     private Integer id;
     private String name;
+    private Integer parentId;
 }

@@ -84,21 +84,33 @@ export class LibraryComponent implements AfterViewInit {
   }
 
   private performDelete(libraryBook: LibraryBook): void {
-    this.libraryBookService.removeBook(libraryBook.id).subscribe(() => {
-      this.libraryBooks = this.libraryBooks.filter(lb => lb.id !== libraryBook.id);
-      this.updateBookGroups();
+    this.libraryBookService.removeBook(libraryBook.id).subscribe({
+      next: () => {
+        this.libraryBooks = this.libraryBooks.filter(lb => lb.id !== libraryBook.id);
+        this.updateBookGroups();
+        this.snackCommon.showSuccess('Книгу видалено з бібліотеки');
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 
   changeLibraryBookStatus(data: [LibraryBook, LibraryBookStatus]): void {
-    this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe((libraryBook: LibraryBook) => {
-      this.updateBook(libraryBook);
+    this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe({
+      next: (libraryBook: LibraryBook) => {
+        this.updateBook(libraryBook);
+        this.snackCommon.showSuccess('Статус змінено');
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 
   changeLibraryBookRating(data: { libraryBookId: number; rating: number }): void {
-    this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe((libraryBook: LibraryBook) => {
-      this.updateBook(libraryBook);
+    this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe({
+      next: (libraryBook: LibraryBook) => {
+        this.updateBook(libraryBook);
+        this.snackCommon.showSuccess('Оцінку змінено');
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 
@@ -137,9 +149,13 @@ export class LibraryComponent implements AfterViewInit {
   }
 
   private addLibraryBook(bookId: number) {
-    this.libraryBookService.addBook(bookId).subscribe(libraryBook => {
-      this.libraryBooks.push(libraryBook);
-      this.updateBookGroups();
+    this.libraryBookService.addBook(bookId).subscribe({
+      next: (libraryBook) => {
+        this.libraryBooks.push(libraryBook);
+        this.updateBookGroups();
+        this.snackCommon.showSuccess('Книгу додано до бібліотеки');
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 

@@ -12,14 +12,14 @@ mat-form-field {
 .parent-selector-info {
   margin-bottom: 16px;
   padding: 12px;
-  background: #f9f9f9;
-  border: 1px solid #eee;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 4px;
 
   label {
     display: block;
     font-size: 0.85em;
-    color: #666;
+    color: var(--mat-sys-on-surface-variant);
     margin-bottom: 4px;
   }
 
@@ -29,7 +29,7 @@ mat-form-field {
     gap: 8px;
 
     mat-icon {
-      color: #3f51b5;
+      color: var(--mat-sys-primary);
     }
 
     strong {
@@ -60,7 +60,7 @@ mat-form-field {
       transition: all .1s;
 
       &.selected {
-        border-color: #000;
+        border-color: var(--mat-sys-on-surface);
       }
     }
   }

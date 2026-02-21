@@ -1,7 +1,21 @@
 <div class="container">
   <div class="header">
-    <h1>Collections</h1>
-    <button mat-flat-button color="primary" (click)="openCreateDialog()">Створити колекцію</button>
+    <h1>Колекції</h1>
+  </div>
+
+  <div class="tree-actions">
+    <button mat-button (click)="tree.expandAll()">
+      <mat-icon>unfold_more</mat-icon>
+      <span>Розгорнути всі</span>
+    </button>
+    <button mat-button (click)="tree.collapseAll()">
+      <mat-icon>unfold_less</mat-icon>
+      <span>Згорнути всі</span>
+    </button>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      <span>Створити колекцію</span>
+    </button>
   </div>
 
   <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
@@ -43,9 +57,26 @@
 
   <mat-menu #menu="matMenu">
     <ng-template matMenuContent let-node="node">
-      <button mat-menu-item (click)="openUpdateDialog(node)">Оновити колекцію</button>
-      <button mat-menu-item (click)="openCreateDialog(node.id)">Створити підколекцію</button>
-      <button mat-menu-item (click)="deleteCollection(node)">Видалити колекцію</button>
+      <button mat-menu-item (click)="openUpdateDialog(node)">
+        <mat-icon>edit</mat-icon>
+        <span>Оновити колекцію</span>
+      </button>
+      <button mat-menu-item (click)="openCreateDialog(node.id)">
+        <mat-icon>add</mat-icon>
+        <span>Створити підколекцію</span>
+      </button>
+      <button mat-menu-item (click)="addChildCollection(node)">
+        <mat-icon>playlist_add</mat-icon>
+        <span>Додати колекцію</span>
+      </button>
+      <button mat-menu-item (click)="moveCollection(node)">
+        <mat-icon>drive_file_move</mat-icon>
+        <span>Перемістити колекцію</span>
+      </button>
+      <button mat-menu-item (click)="deleteCollection(node)">
+        <mat-icon color="warn">delete</mat-icon>
+        <span>Видалити колекцію</span>
+      </button>
     </ng-template>
   </mat-menu>
 </div>

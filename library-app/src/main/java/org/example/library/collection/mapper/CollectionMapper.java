@@ -12,15 +12,18 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CollectionMapper {
 
+    @Mapping(target = "parentId", source = "parent.id")
     BasicCollectionDto toBasicDto(Collection collection);
 
     List<BasicCollectionDto> toBasicDto(List<Collection> collections);
 
+    @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "children", ignore = true)
     CollectionNodeDto toNodeDto(Collection collection);
 
     List<CollectionNodeDto> toNodeDto(List<Collection> collections);
 
+    @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "books", ignore = true)
     CollectionDetailsDto toDetailsDto(Collection collection);
 

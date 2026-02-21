@@ -19,6 +19,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 })
 export class CollectionSelectorComponent implements OnInit {
   initialSelectionId = input<number | null>(null);
+  disabledIds = input<number[]>([]);
+  showRoot = input<boolean>(true);
   onSelect = output<SelectedCollection>();
 
   leafPaths: Collection[][] = [];
@@ -63,7 +65,13 @@ export class CollectionSelectorComponent implements OnInit {
     return res;
   }
 
+  isDisabled(id: number | null): boolean {
+    if (id === null) return false;
+    return this.disabledIds().includes(id);
+  }
+
   select(id: number | null, name: string): void {
+    if (this.isDisabled(id)) return;
     this.selectedId = id;
     this.onSelect.emit({id, name});
   }

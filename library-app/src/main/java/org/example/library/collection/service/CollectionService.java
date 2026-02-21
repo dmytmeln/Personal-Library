@@ -141,7 +141,12 @@ public class CollectionService {
             oldParent.removeChildrenCollection(collectionToMove);
         }
 
-        collectionToMove.setParent(newParent);
+        if (newParent != null) {
+            newParent.addChildrenCollection(collectionToMove);
+        } else {
+            collectionToMove.setParent(null);
+        }
+
         collectionRepository.save(collectionToMove);
     }
 
@@ -168,7 +173,11 @@ public class CollectionService {
             if (oldParent != null) {
                 oldParent.removeChildrenCollection(collection);
             }
-            collection.setParent(newParent);
+            if (newParent != null) {
+                newParent.addChildrenCollection(collection);
+            } else {
+                collection.setParent(null);
+            }
         }
 
         collectionRepository.saveAll(collectionsToMove);

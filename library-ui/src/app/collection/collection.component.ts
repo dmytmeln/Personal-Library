@@ -70,8 +70,12 @@ export class CollectionComponent implements OnInit {
     });
 
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((updatedCollection: UpdateCollection) => {
-      this.collectionService.update(this.collection.id, updatedCollection).subscribe(collection => {
-        this.collection = collection;
+      this.collectionService.update(this.collection.id, updatedCollection).subscribe({
+        next: (collection) => {
+          this.collection = collection;
+          this.snackCommon.showSuccess('Колекцію оновлено успішно');
+        },
+        error: (err) => this.snackCommon.showError(err)
       });
     });
   }
@@ -84,34 +88,52 @@ export class CollectionComponent implements OnInit {
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
     dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
       if (libraryBookId) {
-        this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe(collectionBook => {
-          this.collectionBooks.push(collectionBook);
+        this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe({
+          next: (collectionBook) => {
+            this.collectionBooks.push(collectionBook);
+            this.snackCommon.showSuccess('Книгу додано до колекції');
+          },
+          error: (err) => this.snackCommon.showError(err)
         });
       }
     });
   }
 
   deleteBook(libraryBook: LibraryBook): void {
-    this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe(() => {
-      this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+    this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe({
+      next: () => {
+        this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+        this.snackCommon.showSuccess('Книгу видалено з колекції');
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 
   statusChange(data: [LibraryBook, LibraryBookStatus]): void {
-    this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe(libraryBook =>
-      this.updateBook(libraryBook));
+    this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe({
+      next: (libraryBook) => {
+        this.updateBook(libraryBook);
+        this.snackCommon.showSuccess('Статус змінено');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
   }
 
   ratingChange(data: { libraryBookId: number; rating: number }): void {
-    this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe(libraryBook =>
-      this.updateBook(libraryBook));
+    this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe({
+      next: (libraryBook) => {
+        this.updateBook(libraryBook);
+        this.snackCommon.showSuccess('Оцінку змінено');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
   }
 
   removeFromAllCollections(libraryBook: LibraryBook): void {
     this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
       next: () => {
         this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
-        this.snackCommon.showSuccess('Book removed from all collections');
+        this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
       },
       error: (err) => this.snackCommon.showError(err)
     });
