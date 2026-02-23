@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.library.collection.domain.Collection;
 import org.example.library.library_book.domain.LibraryBook;
+import org.example.library.library_book.domain.LibraryBookView;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,10 @@ public class CollectionBook {
     @MapsId("libraryBookId")
     @JoinColumn(name = "library_book_id", nullable = false)
     private LibraryBook libraryBook;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "library_book_id", insertable = false, updatable = false)
+    private LibraryBookView libraryBookView;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("collectionId")

@@ -24,16 +24,16 @@
           <p class="collection-description">{{ collection.description }}</p>
         }
         <p class="books-number">
-          {{ collectionBooks.length }} книг, {{ collection.children.length }} підколекцій
+          {{ this.collection.books.length }} книг, {{ collection.children.length }} підколекцій
         </p>
       </div>
-      
+
       <div class="header-actions">
         <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
           <mat-icon>add</mat-icon>
           Додати книгу
         </button>
-        
+
         <button mat-icon-button [matMenuTriggerFor]="collectionMenu" class="more-btn">
           <mat-icon>more_vert</mat-icon>
         </button>
@@ -58,7 +58,7 @@
   <div class="collection-books">
     <h4>Книги в колекції:</h4>
     <div class="books-list">
-      @for (collectionBook of collectionBooks; track collectionBook.libraryBook.id) {
+      @for (collectionBook of this.collection.books; track collectionBook.libraryBook.id) {
         <app-book
           [book]="collectionBook.libraryBook.book"
           [actionsMenu]="collectionBookMenu"
@@ -97,6 +97,10 @@
     <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
       <mat-icon>info</mat-icon>
       <span>Деталі книги</span>
+    </button>
+    <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
+      <mat-icon>edit</mat-icon>
+      <span>Редагувати деталі</span>
     </button>
     <button mat-menu-item (click)="addToCollection(libraryBook)">
       <mat-icon>playlist_add</mat-icon>

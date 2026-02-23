@@ -1,5 +1,6 @@
 package org.example.library.collection_book.service;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.example.library.collection.service.CollectionService;
 import org.example.library.collection_book.domain.CollectionBook;
@@ -22,6 +23,8 @@ public class CollectionBookService {
     private final CollectionBookMapper mapper;
     private final CollectionService collectionService;
     private final LibraryBookService libraryBookService;
+    private final EntityManager entityManager;
+
 
     public List<CollectionBookDto> getCollectionBooks(Integer userId, Integer collectionId) {
         var collection = collectionService.getExistingById(collectionId);
@@ -31,21 +34,24 @@ public class CollectionBookService {
         return mapper.toDto(repository.findByIdCollectionId(collectionId));
     }
 
+    @Transactional
     public CollectionBookDto addBookToCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
         var collection = collectionService.getExistingById(collectionId);
         if (!collection.getUser().getId().equals(userId))
             throw new BadRequestException("Collection does not belong to user");
 
         var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
-        if (repository.existsById(new CollectionBookId(collection.getId(), libraryBook.getId())))
+        var id = new CollectionBookId(collection.getId(), libraryBook.getId());
+        if (repository.existsById(id))
             throw new BadRequestException("Book is already added to collection");
 
-        var collectionBook = repository.save(CollectionBook.builder()
-                .id(new CollectionBookId(collection.getId(), libraryBook.getId()))
+        var managedEntity = repository.saveAndFlush(CollectionBook.builder()
+                .id(id)
                 .libraryBook(libraryBook)
                 .collection(collection)
                 .build());
-        return mapper.toDto(collectionBook);
+        entityManager.refresh(managedEntity);
+        return mapper.toDto(managedEntity);
     }
 
     public void removeBookFromCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
@@ -59,7 +65,7 @@ public class CollectionBookService {
 
     @Transactional
     public void removeBookFromAllCollections(Integer userId, Integer libraryBookId) {
-        repository.deleteAllByIdLibraryBookIdAndLibraryBookUserId(libraryBookId, userId);
+        repository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
     }
 
     @Transactional

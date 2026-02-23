@@ -7,9 +7,12 @@ import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
+import org.example.library.library_book.domain.LibraryBookView;
 import org.example.library.library_book.dto.LibraryBookDto;
+import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
 import org.example.library.library_book.mapper.LibraryBookMapper;
 import org.example.library.library_book.repository.LibraryBookRepository;
+import org.example.library.library_book.repository.LibraryBookViewRepository;
 import org.example.library.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,13 +33,15 @@ public class LibraryBookService {
 
 
     private final LibraryBookRepository repository;
+    private final LibraryBookViewRepository viewRepository;
     private final LibraryBookMapper mapper;
     private final CollectionBookRepository collectionBookRepository;
     private final BookService bookService;
 
 
+    @Transactional(readOnly = true)
     public Page<LibraryBookDto> getAllByUserId(Integer userId, Pageable pageable) {
-        return repository.findAllByUserId(userId, pageable)
+        return viewRepository.findAllByUserId(userId, pageable)
                 .map(mapper::toDto);
     }
 
@@ -45,29 +50,58 @@ public class LibraryBookService {
                 .orElseThrow(() -> new NotFoundException("There is no such book in your library"));
     }
 
+    @Transactional
     public LibraryBookDto create(Integer bookId, User user) {
         verifyNotExists(bookId, user.getId());
         var book = bookService.getExistingById(bookId);
-        var saved = repository.save(LibraryBook.of(book, user));
-        return mapper.toDto(saved);
+        var saved = repository.saveAndFlush(LibraryBook.of(book, user));
+
+        var view = getViewById(saved.getId());
+        return mapper.toDto(view);
     }
 
+    @Transactional
     public LibraryBookDto rate(Integer libraryBookId, Integer userId, Integer rating) {
         verifyRatingIsValid(rating);
         var libraryBook = getExistingById(libraryBookId, userId);
         libraryBook.setRating(rating.byteValue());
-        return mapper.toDto(repository.save(libraryBook));
+        repository.saveAndFlush(libraryBook);
+
+        var view = getViewById(libraryBookId);
+        return mapper.toDto(view);
     }
 
+    @Transactional
     public LibraryBookDto updateStatus(Integer libraryBookId, Integer userId, LibraryBookStatus status) {
         var libraryBook = getExistingById(libraryBookId, userId);
         libraryBook.setStatus(status);
-        return mapper.toDto(repository.save(libraryBook));
+        repository.saveAndFlush(libraryBook);
+
+        var view = getViewById(libraryBookId);
+        return mapper.toDto(view);
+    }
+
+    @Transactional
+    public LibraryBookDto updateDetails(Integer libraryBookId, Integer userId, UpdateLibraryBookDetailsDto dto) {
+        var libraryBook = getExistingById(libraryBookId, userId);
+        mapper.update(libraryBook, dto);
+        repository.saveAndFlush(libraryBook);
+        var updatedView = getViewById(libraryBookId);
+        return mapper.toDto(updatedView);
+    }
+
+    @Transactional
+    public LibraryBookDto resetDetails(Integer libraryBookId, Integer userId) {
+        var libraryBook = getExistingById(libraryBookId, userId);
+        libraryBook.resetOverriddenFields();
+        repository.saveAndFlush(libraryBook);
+        var updatedView = getViewById(libraryBookId);
+        return mapper.toDto(updatedView);
     }
 
     @Transactional
     public void delete(Integer libraryBookId, Integer userId) {
-        collectionBookRepository.deleteAllByIdLibraryBookIdAndLibraryBookUserId(libraryBookId, userId);
+        collectionBookRepository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
         repository.deleteByIdAndUserId(libraryBookId, userId);
     }
 
@@ -88,6 +122,11 @@ public class LibraryBookService {
 
     public Optional<Integer> getUserRatingOfBook(Integer bookId, Integer userId) {
         return repository.findUserRatingOfBook(bookId, userId); // todo refactor
+    }
+
+    private LibraryBookView getViewById(Integer libraryBookId) {
+        return viewRepository.findById(libraryBookId)
+                .orElseThrow(() -> new NotFoundException("Library book view not found"));
     }
 
     private void verifyRatingIsValid(Integer rating) {

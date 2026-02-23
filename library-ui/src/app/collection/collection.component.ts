@@ -17,14 +17,25 @@ import {BookComponent} from '../book/book.component';
 import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
-import {CollectionDialogComponent, CollectionDialogData} from '../dialogs/collection-dialog/collection-dialog.component';
+import {
+  CollectionDialogComponent,
+  CollectionDialogData
+} from '../dialogs/collection-dialog/collection-dialog.component';
 import {UpdateCollection} from '../interfaces/update-collection';
 import {filter} from 'rxjs';
 import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import {SelectedCollection} from '../interfaces/selected-collection';
-import {CollectionSelectorDialogComponent} from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
+import {
+  CollectionSelectorDialogComponent
+} from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
 import {CollectionNode} from '../interfaces/collection-node';
 import {MatDividerModule} from '@angular/material/divider';
+import {
+  LibraryBookDetailsDialogComponent,
+  LibraryBookDetailsDialogData,
+  LibraryBookDetailsDialogResult
+} from '../dialogs/library-book-details-dialog/library-book-details-dialog.component';
+import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
 
 @Component({
   selector: 'app-collection',
@@ -45,7 +56,6 @@ import {MatDividerModule} from '@angular/material/divider';
 export class CollectionComponent implements OnInit {
 
   collection!: CollectionDetails;
-  collectionBooks: CollectionBook[] = [];
   private snackCommon: MatSnackCommon;
 
   constructor(
@@ -55,7 +65,7 @@ export class CollectionComponent implements OnInit {
     private collectionBookService: CollectionBookService,
     private dialog: MatDialog,
     private libraryBookService: LibraryBookService,
-    private matSnackBar: MatSnackBar,
+    matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
@@ -70,7 +80,6 @@ export class CollectionComponent implements OnInit {
   private loadCollection(id: number): void {
     this.collectionService.getById(id).subscribe(collection => {
       this.collection = collection;
-      this.initCollectionBooks();
     });
   }
 
@@ -84,7 +93,7 @@ export class CollectionComponent implements OnInit {
 
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((updatedCollection: UpdateCollection) => {
       this.collectionService.update(this.collection.id, updatedCollection).subscribe({
-        next: (collection) => {
+        next: (collection) => { // todo refactor
           this.loadCollection(this.collection.id);
           this.snackCommon.showSuccess('Колекцію оновлено успішно');
         },
@@ -189,15 +198,15 @@ export class CollectionComponent implements OnInit {
 
   openViewBookListDialog(): void {
     const data: ViewBookListDialogData = {
-      libraryBooks: this.collectionBooks.map(cd => cd.libraryBook),
+      libraryBooks: this.collection.books.map(cd => cd.libraryBook),
       fetchBooksFn: (page, size) => this.libraryBookService.getAll(page, size),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
     dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
       if (libraryBookId) {
         this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe({
-          next: (collectionBook) => {
-            this.collectionBooks.push(collectionBook);
+          next: (collectionBook: CollectionBook) => {
+            this.collection.books.push(collectionBook);
             this.snackCommon.showSuccess('Книгу додано до колекції');
           },
           error: (err) => this.snackCommon.showError(err)
@@ -209,7 +218,7 @@ export class CollectionComponent implements OnInit {
   deleteBook(libraryBook: LibraryBook): void {
     this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe({
       next: () => {
-        this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+        this.collection.books = this.collection.books.filter(cb => cb.libraryBook.id !== libraryBook.id);
         this.snackCommon.showSuccess('Книгу видалено з колекції');
       },
       error: (err) => this.snackCommon.showError(err)
@@ -246,7 +255,7 @@ export class CollectionComponent implements OnInit {
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
       this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
         next: () => {
-          this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+          this.collection.books = this.collection.books.filter(cb => cb.libraryBook.id !== libraryBook.id);
           this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
         },
         error: (err) => this.snackCommon.showError(err)
@@ -295,7 +304,7 @@ export class CollectionComponent implements OnInit {
         if (selection.id) {
           this.collectionBookService.moveBookToOtherCollection(this.collection.id, libraryBook.id, selection.id).subscribe({
             next: () => {
-              this.collectionBooks = this.collectionBooks.filter(cb => cb.libraryBook.id !== libraryBook.id);
+              this.collection.books = this.collection.books.filter(cb => cb.libraryBook.id !== libraryBook.id);
               this.snackCommon.showSuccess('Книгу переміщено до іншої колекції');
             },
             error: (err) => this.snackCommon.showError(err)
@@ -305,20 +314,55 @@ export class CollectionComponent implements OnInit {
     });
   }
 
+  openEditDetailsDialog(libraryBook: LibraryBook): void {
+    const dialogRef = this.dialog.open(LibraryBookDetailsDialogComponent, {
+      data: {libraryBook} as LibraryBookDetailsDialogData
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((result: LibraryBookDetailsDialogResult) => {
+      switch (result.action) {
+        case 'save':
+          this.updateBookDetails(libraryBook.id, result.payload);
+          break;
+
+        case 'reset':
+          this.resetBookDetails(libraryBook.id);
+          break;
+      }
+
+      dialogRef.close();
+    });
+  }
+
   goBack() {
     this.router.navigate(['collections']);
   }
 
   private updateBook(libraryBook: LibraryBook) {
-    this.collectionBooks.map(cb =>
+    this.collection.books.map(cb =>
       cb.libraryBook = cb.libraryBook.id === libraryBook.id
         ? libraryBook
         : cb.libraryBook);
   }
 
-  private initCollectionBooks() {
-    this.collectionBookService.getCollectionBooks(this.collection.id).subscribe(collectionBooks =>
-      this.collectionBooks = collectionBooks);
+  private updateBookDetails(libraryBookId: number, dto: UpdateLibraryBookDetails): void {
+    this.libraryBookService.updateDetails(libraryBookId, dto).subscribe({
+      next: (updatedBook) => {
+        this.updateBook(updatedBook);
+        this.snackCommon.showSuccess('Деталі книги оновлено');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
+  }
+
+  private resetBookDetails(libraryBookId: number): void {
+    this.libraryBookService.resetDetails(libraryBookId).subscribe({
+      next: (updatedBook: LibraryBook) => {
+        this.updateBook(updatedBook);
+        this.snackCommon.showSuccess('Деталі книги скинуто до стандартних');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
   }
 
   private getSubtreeIds(targetId: number, tree: CollectionNode[]): number[] {

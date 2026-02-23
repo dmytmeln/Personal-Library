@@ -6,7 +6,10 @@ import {CreateCollection} from '../interfaces/create-collection';
 import {MatTreeModule} from '@angular/material/tree';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
-import {CollectionDialogComponent, CollectionDialogData} from '../dialogs/collection-dialog/collection-dialog.component';
+import {
+  CollectionDialogComponent,
+  CollectionDialogData
+} from '../dialogs/collection-dialog/collection-dialog.component';
 import {UpdateCollection} from '../interfaces/update-collection';
 import {filter} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
@@ -15,7 +18,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import {SelectedCollection} from '../interfaces/selected-collection';
 import {
-  CollectionSelectorDialogComponent, CollectionSelectorDialogData
+  CollectionSelectorDialogComponent,
+  CollectionSelectorDialogData
 } from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -51,9 +55,9 @@ export class CollectionsComponent implements OnInit {
     private collectionBookService: CollectionBookService,
     private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
-    private matSnackBar: MatSnackBar,
+    matSnackBar: MatSnackBar,
   ) {
-    this.snackCommon = new MatSnackCommon(this.matSnackBar);
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {

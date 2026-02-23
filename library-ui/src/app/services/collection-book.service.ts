@@ -12,7 +12,7 @@ export class CollectionBookService {
   }
 
   getCollectionBooks(collectionId: number): Observable<CollectionBook[]> {
-    return this.apiService.get(`/collections/${collectionId}/books`, {});
+    return this.apiService.get(`/collections/${collectionId}/books`, {}); // todo remove
   }
 
   addBookToCollection(collectionId: number, libraryBookId: number): Observable<CollectionBook> {

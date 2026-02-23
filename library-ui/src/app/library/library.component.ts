@@ -23,6 +23,12 @@ import {
 import {filter} from 'rxjs';
 import {SelectedCollection} from '../interfaces/selected-collection';
 import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
+import {
+  LibraryBookDetailsDialogComponent,
+  LibraryBookDetailsDialogData,
+  LibraryBookDetailsDialogResult
+} from '../dialogs/library-book-details-dialog/library-book-details-dialog.component';
+import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
 
 @Component({
   selector: 'app-library',
@@ -161,6 +167,26 @@ export class LibraryComponent implements AfterViewInit {
     });
   }
 
+  openEditDetailsDialog(libraryBook: LibraryBook): void {
+    const dialogRef = this.dialog.open(LibraryBookDetailsDialogComponent, {
+      data: {libraryBook} as LibraryBookDetailsDialogData
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((result: LibraryBookDetailsDialogResult) => {
+      switch (result.action) {
+        case 'save':
+          this.updateBookDetails(libraryBook.id, result.payload);
+          break;
+
+        case 'reset':
+          this.resetBookDetails(libraryBook.id);
+          break;
+      }
+
+      dialogRef.close();
+    });
+  }
+
   openViewBookListDialog() {
     const data: ViewBookListDialogData = {
       libraryBooks: this.libraryBooks,
@@ -175,11 +201,31 @@ export class LibraryComponent implements AfterViewInit {
   }
 
   private updateBook(libraryBook: LibraryBook) {
-    const index = this.libraryBooks.findIndex(lb => lb.book.id === libraryBook.book.id);
+    const index = this.libraryBooks.findIndex(lb => lb.id === libraryBook.id);
     if (index !== -1) {
       this.libraryBooks.splice(index, 1, libraryBook);
       this.updateBookGroups();
     }
+  }
+
+  private updateBookDetails(libraryBookId: number, dto: UpdateLibraryBookDetails): void {
+    this.libraryBookService.updateDetails(libraryBookId, dto).subscribe({
+      next: (updatedBook) => {
+        this.updateBook(updatedBook);
+        this.snackCommon.showSuccess('Деталі книги оновлено');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
+  }
+
+  private resetBookDetails(libraryBookId: number): void {
+    this.libraryBookService.resetDetails(libraryBookId).subscribe({
+      next: (updatedBook: LibraryBook) => {
+        this.updateBook(updatedBook);
+        this.snackCommon.showSuccess('Деталі книги скинуто до стандартних');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
   }
 
   private updateBookGroups() {

@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_view_library_books_view
+      author: Dmytro Melnyk
+      changes:
+        - createView:
+            viewName: library_books_view
+            selectQuery: |
+              SELECT 
+                  lb.library_book_id,
+                  lb.user_id,
+                  lb.book_id,
+                  lb.status,
+                  lb.added_at,
+                  lb.rating,
+                  COALESCE(lb.title, b.title) as title,
+                  COALESCE(lb.publish_year, b.publish_year) as publish_year,
+                  COALESCE(lb.pages, b.pages) as pages,
+                  COALESCE(lb.language, b.language) as language,
+                  COALESCE(lb.description, b.description) as description,
+                  COALESCE(lb.cover_image_url, b.cover_image_url) as cover_image_url,
+                  b.category_id,
+                  c.name as category_name
+              FROM library_books lb
+              JOIN books b ON lb.book_id = b.book_id
+              JOIN categories c ON b.category_id = c.category_id

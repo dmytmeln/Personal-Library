@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_override_columns_to_library_books
+      author: Dmytro Melnyk
+      changes:
+        - addColumn:
+            tableName: library_books
+            columns:
+              - column:
+                  name: title
+                  type: varchar(255)
+              - column:
+                  name: publish_year
+                  type: smallint
+              - column:
+                  name: pages
+                  type: smallint
+              - column:
+                  name: language
+                  type: varchar(50)
+              - column:
+                  name: description
+                  type: text
+              - column:
+                  name: cover_image_url
+                  type: varchar(1024)

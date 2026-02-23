@@ -12,20 +12,22 @@ public class LibraryApplication {
     //  BE: logging
 
     // todo:
-    //  FE: use tree in collection-selector component to show collection hierarchy together with selection possibility
-    //  BE + FE: collection - collections pagination, sorting and filtering
     //  BE + FE: library - searching and filtering in user library
+    //  BE + FE: collection - recursive subtree view
+    //  BE + FE: collection - collections pagination, sorting and filtering
     //  BE + FE: collection - create collection filled with books
-    //  BE + FE: library - possibility to change book details for library books
     //  BE + FE: library - notes
     //  BE + FE: library - statistics
+    //  FE: enhance searching and filtering in search page
     //  FE: different ui layouts for searching and for library
     //  FE: grouping layout for library (group by author, genre, etc.)
     //  BE+ FE: recommendations
     //  BE + FE: share library with other users?
-    //  FE: enhance searching and filtering in search page
     //  FE: use MatSnackBar to show messages to user
     //  BE: JWT refresh tokens
+    //  BE: password reset
+    //  JPA optimizations
+    //  indexes
     //  CI/CD
     //  AWS deployment
 

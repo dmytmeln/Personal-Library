@@ -28,7 +28,7 @@
           <span>{{ node.name }}</span>
         </div>
         <button mat-icon-button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{node: node}"
-                (click)="$event.stopPropagation()">
+                (click)="$event.stopPropagation()" class="menu-button">
           <mat-icon>more_vert</mat-icon>
         </button>
       </li>
@@ -48,7 +48,7 @@
           <span>{{ node.name }}</span>
         </div>
         <button mat-icon-button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{node: node}"
-                (click)="$event.stopPropagation()">
+                (click)="$event.stopPropagation()" class="menu-button">
           <mat-icon>more_vert</mat-icon>
         </button>
       </div>

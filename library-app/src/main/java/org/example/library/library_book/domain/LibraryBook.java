@@ -37,6 +37,24 @@ public class LibraryBook {
     @Column(name = "rating")
     private Byte rating;
 
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "publish_year")
+    private Short publishYear;
+
+    @Column(name = "pages")
+    private Short pages;
+
+    @Column(name = "language")
+    private String language;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "cover_image_url")
+    private String coverImageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
@@ -50,6 +68,15 @@ public class LibraryBook {
                 .book(book)
                 .user(user)
                 .build();
+    }
+
+    public void resetOverriddenFields() {
+        this.title = null;
+        this.publishYear = null;
+        this.pages = null;
+        this.language = null;
+        this.description = null;
+        this.coverImageUrl = null;
     }
 
     @Override

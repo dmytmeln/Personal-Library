@@ -82,7 +82,7 @@ public class CollectionService {
         var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
                 .orElseThrow(() -> new NotFoundException("Collection not found with id: " + collectionId));
 
-        var books = collectionBookRepository.findByCollectionId(collectionId);
+        var books = collectionBookRepository.findByIdCollectionId(collectionId);
         var bookDtos = collectionBookMapper.toDto(books);
 
         var detailsDto = collectionMapper.toDetailsDto(collection);
@@ -90,16 +90,6 @@ public class CollectionService {
         detailsDto.setAncestors(getAncestors(collection));
 
         return detailsDto;
-    }
-
-    private List<BasicCollectionDto> getAncestors(Collection collection) {
-        List<BasicCollectionDto> ancestors = new ArrayList<>(MAX_ALLOWED_DEPTH - 1);
-        Collection current = collection.getParent();
-        while (current != null) {
-            ancestors.add(0, collectionMapper.toBasicDto(current));
-            current = current.getParent();
-        }
-        return ancestors;
     }
 
     @Transactional
@@ -223,7 +213,7 @@ public class CollectionService {
         var newMappings = collections.stream()
                 .filter(collection -> !existingMappings.contains(collection.getId()))
                 .map(collection -> CollectionBook.builder()
-                        .id(new CollectionBookId(libraryBookId, collection.getId()))
+                        .id(new CollectionBookId(collection.getId(), libraryBookId))
                         .libraryBook(book)
                         .collection(collection)
                         .build())
@@ -263,6 +253,16 @@ public class CollectionService {
                     .build();
             collectionBookRepository.save(newMapping);
         }
+    }
+
+    private List<BasicCollectionDto> getAncestors(Collection collection) {
+        List<BasicCollectionDto> ancestors = new ArrayList<>(MAX_ALLOWED_DEPTH - 1);
+        Collection current = collection.getParent();
+        while (current != null) {
+            ancestors.add(0, collectionMapper.toBasicDto(current));
+            current = current.getParent();
+        }
+        return ancestors;
     }
 
     private void validateMove(Collection toMove, Collection newParent) {

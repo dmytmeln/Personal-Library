@@ -3,6 +3,7 @@ package org.example.library.library_book.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.dto.LibraryBookDto;
+import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
 import org.example.library.library_book.service.LibraryBookService;
 import org.example.library.security.UserDetailsImpl;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,23 @@ public class LibraryBookController {
                                        @RequestParam LibraryBookStatus status
     ) {
         return service.updateStatus(libraryBookId, userDetails.getId(), status);
+    }
+
+    @PutMapping("/{libraryBookId}/details")
+    @ResponseStatus(HttpStatus.OK)
+    public LibraryBookDto updateDetails(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                        @PathVariable Integer libraryBookId,
+                                        @RequestBody UpdateLibraryBookDetailsDto dto
+    ) {
+        return service.updateDetails(libraryBookId, userDetails.getId(), dto);
+    }
+
+    @PutMapping("/{libraryBookId}/details/reset")
+    @ResponseStatus(HttpStatus.OK)
+    public LibraryBookDto resetDetails(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                       @PathVariable Integer libraryBookId
+    ) {
+        return service.resetDetails(libraryBookId, userDetails.getId());
     }
 
     @DeleteMapping("/{libraryBookId}")

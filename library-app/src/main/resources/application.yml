@@ -11,6 +11,7 @@ spring:
     properties:
       hibernate:
         show_sql: true
+        default_batch_fetch_size: ${application.pagination.max-page-size}
   liquibase:
     enabled: true
   security:
