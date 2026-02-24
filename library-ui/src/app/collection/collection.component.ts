@@ -199,6 +199,7 @@ export class CollectionComponent implements OnInit {
   openViewBookListDialog(): void {
     const data: ViewBookListDialogData = {
       libraryBooks: this.collection.books.map(cd => cd.libraryBook),
+      categoryColumn: 'categoryName',
       fetchBooksFn: (options) => this.libraryBookService.getAll(options),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});

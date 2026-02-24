@@ -6,19 +6,19 @@
 
     <mat-tab label="Книги">
       <div class="tab-content">
-        
+
         <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
           <div mainFilters>
-            <app-text-filter 
-              label="Назва книги" 
-              [value]="bookFilters.state().title"
-              (valueChange)="bookFilters.update('title', $event)"/>
-            
+            <app-text-filter
+              label="Назва книги"
+              [value]="filters.state().title"
+              (valueChange)="filters.update('title', $event)"/>
+
             <app-autocomplete-filter
               label="Автор"
-              [searchInput]="authorSearchInput()"
-              [selected]="bookFilters.state().author"
-              [options]="filteredAuthors()"
+              [searchInput]="authorSearch.query()"
+              [selected]="filters.state().author"
+              [options]="authorSearch.results()"
               displayField="fullName"
               (searchInputChange)="onAuthorSearchInput($event)"
               (optionSelected)="onAuthorSelected($event)"
@@ -26,9 +26,9 @@
 
             <app-autocomplete-filter
               label="Категорія"
-              [searchInput]="categorySearchInput()"
-              [selected]="bookFilters.state().category"
-              [options]="filteredCategories()"
+              [searchInput]="categorySearch.query()"
+              [selected]="filters.state().category"
+              [options]="categorySearch.results()"
               displayField="name"
               (searchInputChange)="onCategorySearchInput($event)"
               (optionSelected)="onCategorySelected($event)"
@@ -38,28 +38,28 @@
           <div secondaryFilters>
             <app-range-filter
               label="Рік видання"
-              [range]="bookFilters.state().publishYear"
-              (rangeChange)="bookFilters.update('publishYear', $event)"/>
+              [range]="filters.state().publishYear"
+              (rangeChange)="filters.update('publishYear', $event)"/>
 
             <app-range-filter
               label="Кількість сторінок"
-              [range]="bookFilters.state().pages"
-              (rangeChange)="bookFilters.update('pages', $event)"/>
+              [range]="filters.state().pages"
+              (rangeChange)="filters.update('pages', $event)"/>
           </div>
 
           <div footerFilters>
             <app-language-filter
               [available]="languages()"
-              [selected]="bookFilters.state().languages"
+              [selected]="filters.state().languages"
               [showAll]="showAllLanguages()"
               (toggle)="toggleLanguage($event)"
               (toggleShowAll)="showAllLanguages.set(!showAllLanguages())"
-              (clear)="bookFilters.update('languages', [])"/>
+              (clear)="filters.update('languages', [])"/>
           </div>
         </app-filter-shell>
 
         <app-sort-bar [options]="DEFAULT_SORT_OPTIONS" (sortChange)="onBooksSortChange($event)"/>
-        
+
         <app-books-grid
           [books]="booksState.items"
           [totalElements]="booksState.pagination.totalElements"
@@ -72,161 +72,11 @@
     </mat-tab>
 
     <mat-tab label="Автори">
-      <div class="tab-content">
-        
-        <app-filter-shell [hasActiveFilters]="hasAuthorFilters() || !!authorsState.search.name" (resetAll)="clearAllAuthorFilters()">
-          <div mainFilters>
-            <app-text-filter 
-              label="Пошук за ім'ям" 
-              [value]="authorsState.search.name"
-              (valueChange)="authorsState.search.name = $event; onAuthorNameSearch()"/>
-
-            <app-select-filter
-              label="Країна"
-              [value]="authorsState.filter.country"
-              [options]="countryOptions()"
-              (valueChange)="onAuthorCountrySelected($event)"/>
-          </div>
-
-          <div secondaryFilters>
-            <app-range-filter
-              label="Рік народження"
-              [range]="{min: authorsState.filter.birthYearMin, max: authorsState.filter.birthYearMax}"
-              (rangeChange)="authorsState.filter.birthYearMin = $event.min; authorsState.filter.birthYearMax = $event.max; onAuthorBirthYearMinChange()"/>
-
-            <app-range-filter
-              label="Кількість книг"
-              [range]="{min: authorsState.filter.booksCountMin, max: authorsState.filter.booksCountMax}"
-              (rangeChange)="authorsState.filter.booksCountMin = $event.min; authorsState.filter.booksCountMax = $event.max; onAuthorBooksCountMinChange()"/>
-          </div>
-        </app-filter-shell>
-
-        <app-sort-bar [options]="authorsState.sorting.options" (sortChange)="loadAuthors()"/>
-
-        <div class="content-wrapper">
-          @if (authorsState.loading) {
-            <div class="loading-overlay">
-              <mat-spinner diameter="50"></mat-spinner>
-            </div>
-          }
-          <div class="authors-table-container">
-            <table class="authors-table">
-              <thead>
-              <tr>
-                <th>ПІБ</th>
-                <th>Країна</th>
-                <th>Рік народження</th>
-                <th>Рік смерті</th>
-                <th>Кількість книг</th>
-                <th>Дії</th>
-              </tr>
-              </thead>
-              <tbody>
-                @for (author of authorsState.items; track author.id) {
-                  <tr>
-                    <td>
-                      <a class="author-link" (click)="goToAuthorDetails(author)">{{ author.fullName }}</a>
-                    </td>
-                    <td>{{ author.country }}</td>
-                    <td>{{ author.birthYear }}</td>
-                    <td>{{ author.deathYear || '-' }}</td>
-                    <td>{{ getBooksCountText(author.booksCount || 0) }}</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button mat-stroked-button (click)="goToAuthorDetails(author)" class="action-btn">
-                          Деталі
-                        </button>
-                        <button mat-stroked-button (click)="showAuthorBooks(author)" class="action-btn">
-                          Книги
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <mat-paginator
-            [length]="authorsState.pagination.totalElements"
-            [pageSize]="authorsState.pagination.pageSize"
-            [pageIndex]="authorsState.pagination.currentPage"
-            [pageSizeOptions]="[12, 24, 48]"
-            (page)="onAuthorPageChange($event)"
-            aria-label="Вибрати сторінку">
-          </mat-paginator>
-        </div>
-      </div>
+      <app-author-list mode="search" (authorBooks)="showAuthorBooks($event)"/>
     </mat-tab>
 
     <mat-tab label="Категорії">
-      <div class="tab-content">
-        
-        <app-filter-shell [hasActiveFilters]="hasCategoryFilters() || !!categoriesState.search.name" (resetAll)="clearAllCategoryFilters()">
-          <div mainFilters>
-            <app-text-filter 
-              label="Пошук за назвою" 
-              [value]="categoriesState.search.name"
-              (valueChange)="categoriesState.search.name = $event; onCategoryNameSearch()"/>
-          </div>
-
-          <div secondaryFilters>
-            <app-range-filter
-              label="Кількість книг"
-              [range]="{min: categoriesState.filter.booksCountMin, max: categoriesState.filter.booksCountMax}"
-              (rangeChange)="categoriesState.filter.booksCountMin = $event.min; categoriesState.filter.booksCountMax = $event.max; onCategoryBooksCountMinChange()"/>
-          </div>
-        </app-filter-shell>
-
-        <app-sort-bar [options]="categoriesState.sorting.options" (sortChange)="loadCategories()"/>
-
-        <div class="content-wrapper">
-          @if (categoriesState.loading) {
-            <div class="loading-overlay">
-              <mat-spinner diameter="50"></mat-spinner>
-            </div>
-          }
-          <div class="authors-table-container">
-            <table class="authors-table">
-              <thead>
-              <tr>
-                <th>Назва</th>
-                <th>Опис</th>
-                <th>Кількість книг</th>
-                <th>Дії</th>
-              </tr>
-              </thead>
-              <tbody>
-                @for (category of categoriesState.items; track category.id) {
-                  <tr>
-                    <td>{{ category.name }}</td>
-                    <td [matTooltip]="category.description || '-'"
-                        matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}
-                    </td>
-                    <td>{{ getBooksCountText(category.booksCount || 0) }}</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button mat-stroked-button (click)="goToCategoryBooks(category)" class="action-btn">
-                          Книги
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <mat-paginator
-            [length]="categoriesState.pagination.totalElements"
-            [pageSize]="categoriesState.pagination.pageSize"
-            [pageIndex]="categoriesState.pagination.currentPage"
-            [pageSizeOptions]="[12, 24, 48]"
-            (page)="onCategoryPageChange($event)"
-            aria-label="Вибрати сторінку">
-          </mat-paginator>
-        </div>
-      </div>
+      <app-category-list mode="search" (categoryBooks)="goToCategoryBooks($event)"/>
     </mat-tab>
 
   </mat-tab-group>

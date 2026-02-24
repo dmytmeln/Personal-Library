@@ -9,6 +9,8 @@ import java.util.Set;
 @Component
 public class SortValidator {
 
+    // todo
+
     public static final String DELIMITER = ";";
     private static final Set<String> ALLOWED_DIRECTIONS = Set.of("ASC", "DESC");
 

@@ -20,3 +20,15 @@ export interface LibraryFilters extends BaseBookFilters {
   status: LibraryBookStatus | null;
   rating: Range<number>;
 }
+
+export interface AuthorFilters {
+  name: string;
+  country: string | null;
+  birthYear: Range<number>;
+  booksCount: Range<number>;
+}
+
+export interface CategoryFilters {
+  name: string;
+  booksCount: Range<number>;
+}

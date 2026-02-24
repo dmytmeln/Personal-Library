@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {LibraryBookService} from '../services/library-book.service';
 import {getStatusName, LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
@@ -19,7 +19,7 @@ import {
   CollectionSelectorDialogComponent,
   CollectionSelectorDialogData
 } from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
-import {debounceTime, distinctUntilChanged, filter, Subject, switchMap} from 'rxjs';
+import {filter} from 'rxjs';
 import {SelectedCollection} from '../interfaces/selected-collection';
 import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import {
@@ -27,12 +27,13 @@ import {
   LibraryBookDetailsDialogData,
   LibraryBookDetailsDialogResult
 } from '../dialogs/library-book-details-dialog/library-book-details-dialog.component';
-import {BookFilterStore} from '../services/book-filter.store';
+import {EntityFilterStore} from '../services/entity-filter.store';
+import {AutocompleteSearchStore} from '../services/autocomplete-search.store';
 import {LibraryFilters} from '../interfaces/filters';
 import {Author} from '../interfaces/author';
 import {Category} from '../interfaces/category';
 import {LanguageWithCount} from '../interfaces/language-with-count';
-import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
+import {PageEvent} from '@angular/material/paginator';
 import {AuthorService} from '../services/author.service';
 import {CategoryService} from '../services/category.service';
 import {SortOption} from '../interfaces/sort-config';
@@ -47,10 +48,10 @@ import {BooksGridComponent} from '../books-grid/books-grid.component';
 import {MatSelectModule} from '@angular/material/select';
 import {FormsModule} from '@angular/forms';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {Router} from '@angular/router';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
-import {CountryWithCount} from '../interfaces/country-with-count';
+import {AuthorListComponent} from '../author-list/author-list.component';
+import {CategoryListComponent} from '../category-list/category-list.component';
 
 const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
   title: '',
@@ -84,18 +85,16 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     SortBarComponent,
     BooksGridComponent,
     MatSelectModule,
-    MatPaginatorModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
     SelectFilterComponent,
+    AuthorListComponent,
+    CategoryListComponent,
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })
 export class LibraryComponent implements OnInit {
-
-  protected readonly getStatusName = getStatusName;
-  protected readonly LIBRARY_BOOK_STATUSES = LIBRARY_BOOK_STATUSES;
 
   readonly bookSortOptions: SortOption[] = [
     {field: 'title', label: 'Назва'},
@@ -103,18 +102,6 @@ export class LibraryComponent implements OnInit {
     {field: 'rating', label: 'Оцінка'},
     {field: 'addedAt', label: 'Дата додавання'},
     {field: 'pages', label: 'Сторінки'},
-  ];
-
-  readonly authorSortOptions: SortOption[] = [
-    {field: 'fullName', label: 'ПІБ'},
-    {field: 'country', label: 'Країна'},
-    {field: 'birthYear', label: 'Рік народження'},
-    {field: 'booksCount', label: 'Кількість книг'},
-  ];
-
-  readonly categorySortOptions: SortOption[] = [
-    {field: 'name', label: 'Назва'},
-    {field: 'booksCount', label: 'Кількість книг'},
   ];
 
   booksState = {
@@ -126,71 +113,26 @@ export class LibraryComponent implements OnInit {
     sort: undefined as string[] | undefined,
   };
 
-  authorsState = {
-    items: [] as Author[],
-    totalElements: 0,
-    pageSize: 12,
-    currentPage: 0,
-    loading: false,
-    sort: undefined as string[] | undefined,
-    loaded: false,
-    filter: {
-      name: '',
-      country: null as string | null,
-      birthYearMin: null as number | null,
-      birthYearMax: null as number | null,
-      booksCountMin: null as number | null,
-      booksCountMax: null as number | null,
-    },
-  };
-
-  countries = signal<CountryWithCount[]>([]);
-
-  categoriesState = {
-    items: [] as Category[],
-    totalElements: 0,
-    pageSize: 12,
-    currentPage: 0,
-    loading: false,
-    sort: undefined as string[] | undefined,
-    loaded: false,
-    filter: {
-      name: '',
-      booksCountMin: null as number | null,
-      booksCountMax: null as number | null,
-    }
-  };
-
   readonly statusOptions: SelectOption[] = LIBRARY_BOOK_STATUSES.map(s => ({
     value: s,
     label: getStatusName(s)
   }));
 
-  readonly countryOptions = computed<SelectOption[]>(() =>
-    this.countries().map(c => ({
-      value: c.country,
-      label: `${c.country} (${c.count})`
-    }))
+  readonly filters = new EntityFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
+
+  readonly authorSearch = new AutocompleteSearchStore<Author>(
+    (q, p, s) => this.authorService.searchMe({name: q, page: p, size: s}),
+    450,
+    10
   );
-
-  readonly filters = new BookFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
-
-  authorSearchInput = signal('');
-  filteredAuthors = signal<Author[]>([]);
-  categorySearchInput = signal('');
-  filteredCategories = signal<Category[]>([]);
+  readonly categorySearch = new AutocompleteSearchStore<Category>(
+    (q, p, s) => this.categoryService.searchMe({name: q, page: p, size: s}),
+    450,
+    10
+  );
 
   languages = signal<LanguageWithCount[]>([]);
   showAllLanguages = signal(false);
-
-  private readonly subjects = {
-    authorSearch: new Subject<string>(),
-    categorySearch: new Subject<string>(),
-    authorName: new Subject<string>(),
-    categoryName: new Subject<string>(),
-    authorRange: new Subject<void>(),
-    categoryRange: new Subject<void>(),
-  };
 
   uiState = {
     activeTabIndex: 0,
@@ -206,7 +148,6 @@ export class LibraryComponent implements OnInit {
     private categoryService: CategoryService,
     private collectionService: CollectionService,
     private collectionBookService: CollectionBookService,
-    private router: Router,
     matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
@@ -220,13 +161,6 @@ export class LibraryComponent implements OnInit {
 
   onTabChange(index: number): void {
     this.uiState.activeTabIndex = index;
-    if (index === 1 && !this.authorsState.loaded) {
-      this.loadAuthors();
-      this.loadAuthorCountries();
-    }
-    if (index === 2 && !this.categoriesState.loaded) {
-      this.loadCategories();
-    }
   }
 
   //region Books Methods
@@ -274,172 +208,17 @@ export class LibraryComponent implements OnInit {
 
   //endregion
 
-  //region Authors Methods
-
-  onAuthorPageChange(event: PageEvent): void {
-    this.authorsState.currentPage = event.pageIndex;
-    this.authorsState.pageSize = event.pageSize;
-    this.loadAuthors();
-  }
-
-  onAuthorSortChange(sort: string[] | undefined): void {
-    this.authorsState.sort = sort;
-    this.authorsState.currentPage = 0;
-    this.loadAuthors();
-  }
-
-  onAuthorNameSearch(): void {
-    this.subjects.authorName.next(this.authorsState.filter.name);
-  }
-
-  onAuthorBirthYearChange(): void {
-    this.subjects.authorRange.next();
-  }
-
-  onAuthorBooksCountChange(): void {
-    this.subjects.authorRange.next();
-  }
-
-  onAuthorCountrySelected(country: string | null): void {
-    this.authorsState.filter.country = country;
-    this.authorsState.currentPage = 0;
-    this.loadAuthors();
-  }
-
-  hasAuthorFilters(): boolean {
-    const f = this.authorsState.filter;
-    return !!f.name || !!f.country || f.birthYearMin != null || f.birthYearMax != null || f.booksCountMin != null || f.booksCountMax != null;
-  }
-
-  clearAllAuthorFilters(): void {
-    this.authorsState.filter = {
-      name: '',
-      country: null,
-      birthYearMin: null,
-      birthYearMax: null,
-      booksCountMin: null,
-      booksCountMax: null
-    };
-    this.authorsState.currentPage = 0;
-    this.loadAuthors();
-  }
-
-  private loadAuthors(): void {
-    this.authorsState.loading = true;
-    const f = this.authorsState.filter;
-
-    this.authorService.searchMe({
-      page: this.authorsState.currentPage,
-      size: this.authorsState.pageSize,
-      sort: this.authorsState.sort,
-      name: f.name,
-      country: f.country ?? undefined,
-      birthYearMin: f.birthYearMin ?? undefined,
-      birthYearMax: f.birthYearMax ?? undefined,
-      booksCountMin: f.booksCountMin ?? undefined,
-      booksCountMax: f.booksCountMax ?? undefined,
-    }).subscribe({
-      next: page => {
-        this.authorsState.items = page.content;
-        this.authorsState.totalElements = page.page.totalElements;
-        this.authorsState.loading = false;
-        this.authorsState.loaded = true;
-      },
-      error: () => this.authorsState.loading = false
-    });
-  }
-
-  private loadAuthorCountries(): void {
-    this.authorService.getCountriesMe().subscribe(countries => {
-      this.countries.set(countries);
-    });
-  }
-
   goToAuthorBooks(author: Author): void {
     this.uiState.activeTabIndex = 0;
     this.filters.update('author', author);
-    this.authorSearchInput.set(author.fullName);
-  }
-
-  getBooksCountText(count: number): string {
-    if (count === 0) return '0 книг';
-    if (count === 1) return '1 книга';
-    if (count >= 2 && count <= 4) return `${count} книги`;
-    return `${count} книг`;
-  }
-
-  goToAuthorDetails(author: Author): void {
-    this.router.navigate(['/author-details'], {state: {id: author.id}});
-  }
-
-  //endregion
-
-  //region Categories Methods
-
-  onCategoryPageChange(event: PageEvent): void {
-    this.categoriesState.currentPage = event.pageIndex;
-    this.categoriesState.pageSize = event.pageSize;
-    this.loadCategories();
-  }
-
-  onCategorySortChange(sort: string[] | undefined): void {
-    this.categoriesState.sort = sort;
-    this.categoriesState.currentPage = 0;
-    this.loadCategories();
-  }
-
-  onCategoryNameSearch(): void {
-    this.subjects.categoryName.next(this.categoriesState.filter.name);
-  }
-
-  onCategoryBooksCountChange(): void {
-    this.subjects.categoryRange.next();
-  }
-
-  hasCategoryFilters(): boolean {
-    const f = this.categoriesState.filter;
-    return !!f.name || f.booksCountMin != null || f.booksCountMax != null;
-  }
-
-  clearAllCategoryFilters(): void {
-    this.categoriesState.filter = {
-      name: '',
-      booksCountMin: null,
-      booksCountMax: null
-    };
-    this.categoriesState.currentPage = 0;
-    this.loadCategories();
-  }
-
-  private loadCategories(): void {
-    this.categoriesState.loading = true;
-    const f = this.categoriesState.filter;
-
-    this.categoryService.searchMe({
-      page: this.categoriesState.currentPage,
-      size: this.categoriesState.pageSize,
-      sort: this.categoriesState.sort,
-      name: f.name,
-      booksCountMin: f.booksCountMin ?? undefined,
-      booksCountMax: f.booksCountMax ?? undefined,
-    }).subscribe({
-      next: page => {
-        this.categoriesState.items = page.content;
-        this.categoriesState.totalElements = page.page.totalElements;
-        this.categoriesState.loading = false;
-        this.categoriesState.loaded = true;
-      },
-      error: () => this.categoriesState.loading = false
-    });
+    this.authorSearch.query.set(author.fullName);
   }
 
   goToCategoryBooks(category: Category): void {
     this.uiState.activeTabIndex = 0;
     this.filters.update('category', category);
-    this.categorySearchInput.set(category.name);
+    this.categorySearch.query.set(category.name);
   }
-
-  //endregion
 
   deleteLibraryBook(libraryBook: LibraryBook): void {
     this.collectionService.getCollectionsContainingBook(libraryBook.id).subscribe(collections => {
@@ -520,6 +299,7 @@ export class LibraryComponent implements OnInit {
         } as CollectionSelectorDialogData
       });
 
+      // todo duplicate code fragment
       dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
         if (selection.id) {
           this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
@@ -565,6 +345,7 @@ export class LibraryComponent implements OnInit {
   openViewBookListDialog() {
     const data: ViewBookListDialogData = {
       libraryBooks: [], // Todo: pass actual library books to show 'Already in library'
+      categoryColumn: 'category.name',
       fetchBooksFn: (options) => this.bookService.getAll(options),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
@@ -582,52 +363,11 @@ export class LibraryComponent implements OnInit {
   }
 
   private loadLanguages(): void {
+    // todo change
     this.bookService.getLanguages().subscribe(langs => this.languages.set(langs));
   }
 
   private setupSubscriptions(): void {
-    this.subjects.authorSearch.pipe(
-      debounceTime(450),
-      distinctUntilChanged(),
-      switchMap(query => this.authorService.search({name: query, page: 0, size: 10}))
-    ).subscribe(page => this.filteredAuthors.set(page.content));
-
-    this.subjects.categorySearch.pipe(
-      debounceTime(450),
-      distinctUntilChanged(),
-      switchMap(query => this.categoryService.search({name: query, page: 0, size: 10}))
-    ).subscribe(page => this.filteredCategories.set(page.content));
-
-    this.subjects.authorName.pipe(
-      debounceTime(450),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.authorsState.currentPage = 0;
-      this.loadAuthors();
-    });
-
-    this.subjects.categoryName.pipe(
-      debounceTime(450),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.categoriesState.currentPage = 0;
-      this.loadCategories();
-    });
-
-    this.subjects.authorRange.pipe(
-      debounceTime(450)
-    ).subscribe(() => {
-      this.authorsState.currentPage = 0;
-      this.loadAuthors();
-    });
-
-    this.subjects.categoryRange.pipe(
-      debounceTime(450)
-    ).subscribe(() => {
-      this.categoriesState.currentPage = 0;
-      this.loadCategories();
-    });
-
     this.filters.filtersChanged$.subscribe(() => {
       this.booksState.currentPage = 0;
       this.loadBooks();
@@ -635,37 +375,31 @@ export class LibraryComponent implements OnInit {
   }
 
   onAuthorSearchInput(val: string): void {
-    this.authorSearchInput.set(val);
-    this.subjects.authorSearch.next(val);
+    this.authorSearch.search(val);
   }
 
   onCategorySearchInput(val: string): void {
-    this.categorySearchInput.set(val);
-    this.subjects.categorySearch.next(val);
+    this.categorySearch.search(val);
   }
 
   onAuthorSelected(author: Author): void {
     this.filters.update('author', author);
-    this.authorSearchInput.set(author.fullName);
-    this.filteredAuthors.set([]);
+    this.authorSearch.clear();
   }
 
   onCategorySelected(category: Category): void {
     this.filters.update('category', category);
-    this.categorySearchInput.set(category.name);
-    this.filteredCategories.set([]);
+    this.categorySearch.clear();
   }
 
   clearAuthorFilter(): void {
     this.filters.update('author', null);
-    this.authorSearchInput.set('');
-    this.filteredAuthors.set([]);
+    this.authorSearch.clear();
   }
 
   clearCategoryFilter(): void {
     this.filters.update('category', null);
-    this.categorySearchInput.set('');
-    this.filteredCategories.set([]);
+    this.categorySearch.clear();
   }
 
   toggleLanguage(language: string): void {
@@ -680,18 +414,19 @@ export class LibraryComponent implements OnInit {
   }
 
   hasActiveFilters(): boolean {
-    const f = this.filters.state();
-    return f.author !== null || f.category !== null || f.title !== '' ||
-      f.publishYear.min !== null || f.publishYear.max !== null ||
-      f.pages.min !== null || f.pages.max !== null ||
-      f.languages.length > 0 || f.status !== null ||
-      f.rating.min !== null || f.rating.max !== null;
+    return this.filters.hasActiveFilters(f => {
+      return f.author !== null || f.category !== null || f.title !== '' ||
+        f.publishYear.min !== null || f.publishYear.max !== null ||
+        f.pages.min !== null || f.pages.max !== null ||
+        f.languages.length > 0 || f.status !== null ||
+        f.rating.min !== null || f.rating.max !== null
+    });
   }
 
   clearAllFilters(): void {
     this.filters.reset(EMPTY_LIBRARY_FILTERS);
-    this.authorSearchInput.set('');
-    this.categorySearchInput.set('');
+    this.authorSearch.clear();
+    this.categorySearch.clear();
   }
 
 }

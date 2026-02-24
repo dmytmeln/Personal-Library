@@ -1,0 +1,166 @@
+import {Component, computed, input, OnInit, output, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {AuthorService} from '../services/author.service';
+import {Author} from '../interfaces/author';
+import {CountryWithCount} from '../interfaces/country-with-count';
+import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatButtonModule} from '@angular/material/button';
+import {Router} from '@angular/router';
+import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
+import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
+import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
+import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
+import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
+import {SortOption} from '../interfaces/sort-config';
+import {AuthorFilters} from '../interfaces/filters';
+import {EntityFilterStore} from '../services/entity-filter.store';
+
+const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
+  name: '',
+  country: null,
+  birthYear: {min: null, max: null},
+  booksCount: {min: null, max: null},
+};
+
+@Component({
+  selector: 'app-author-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    FilterShellComponent,
+    TextFilterComponent,
+    SelectFilterComponent,
+    RangeFilterComponent,
+    SortBarComponent,
+  ],
+  templateUrl: './author-list.component.html',
+  styleUrl: './author-list.component.scss'
+})
+export class AuthorListComponent implements OnInit {
+  mode = input.required<'library' | 'search'>();
+
+  authorBooks = output<Author>();
+
+  authorsState = {
+    items: [] as Author[],
+    totalElements: 0,
+    pageSize: 12,
+    currentPage: 0,
+    loading: false,
+    sort: undefined as string[] | undefined,
+  };
+
+  countries = signal<CountryWithCount[]>([]);
+
+  readonly filters = new EntityFilterStore<AuthorFilters>(EMPTY_AUTHOR_FILTERS);
+
+  readonly authorSortOptions: SortOption[] = [
+    {field: 'fullName', label: 'ПІБ'},
+    {field: 'country', label: 'Країна'},
+    {field: 'birthYear', label: 'Рік народження'},
+    {field: 'booksCount', label: 'Кількість книг'},
+  ];
+
+  readonly countryOptions = computed<SelectOption[]>(() =>
+    this.countries().map(c => ({
+      value: c.country,
+      label: `${c.country} (${c.count})`
+    }))
+  );
+
+  constructor(
+    private authorService: AuthorService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.loadAuthors();
+    this.loadCountries();
+    this.setupSubscriptions();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.authorsState.currentPage = event.pageIndex;
+    this.authorsState.pageSize = event.pageSize;
+    this.loadAuthors();
+  }
+
+  onSortChange(sort: string[] | undefined): void {
+    this.authorsState.sort = sort;
+    this.authorsState.currentPage = 0;
+    this.loadAuthors();
+  }
+
+  hasActiveFilters(): boolean {
+    return this.filters.hasActiveFilters(f => {
+      return !!f.name || !!f.country || f.birthYear.min != null || f.birthYear.max != null || f.booksCount.min != null || f.booksCount.max != null;
+    });
+  }
+
+  clearAllFilters(): void {
+    this.filters.reset(EMPTY_AUTHOR_FILTERS);
+  }
+
+  loadAuthors(): void {
+    this.authorsState.loading = true;
+    const f = this.filters.state();
+    const options = {
+      page: this.authorsState.currentPage,
+      size: this.authorsState.pageSize,
+      sort: this.authorsState.sort,
+      name: f.name,
+      country: f.country ?? undefined,
+      birthYearMin: f.birthYear.min ?? undefined,
+      birthYearMax: f.birthYear.max ?? undefined,
+      booksCountMin: f.booksCount.min ?? undefined,
+      booksCountMax: f.booksCount.max ?? undefined,
+    };
+
+    const request = this.mode() === 'library'
+      ? this.authorService.searchMe(options)
+      : this.authorService.search(options);
+
+    request.subscribe({
+      next: page => {
+        this.authorsState.items = page.content;
+        this.authorsState.totalElements = page.page.totalElements;
+        this.authorsState.loading = false;
+      },
+      error: () => this.authorsState.loading = false
+    });
+  }
+
+  private loadCountries(): void {
+    const request = this.mode() === 'library'
+      ? this.authorService.getCountriesMe()
+      : this.authorService.getCountries();
+
+    request.subscribe(countries => this.countries.set(countries));
+  }
+
+  private setupSubscriptions(): void {
+    this.filters.filtersChanged$.subscribe(() => {
+      this.authorsState.currentPage = 0;
+      this.loadAuthors();
+    });
+  }
+
+  getBooksCountText(count: number): string {
+    if (count === 0) return '0 книг';
+    if (count === 1) return '1 книга';
+    if (count >= 2 && count <= 4) return `${count} книги`;
+    return `${count} книг`;
+  }
+
+  goToAuthorDetails(author: Author): void {
+    this.router.navigate(['/author-details'], {state: {id: author.id}});
+  }
+
+  onShowBooks(author: Author): void {
+    this.authorBooks.emit(author);
+  }
+}

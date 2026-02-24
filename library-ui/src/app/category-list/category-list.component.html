@@ -1,0 +1,64 @@
+<div class="tab-content">
+  <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
+    <div mainFilters>
+      <app-text-filter
+        label="Пошук за назвою"
+        [value]="filters.state().name"
+        (valueChange)="filters.update('name', $event)"/>
+    </div>
+
+    <div secondaryFilters>
+      <app-range-filter
+        label="Кількість книг"
+        [range]="filters.state().booksCount"
+        (rangeChange)="filters.update('booksCount', $event)"/>
+    </div>
+  </app-filter-shell>
+
+  <app-sort-bar [options]="categorySortOptions" (sortChange)="onSortChange($event)"/>
+
+  <div class="content-wrapper">
+    @if (categoriesState.loading) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    }
+    <div class="authors-table-container">
+      <table class="authors-table">
+        <thead>
+        <tr>
+          <th>Назва</th>
+          <th>Опис</th>
+          <th>Кількість книг</th>
+          <th>Дії</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (category of categoriesState.items; track category.id) {
+            <tr>
+              <td>{{ category.name }}</td>
+              <td [matTooltip]="category.description || '-'"
+                  matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}
+              </td>
+              <td>{{ getBooksCountText(category.booksCount || 0) }}</td>
+              <td>
+                <button mat-stroked-button (click)="onShowBooks(category)" class="action-btn">
+                  Книги
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="categoriesState.totalElements"
+      [pageSize]="categoriesState.pageSize"
+      [pageIndex]="categoriesState.currentPage"
+      [pageSizeOptions]="[12, 24, 48]"
+      (page)="onPageChange($event)"
+      aria-label="Вибрати сторінку">
+    </mat-paginator>
+  </div>
+</div>

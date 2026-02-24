@@ -2,7 +2,7 @@ import {signal} from '@angular/core';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {debounceTime, distinctUntilChanged, skip} from 'rxjs';
 
-export class BookFilterStore<T extends object> {
+export class EntityFilterStore<T extends object> {
 
   readonly state = signal<T>({} as T);
 
@@ -22,6 +22,10 @@ export class BookFilterStore<T extends object> {
 
   reset(initialState: T): void {
     this.state.set(initialState);
+  }
+
+  hasActiveFilters(predicate: (values: T) => boolean): boolean {
+    return predicate(this.state());
   }
 
 }

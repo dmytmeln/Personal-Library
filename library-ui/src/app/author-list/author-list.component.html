@@ -1,0 +1,84 @@
+<div class="tab-content">
+  <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
+    <div mainFilters>
+      <app-text-filter
+        label="Пошук за ім'ям"
+        [value]="filters.state().name"
+        (valueChange)="filters.update('name', $event)"/>
+
+      <app-select-filter
+        label="Країна"
+        [value]="filters.state().country"
+        [options]="countryOptions()"
+        (valueChange)="filters.update('country', $event)"/>
+    </div>
+
+    <div secondaryFilters>
+      <app-range-filter
+        label="Рік народження"
+        [range]="filters.state().birthYear"
+        (rangeChange)="filters.update('birthYear', $event)"/>
+
+      <app-range-filter
+        label="Кількість книг"
+        [range]="filters.state().booksCount"
+        (rangeChange)="filters.update('booksCount', $event)"/>
+    </div>
+  </app-filter-shell>
+
+  <app-sort-bar [options]="authorSortOptions" (sortChange)="onSortChange($event)"/>
+
+  <div class="content-wrapper">
+    @if (authorsState.loading) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    }
+    <div class="authors-table-container">
+      <table class="authors-table">
+        <thead>
+        <tr>
+          <th>ПІБ</th>
+          <th>Країна</th>
+          <th>Рік народження</th>
+          <th>Рік смерті</th>
+          <th>Кількість книг</th>
+          <th>Дії</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (author of authorsState.items; track author.id) {
+            <tr>
+              <td>
+                <a class="author-link" (click)="goToAuthorDetails(author)">{{ author.fullName }}</a>
+              </td>
+              <td>{{ author.country }}</td>
+              <td>{{ author.birthYear }}</td>
+              <td>{{ author.deathYear || '-' }}</td>
+              <td>{{ getBooksCountText(author.booksCount || 0) }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button mat-stroked-button (click)="goToAuthorDetails(author)" class="action-btn">
+                    Деталі
+                  </button>
+                  <button mat-stroked-button (click)="onShowBooks(author)" class="action-btn">
+                    Книги
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="authorsState.totalElements"
+      [pageSize]="authorsState.pageSize"
+      [pageIndex]="authorsState.currentPage"
+      [pageSizeOptions]="[12, 24, 48]"
+      (page)="onPageChange($event)"
+      aria-label="Вибрати сторінку">
+    </mat-paginator>
+  </div>
+</div>

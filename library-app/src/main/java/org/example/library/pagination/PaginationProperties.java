@@ -11,6 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 public class PaginationProperties {
     private int defaultPageSize = 20;
-    private int maxPageSize = 100;
+    private int maxPageSize = 50;
     private int minPageSize = 1;
 }

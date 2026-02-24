@@ -1,6 +1,6 @@
-import {Component, input, output} from '@angular/core';
+import {Component, effect, input, output} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
@@ -13,6 +13,7 @@ import {MatButtonModule} from '@angular/material/button';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
@@ -23,12 +24,12 @@ import {MatButtonModule} from '@angular/material/button';
   styleUrl: './autocomplete-filter.component.scss'
 })
 export class AutocompleteFilterComponent {
+
   label = input.required<string>();
   placeholder = input<string>('');
   options = input<any[]>([]);
   displayField = input.required<string>();
-  
-  // Two separate inputs for the visual search string and the actual selected object
+
   searchInput = input<string>('');
   selected = input<any | null>(null);
 
@@ -36,15 +37,38 @@ export class AutocompleteFilterComponent {
   optionSelected = output<any>();
   clear = output<void>();
 
-  onInputChange(val: string): void {
-    this.searchInputChange.emit(val);
+  inputControl = new FormControl('');
+
+  constructor() {
+    effect(() => {
+      const val = this.searchInput();
+      if (val === '' && this.inputControl.value !== '') {
+        this.inputControl.setValue('', {emitEvent: false});
+      }
+    });
+  }
+
+  onInputChange(val: any): void {
+    if (typeof val === 'string') {
+      this.searchInputChange.emit(val);
+    }
   }
 
   onSelect(option: any): void {
+    this.inputControl.setValue(this.displayFn(option), {emitEvent: false});
     this.optionSelected.emit(option);
   }
 
   onClear(): void {
+    this.inputControl.setValue('', {emitEvent: false});
     this.clear.emit();
   }
+
+  displayFn = (option: any): string => {
+    if (option && typeof option === 'object') {
+      return option[this.displayField()] || '';
+    }
+    return option || '';
+  }
+
 }
