@@ -13,6 +13,7 @@ public class LibraryApplication {
 
     // todo tomorrow:
     //  BE + FE: library - searching and filtering in user library
+    //  Rewrite ViewBookListDialog
     //  BE + FE: collection - recursive subtree view
     //  BE + FE: collection - collections pagination, sorting and filtering
     //  BE + FE: collection - create collection filled with books

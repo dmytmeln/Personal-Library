@@ -1,0 +1,25 @@
+<div class="language-filter">
+  <div class="language-filter-header">
+    <span class="filter-label">Мови:</span>
+    @if (selected().length > 0) {
+      <button mat-stroked-button (click)="clear.emit()" class="language-action-btn">
+        Очистити
+      </button>
+    }
+  </div>
+  <div class="language-checkboxes">
+    @for (lang of displayedLanguages; track lang.language) {
+      <mat-checkbox
+        [checked]="isSelected(lang.language)"
+        (change)="toggle.emit(lang.language)"
+        class="language-checkbox">
+        {{ lang.language }} <span class="language-count">({{ lang.count }})</span>
+      </mat-checkbox>
+    }
+  </div>
+  @if (hasMore) {
+    <button mat-stroked-button (click)="toggleShowAll.emit()" class="show-more-btn">
+      {{ showAll() ? 'Показати менше' : 'Показати більше' }}
+    </button>
+  }
+</div>

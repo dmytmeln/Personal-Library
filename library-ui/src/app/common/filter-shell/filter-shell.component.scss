@@ -1,0 +1,44 @@
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--mat-sys-surface-container-low);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.main-row {
+  align-items: flex-start;
+}
+
+.secondary-row {
+  justify-content: flex-start;
+}
+
+.clear-filters-btn {
+  height: 40px;
+  border-radius: 20px;
+  margin-left: auto;
+  
+  mat-icon {
+    margin-right: 4px;
+  }
+}
+
+.footer-row {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  padding-top: 16px;
+}
+
+::ng-deep [mainFilters], ::ng-deep [secondaryFilters] {
+  display: contents;
+}

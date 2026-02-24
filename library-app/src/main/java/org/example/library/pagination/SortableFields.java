@@ -21,4 +21,8 @@ public class SortableFields {
             "id", "name", "booksCount"
     );
 
+    public static final Set<String> LIBRARY_BOOK_FIELDS = Set.of(
+            "id", "status", "addedAt", "rating", "title", "publishYear", "pages", "language", "categoryName"
+    );
+
 }

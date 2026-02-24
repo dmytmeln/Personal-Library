@@ -1,0 +1,39 @@
+.language-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.language-filter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-label {
+  font-size: 0.9rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 500;
+}
+
+.language-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.language-checkbox {
+  font-size: 0.9rem;
+}
+
+.language-count {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
+}
+
+.language-action-btn, .show-more-btn {
+  height: 28px;
+  line-height: 28px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+}

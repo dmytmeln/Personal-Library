@@ -86,7 +86,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
   }
 
   private getBooks() {
-    this.data.fetchBooksFn(this.currentPage, this.SIZE).subscribe(page => {
+    this.data.fetchBooksFn({ page: this.currentPage, size: this.SIZE }).subscribe(page => {
       this.totalElements = page.page.totalElements;
       this.dataSource.data = page.content;
     });
@@ -96,5 +96,5 @@ export class ViewBookListDialog implements AfterViewInit, OnInit {
 
 export interface ViewBookListDialogData {
   libraryBooks: ReadonlyArray<LibraryBook>;
-  fetchBooksFn: (page: number, size: number) => Observable<Page<Book> | Page<LibraryBook>>;
+  fetchBooksFn: (options: { page: number, size: number }) => Observable<Page<Book> | Page<LibraryBook>>;
 }

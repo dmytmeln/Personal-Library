@@ -1,0 +1,21 @@
+.range-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.range-label {
+  font-size: 0.9rem;
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+}
+
+.range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-input {
+  width: 100px;
+}

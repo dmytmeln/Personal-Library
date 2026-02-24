@@ -5,6 +5,23 @@ import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {Page} from '../interfaces/page';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
 
+export interface LibraryBookQueryOptions {
+  page?: number;
+  size?: number;
+  sort?: string[];
+  title?: string;
+  status?: LibraryBookStatus | null;
+  authorId?: number;
+  categoryId?: number;
+  publishYearMin?: number;
+  publishYearMax?: number;
+  pagesMin?: number;
+  pagesMax?: number;
+  ratingMin?: number;
+  ratingMax?: number;
+  languages?: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,8 +32,8 @@ export class LibraryBookService {
   ) {
   }
 
-  getAll(page: number = 0, size: number = 10): Observable<Page<LibraryBook>> {
-    return this.apiService.get('/users/me/library-books', {params: {page, size}});
+  getAll(options: LibraryBookQueryOptions = {}): Observable<Page<LibraryBook>> {
+    return this.apiService.get('/users/me/library-books', {params: this.buildParams(options)});
   }
 
   addBook(bookId: number): Observable<LibraryBook> {
@@ -41,6 +58,42 @@ export class LibraryBookService {
 
   resetDetails(libraryBookId: number): Observable<LibraryBook> {
     return this.apiService.put(`/users/me/library-books/${libraryBookId}/details/reset`, {});
+  }
+
+  private buildParams(options: LibraryBookQueryOptions): LibraryBookQueryOptions {
+    const {
+      page = 0,
+      size = 15,
+      sort,
+      title,
+      status,
+      authorId,
+      categoryId,
+      publishYearMin,
+      publishYearMax,
+      pagesMin,
+      pagesMax,
+      ratingMin,
+      ratingMax,
+      languages
+    } = options;
+
+    const params: LibraryBookQueryOptions = {page, size};
+
+    if (sort && sort.length > 0) params.sort = sort;
+    if (title) params.title = title;
+    if (status) params.status = status;
+    if (authorId) params.authorId = authorId;
+    if (categoryId) params.categoryId = categoryId;
+    if (publishYearMin != null) params.publishYearMin = publishYearMin;
+    if (publishYearMax != null) params.publishYearMax = publishYearMax;
+    if (pagesMin != null) params.pagesMin = pagesMin;
+    if (pagesMax != null) params.pagesMax = pagesMax;
+    if (ratingMin != null) params.ratingMin = ratingMin;
+    if (ratingMax != null) params.ratingMax = ratingMax;
+    if (languages && languages.length > 0) params.languages = languages;
+
+    return params;
   }
 
 }

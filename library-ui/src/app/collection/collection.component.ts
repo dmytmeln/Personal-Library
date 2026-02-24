@@ -93,7 +93,7 @@ export class CollectionComponent implements OnInit {
 
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((updatedCollection: UpdateCollection) => {
       this.collectionService.update(this.collection.id, updatedCollection).subscribe({
-        next: (collection) => { // todo refactor
+        next: () => {
           this.loadCollection(this.collection.id);
           this.snackCommon.showSuccess('Колекцію оновлено успішно');
         },
@@ -199,7 +199,7 @@ export class CollectionComponent implements OnInit {
   openViewBookListDialog(): void {
     const data: ViewBookListDialogData = {
       libraryBooks: this.collection.books.map(cd => cd.libraryBook),
-      fetchBooksFn: (page, size) => this.libraryBookService.getAll(page, size),
+      fetchBooksFn: (options) => this.libraryBookService.getAll(options),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
     dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
@@ -339,10 +339,11 @@ export class CollectionComponent implements OnInit {
   }
 
   private updateBook(libraryBook: LibraryBook) {
-    this.collection.books.map(cb =>
-      cb.libraryBook = cb.libraryBook.id === libraryBook.id
-        ? libraryBook
-        : cb.libraryBook);
+    this.collection.books.forEach(cb => {
+      if (cb.libraryBook.id === libraryBook.id) {
+        cb.libraryBook = libraryBook;
+      }
+    });
   }
 
   private updateBookDetails(libraryBookId: number, dto: Partial<UpdateLibraryBookDetails>): void {

@@ -41,4 +41,15 @@ public class CategoryService {
         return mapper.toDto(getExistingById(categoryId));
     }
 
+    public Page<CategoryWithBooksCount> searchForUser(Integer userId, PaginationParams paginationParams, CategorySearchParams searchParams) {
+        var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.CATEGORY_FIELDS);
+        return repository.searchForUser(
+                userId,
+                searchParams.getName(),
+                searchParams.getBooksCountMin(),
+                searchParams.getBooksCountMax(),
+                pageable
+        );
+    }
+
 }

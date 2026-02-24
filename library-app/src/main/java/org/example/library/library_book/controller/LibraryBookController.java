@@ -3,11 +3,12 @@ package org.example.library.library_book.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.dto.LibraryBookDto;
+import org.example.library.library_book.dto.LibraryBookSearchCriteria;
 import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
 import org.example.library.library_book.service.LibraryBookService;
+import org.example.library.pagination.PaginationParams;
 import org.example.library.security.UserDetailsImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +23,10 @@ public class LibraryBookController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<LibraryBookDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                       @RequestParam(defaultValue = "0") Integer page,
-                                       @RequestParam(defaultValue = "10") Integer size
+                                       PaginationParams paginationParams,
+                                       LibraryBookSearchCriteria criteria
     ) {
-        return service.getAllByUserId(userDetails.getId(), PageRequest.of(page, size));
+        return service.getAllByUserId(userDetails.getId(), criteria, paginationParams);
     }
 
     @PostMapping

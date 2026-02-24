@@ -51,4 +51,48 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             """)
     List<CountryWithCount> findAllCountriesWithCount();
 
+    @Query("""
+            SELECT
+                a.id AS id,
+                a.fullName AS fullName,
+                a.country AS country,
+                a.birthYear AS birthYear,
+                a.deathYear AS deathYear,
+                COUNT(DISTINCT lb.id) AS booksCount
+            FROM Author a
+            JOIN a.books b
+            JOIN LibraryBook lb ON lb.book.id = b.id
+            WHERE lb.user.id = :userId
+              AND (:name IS NULL OR LOWER(a.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
+              AND (:country IS NULL OR a.country = :country)
+              AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
+              AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
+            GROUP BY a.id, a.fullName, a.country, a.birthYear, a.deathYear
+            HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
+               AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
+            """)
+    Page<AuthorWithBooksCount> searchForUser(
+            @Param("userId") Integer userId,
+            @Param("name") String name,
+            @Param("country") String country,
+            @Param("birthYearMin") Short birthYearMin,
+            @Param("birthYearMax") Short birthYearMax,
+            @Param("booksCountMin") Integer booksCountMin,
+            @Param("booksCountMax") Integer booksCountMax,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT
+                a.country AS country,
+                COUNT(DISTINCT a.id) AS count
+            FROM Author a
+            JOIN a.books b
+            JOIN LibraryBook lb ON lb.book.id = b.id
+            WHERE lb.user.id = :userId
+            GROUP BY a.country
+            ORDER BY COUNT(DISTINCT a.id) DESC
+            """)
+    List<CountryWithCount> findAllCountriesForUser(@Param("userId") Integer userId);
+
 }

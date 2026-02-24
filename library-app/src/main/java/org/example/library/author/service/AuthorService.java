@@ -51,4 +51,22 @@ public class AuthorService {
         return repository.findAllCountriesWithCount();
     }
 
+    public Page<AuthorWithBooksCount> searchForUser(Integer userId, PaginationParams paginationParams, AuthorSearchParams searchParams) {
+        var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
+        return repository.searchForUser(
+                userId,
+                searchParams.getName(),
+                searchParams.getCountry(),
+                searchParams.getBirthYearMin(),
+                searchParams.getBirthYearMax(),
+                searchParams.getBooksCountMin(),
+                searchParams.getBooksCountMax(),
+                pageable
+        );
+    }
+
+    public List<CountryWithCount> getCountriesForUser(Integer userId) {
+        return repository.findAllCountriesForUser(userId);
+    }
+
 }

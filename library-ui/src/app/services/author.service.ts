@@ -5,6 +5,18 @@ import {Author} from '../interfaces/author';
 import {Page} from '../interfaces/page';
 import {CountryWithCount} from '../interfaces/country-with-count';
 
+export interface AuthorSearchOptions {
+  name?: string;
+  page?: number;
+  size?: number;
+  sort?: string[];
+  country?: string;
+  birthYearMin?: number;
+  birthYearMax?: number;
+  booksCountMin?: number;
+  booksCountMax?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,21 +27,31 @@ export class AuthorService {
   ) {
   }
 
-  search(options: {
-    name?: string,
-    page?: number,
-    size?: number,
-    sort?: string[],
-    country?: string,
-    birthYearMin?: number,
-    birthYearMax?: number,
-    booksCountMin?: number,
-    booksCountMax?: number
-  } = {}): Observable<Page<Author>> {
+  search(options: AuthorSearchOptions = {}): Observable<Page<Author>> {
+    return this.apiService.get('/authors', {params: this.buildParams(options)});
+  }
+
+  searchMe(options: AuthorSearchOptions = {}): Observable<Page<Author>> {
+    return this.apiService.get('/authors/me', {params: this.buildParams(options)});
+  }
+
+  getCountries(): Observable<CountryWithCount[]> {
+    return this.apiService.get('/authors/countries', {});
+  }
+
+  getCountriesMe(): Observable<CountryWithCount[]> {
+    return this.apiService.get('/authors/countries/me', {});
+  }
+
+  getById(authorId: number): Observable<Author> {
+    return this.apiService.get(`/authors/${authorId}`, {});
+  }
+
+  private buildParams(options: AuthorSearchOptions): AuthorSearchOptions {
     const {
-      name,
       page = 0,
-      size = 10,
+      size = 12,
+      name,
       sort,
       country,
       birthYearMin,
@@ -38,49 +60,17 @@ export class AuthorService {
       booksCountMax
     } = options;
 
-    const params: Params = {page, size};
-    if (name && name.length > 0) {
-      params.name = name;
-    }
-    if (sort && sort.length > 0) {
-      params.sort = sort;
-    }
-    if (country) {
-      params.country = country;
-    }
-    if (birthYearMin !== undefined) {
-      params.birthYearMin = birthYearMin;
-    }
-    if (birthYearMax !== undefined) {
-      params.birthYearMax = birthYearMax;
-    }
-    if (booksCountMin !== undefined) {
-      params.booksCountMin = booksCountMin;
-    }
-    if (booksCountMax !== undefined) {
-      params.booksCountMax = booksCountMax;
-    }
-    return this.apiService.get('/authors', {params});
+    const params: AuthorSearchOptions = {page, size};
+
+    if (name) params.name = name;
+    if (country) params.country = country;
+    if (sort && sort.length > 0) params.sort = sort;
+    if (birthYearMin != null) params.birthYearMin = birthYearMin;
+    if (birthYearMax != null) params.birthYearMax = birthYearMax;
+    if (booksCountMin != null) params.booksCountMin = booksCountMin;
+    if (booksCountMax != null) params.booksCountMax = booksCountMax;
+
+    return params;
   }
 
-  getCountries(): Observable<CountryWithCount[]> {
-    return this.apiService.get('/authors/countries', {});
-  }
-
-  getById(authorId: number): Observable<Author> {
-    return this.apiService.get(`/authors/${authorId}`, {});
-  }
-
-}
-
-interface Params {
-  page: number;
-  size: number;
-  name?: string;
-  sort?: string[];
-  country?: string;
-  birthYearMin?: number;
-  birthYearMax?: number;
-  booksCountMin?: number;
-  booksCountMax?: number;
 }

@@ -1,0 +1,22 @@
+<mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    matInput
+    [ngModel]="searchInput()"
+    (ngModelChange)="onInputChange($event)"
+    (focus)="onInputChange(searchInput())"
+    [matAutocomplete]="auto"
+    [placeholder]="placeholder()">
+  
+  @if (selected() || searchInput()) {
+    <button mat-icon-button matSuffix (click)="onClear()">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelect($event.option.value)">
+    @for (option of options(); track option.id) {
+      <mat-option [value]="option">{{ option[displayField()] }}</mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

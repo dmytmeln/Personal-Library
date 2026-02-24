@@ -5,8 +5,11 @@
     </div>
   }
   <div class="books-grid">
-    @for (book of books(); track book.id) {
-      <app-book [book]="book" [actionsMenu]="actionsMenu()"/>
+    @for (item of books(); track item.id) {
+      <app-book 
+        [book]="getBook(item)" 
+        [actionsMenu]="actionsMenu()"
+        [menuData]="getMenuData(item)"/>
     }
   </div>
 

@@ -5,6 +5,7 @@ import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {Book} from '../interfaces/book';
 import {BookComponent} from '../book/book.component';
 import {MatMenuPanel} from '@angular/material/menu';
+import {LibraryBook} from '../interfaces/library-book';
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [15, 20, 25, 30, 35, 40, 45, 50] as const;
 
@@ -24,7 +25,7 @@ export class BooksGridComponent {
 
   readonly pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS;
 
-  books = input<Book[]>([]);
+  books = input<(Book | LibraryBook)[]>([]);
   totalElements = input<number>(0);
   pageSize = input<number>(15);
   pageIndex = input<number>(0);
@@ -35,6 +36,16 @@ export class BooksGridComponent {
 
   onPageChange(event: PageEvent): void {
     this.pageChange.emit(event);
+  }
+
+  getBook(item: Book | LibraryBook): Book {
+    return 'book' in item ? item.book : (item as Book);
+  }
+
+  getMenuData(item: Book | LibraryBook): Record<string, Book | LibraryBook> {
+    return 'book' in item
+      ? {libraryBook: item}
+      : {$implicit: item};
   }
 
 }

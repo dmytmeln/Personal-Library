@@ -1,0 +1,13 @@
+<mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    matInput
+    [ngModel]="value()"
+    (ngModelChange)="onModelChange($event)"
+    [placeholder]="placeholder()">
+  @if (value()) {
+    <button mat-icon-button matSuffix (click)="clear()">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</mat-form-field>

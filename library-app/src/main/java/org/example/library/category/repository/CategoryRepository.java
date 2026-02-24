@@ -32,4 +32,27 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             Pageable pageable
     );
 
+    @Query("""
+            SELECT
+                c.id AS id,
+                c.name AS name,
+                c.description AS description,
+                COUNT(DISTINCT lb.id) AS booksCount
+            FROM Category c
+            JOIN c.books b
+            JOIN LibraryBook lb ON lb.book.id = b.id
+            WHERE lb.user.id = :userId
+              AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
+            GROUP BY c.id, c.name, c.description
+            HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
+               AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
+            """)
+    Page<CategoryWithBooksCount> searchForUser(
+            @Param("userId") Integer userId,
+            @Param("name") String name,
+            @Param("booksCountMin") Integer booksCountMin,
+            @Param("booksCountMax") Integer booksCountMax,
+            Pageable pageable
+    );
+
 }

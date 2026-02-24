@@ -9,13 +9,17 @@ import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.domain.LibraryBookView;
 import org.example.library.library_book.dto.LibraryBookDto;
+import org.example.library.library_book.dto.LibraryBookSearchCriteria;
 import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
 import org.example.library.library_book.mapper.LibraryBookMapper;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.library_book.repository.LibraryBookViewRepository;
+import org.example.library.library_book.repository.LibraryBookViewSpecification;
+import org.example.library.pagination.PageRequestBuilder;
+import org.example.library.pagination.PaginationParams;
+import org.example.library.pagination.SortableFields;
 import org.example.library.user.domain.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,11 +41,15 @@ public class LibraryBookService {
     private final LibraryBookMapper mapper;
     private final CollectionBookRepository collectionBookRepository;
     private final BookService bookService;
+    private final PageRequestBuilder pageRequestBuilder;
 
 
     @Transactional(readOnly = true)
-    public Page<LibraryBookDto> getAllByUserId(Integer userId, Pageable pageable) {
-        return viewRepository.findAllByUserId(userId, pageable)
+    public Page<LibraryBookDto> getAllByUserId(Integer userId, LibraryBookSearchCriteria criteria, PaginationParams paginationParams) {
+        var spec = LibraryBookViewSpecification.fromSearchCriteria(userId, criteria);
+        var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.LIBRARY_BOOK_FIELDS);
+
+        return viewRepository.findAll(spec, pageable)
                 .map(mapper::toDto);
     }
 

@@ -1,33 +1,250 @@
-<button class="btn" mat-flat-button (click)="openViewBookListDialog()">Додати книгу</button>
+<div class="library-container">
+  <div class="header-row">
+    <h1 class="page-title">Моя бібліотека</h1>
+    <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
+      <mat-icon>add</mat-icon>
+      Додати книгу
+    </button>
+  </div>
 
-<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
+  <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
 
-  <mat-tab label="Всі книги">
-    <div class="mat-tab-content">
-      <app-book-expansion-list
-        [entries]="libraryBooksByStatus"
-        [getTitle]="getStatusName"
-        [actionsMenu]="libraryBookMenu"/>
-    </div>
-  </mat-tab>
+    <mat-tab label="Всі книги">
+      <div class="tab-content">
 
-  <mat-tab label="Жанри">
-    <div class="mat-tab-content">
-      <app-book-expansion-list
-        [entries]="libraryBooksByCategory"
-        [actionsMenu]="libraryBookMenu"/>
-    </div>
-  </mat-tab>
+        <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
+          <div mainFilters>
+            <app-text-filter
+              label="Назва книги"
+              [value]="filters.state().title"
+              (valueChange)="filters.update('title', $event)"/>
 
-  <mat-tab label="Автори">
-    <div class="mat-tab-content">
-      <app-book-expansion-list
-        [entries]="libraryBooksByAuthor"
-        [actionsMenu]="libraryBookMenu"/>
-    </div>
-  </mat-tab>
+            <app-select-filter
+              label="Статус"
+              [value]="filters.state().status"
+              [options]="statusOptions"
+              (valueChange)="filters.update('status', $event)"/>
 
-</mat-tab-group>
+            <app-autocomplete-filter
+              label="Автор"
+              [searchInput]="authorSearchInput()"
+              [selected]="filters.state().author"
+              [options]="filteredAuthors()"
+              displayField="fullName"
+              (searchInputChange)="onAuthorSearchInput($event)"
+              (optionSelected)="onAuthorSelected($event)"
+              (clear)="clearAuthorFilter()"/>
+
+            <app-autocomplete-filter
+              label="Категорія"
+              [searchInput]="categorySearchInput()"
+              [selected]="filters.state().category"
+              [options]="filteredCategories()"
+              displayField="name"
+              (searchInputChange)="onCategorySearchInput($event)"
+              (optionSelected)="onCategorySelected($event)"
+              (clear)="clearCategoryFilter()"/>
+          </div>
+
+          <div secondaryFilters>
+            <app-range-filter
+              label="Рік видання"
+              [range]="filters.state().publishYear"
+              (rangeChange)="filters.update('publishYear', $event)"/>
+
+            <app-range-filter
+              label="Кількість сторінок"
+              [range]="filters.state().pages"
+              (rangeChange)="filters.update('pages', $event)"/>
+
+            <app-range-filter
+              label="Оцінка"
+              [range]="filters.state().rating"
+              minPlaceholder="Від 0"
+              maxPlaceholder="До 5"
+              (rangeChange)="filters.update('rating', $event)"/>
+          </div>
+
+          <div footerFilters>
+            <app-language-filter
+              [available]="languages()"
+              [selected]="filters.state().languages"
+              [showAll]="showAllLanguages()"
+              (toggle)="toggleLanguage($event)"
+              (toggleShowAll)="showAllLanguages.set(!showAllLanguages())"
+              (clear)="filters.update('languages', [])"/>
+          </div>
+        </app-filter-shell>
+
+        <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
+
+        <app-books-grid
+          [books]="booksState.items"
+          [totalElements]="booksState.totalElements"
+          [pageSize]="booksState.pageSize"
+          [pageIndex]="booksState.currentPage"
+          [loading]="booksState.loading"
+          [actionsMenu]="libraryBookMenu"
+          (pageChange)="onPageChange($event)"/>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Автори">
+      <div class="tab-content">
+        <app-filter-shell [hasActiveFilters]="hasAuthorFilters()" (resetAll)="clearAllAuthorFilters()">
+          <div mainFilters>
+            <app-text-filter
+              label="Пошук за ім'ям"
+              [value]="authorsState.filter.name"
+              (valueChange)="authorsState.filter.name = $event; onAuthorNameSearch()"/>
+
+            <app-select-filter
+              label="Країна"
+              [value]="authorsState.filter.country"
+              [options]="countryOptions()"
+              (valueChange)="onAuthorCountrySelected($event)"/>
+          </div>
+
+          <div secondaryFilters>
+            <app-range-filter
+              label="Рік народження"
+              [range]="{min: authorsState.filter.birthYearMin, max: authorsState.filter.birthYearMax}"
+              (rangeChange)="authorsState.filter.birthYearMin = $event.min; authorsState.filter.birthYearMax = $event.max; onAuthorBirthYearChange()"/>
+
+            <app-range-filter
+              label="Кількість книг"
+              [range]="{min: authorsState.filter.booksCountMin, max: authorsState.filter.booksCountMax}"
+              (rangeChange)="authorsState.filter.booksCountMin = $event.min; authorsState.filter.booksCountMax = $event.max; onAuthorBooksCountChange()"/>
+          </div>
+        </app-filter-shell>
+
+        <app-sort-bar [options]="authorSortOptions" (sortChange)="onAuthorSortChange($event)"/>
+
+        <div class="content-wrapper">
+          @if (authorsState.loading) {
+            <div class="loading-overlay">
+              <mat-spinner diameter="50"></mat-spinner>
+            </div>
+          }
+          <div class="authors-table-container">
+            <table class="authors-table">
+              <thead>
+              <tr>
+                <th>ПІБ</th>
+                <th>Країна</th>
+                <th>Рік народження</th>
+                <th>Рік смерті</th>
+                <th>Кількість книг</th>
+                <th>Дії</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (author of authorsState.items; track author.id) {
+                  <tr>
+                    <td>
+                      <a class="author-link" (click)="goToAuthorDetails(author)">{{ author.fullName }}</a>
+                    </td>
+                    <td>{{ author.country }}</td>
+                    <td>{{ author.birthYear }}</td>
+                    <td>{{ author.deathYear || '-' }}</td>
+                    <td>{{ getBooksCountText(author.booksCount || 0) }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button mat-stroked-button (click)="goToAuthorDetails(author)" class="action-btn">
+                          Деталі
+                        </button>
+                        <button mat-stroked-button (click)="goToAuthorBooks(author)" class="action-btn">
+                          Книги
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="authorsState.totalElements"
+            [pageSize]="authorsState.pageSize"
+            [pageIndex]="authorsState.currentPage"
+            [pageSizeOptions]="[12, 24, 48]"
+            (page)="onAuthorPageChange($event)"
+            aria-label="Вибрати сторінку">
+          </mat-paginator>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Жанри">
+      <div class="tab-content">
+        <app-filter-shell [hasActiveFilters]="hasCategoryFilters()" (resetAll)="clearAllCategoryFilters()">
+          <div mainFilters>
+            <app-text-filter
+              label="Пошук за назвою"
+              [value]="categoriesState.filter.name"
+              (valueChange)="categoriesState.filter.name = $event; onCategoryNameSearch()"/>
+          </div>
+
+          <div secondaryFilters>
+            <app-range-filter
+              label="Кількість книг"
+              [range]="{min: categoriesState.filter.booksCountMin, max: categoriesState.filter.booksCountMax}"
+              (rangeChange)="categoriesState.filter.booksCountMin = $event.min; categoriesState.filter.booksCountMax = $event.max; onCategoryBooksCountChange()"/>
+          </div>
+        </app-filter-shell>
+
+        <app-sort-bar [options]="categorySortOptions" (sortChange)="onCategorySortChange($event)"/>
+
+        <div class="content-wrapper">
+          @if (categoriesState.loading) {
+            <div class="loading-overlay">
+              <mat-spinner diameter="50"></mat-spinner>
+            </div>
+          }
+          <div class="authors-table-container">
+            <table class="authors-table">
+              <thead>
+              <tr>
+                <th>Назва</th>
+                <th>Опис</th>
+                <th>Кількість книг</th>
+                <th>Дії</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (category of categoriesState.items; track category.id) {
+                  <tr>
+                    <td>{{ category.name }}</td>
+                    <td [matTooltip]="category.description || '-'"
+                        matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}
+                    </td>
+                    <td>{{ getBooksCountText(category.booksCount || 0) }}</td>
+                    <td>
+                      <button mat-stroked-button (click)="goToCategoryBooks(category)" class="action-btn">
+                        Книги
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="categoriesState.totalElements"
+            [pageSize]="categoriesState.pageSize"
+            [pageIndex]="categoriesState.currentPage"
+            [pageSizeOptions]="[12, 24, 48]"
+            (page)="onCategoryPageChange($event)"
+            aria-label="Вибрати сторінку">
+          </mat-paginator>
+        </div>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
 
 <mat-menu #libraryBookMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">

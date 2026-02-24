@@ -6,29 +6,29 @@ import {Page} from '../interfaces/page';
 import {Book} from '../interfaces/book';
 import {LanguageWithCount} from '../interfaces/language-with-count';
 
+export interface BookQueryOptions {
+  page?: number,
+  size?: number,
+  sort?: string[],
+  authorId?: number,
+  categoryId?: number,
+  title?: string,
+  publishYearMin?: number,
+  publishYearMax?: number,
+  languages?: string[],
+  pagesMin?: number,
+  pagesMax?: number
+};
+
 @Injectable({
   providedIn: 'root'
 })
 export class BookService {
 
-  constructor(
-    private apiService: ApiService,
-  ) {
+  constructor(private apiService: ApiService) {
   }
 
-  getAll(options: {
-    page?: number,
-    size?: number,
-    sort?: string[],
-    authorId?: number,
-    categoryId?: number,
-    title?: string,
-    publishYearMin?: number,
-    publishYearMax?: number,
-    languages?: string[],
-    pagesMin?: number,
-    pagesMax?: number
-  } = {}): Observable<Page<Book>> {
+  getAll(options: BookQueryOptions = {}): Observable<Page<Book>> {
     const {
       page = 0,
       size = 10,
@@ -43,7 +43,7 @@ export class BookService {
       pagesMax
     } = options;
 
-    let params: Params = {page, size};
+    let params: BookQueryOptions = {page, size};
     if (sort && sort.length > 0) {
       params.sort = sort;
     }
@@ -82,18 +82,4 @@ export class BookService {
     return this.apiService.get(`/books/${bookId}/details`, {});
   }
 
-}
-
-interface Params {
-  page: number,
-  size: number,
-  sort?: string[],
-  authorId?: number,
-  categoryId?: number,
-  title?: string,
-  publishYearMin?: number,
-  publishYearMax?: number,
-  languages?: string[],
-  pagesMin?: number,
-  pagesMax?: number
 }

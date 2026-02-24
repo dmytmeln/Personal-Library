@@ -1,8 +1,99 @@
-.btn {
-  margin: 20px;
+.library-container {
+  padding: 24px;
 }
 
-.mat-tab-content {
-  margin-top: 20px;
-  margin-left: 20px;
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  margin-top: 16px;
+}
+
+.content-wrapper {
+  position: relative;
+  min-height: 300px;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 100px;
+  background: var(--mat-sys-surface);
+  z-index: 10;
+}
+
+.authors-table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.authors-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--mat-sys-surface-container);
+  border-radius: 8px;
+  overflow: hidden;
+
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  th {
+    background-color: var(--mat-sys-surface-container-high);
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+
+  tbody tr {
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--mat-sys-surface-container-highest);
+    }
+  }
+
+  td {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.author-link {
+  color: var(--mat-sys-primary);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 0.8rem;
 }

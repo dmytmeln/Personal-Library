@@ -185,7 +185,7 @@ export class CollectionsComponent implements OnInit {
     this.collectionService.getById(node.id).subscribe(collection => {
       const data: ViewBookListDialogData = {
         libraryBooks: collection.books.map(cd => cd.libraryBook),
-        fetchBooksFn: (page, size) => this.libraryBookService.getAll(page, size),
+        fetchBooksFn: (options) => this.libraryBookService.getAll(options),
       };
       const dialogRef = this.dialog.open(ViewBookListDialog, {data});
       dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
