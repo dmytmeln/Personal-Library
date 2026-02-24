@@ -208,7 +208,7 @@ export class LibraryComponent implements AfterViewInit {
     }
   }
 
-  private updateBookDetails(libraryBookId: number, dto: UpdateLibraryBookDetails): void {
+  private updateBookDetails(libraryBookId: number, dto: Partial<UpdateLibraryBookDetails>): void {
     this.libraryBookService.updateDetails(libraryBookId, dto).subscribe({
       next: (updatedBook) => {
         this.updateBook(updatedBook);

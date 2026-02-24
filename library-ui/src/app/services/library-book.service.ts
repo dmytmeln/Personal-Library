@@ -35,7 +35,7 @@ export class LibraryBookService {
     return this.apiService.put(`/users/me/library-books/${libraryBookId}/rating`, {params: {rating}});
   }
 
-  updateDetails(libraryBookId: number, dto: UpdateLibraryBookDetails): Observable<LibraryBook> {
+  updateDetails(libraryBookId: number, dto: Partial<UpdateLibraryBookDetails>): Observable<LibraryBook> {
     return this.apiService.put(`/users/me/library-books/${libraryBookId}/details`, {body: dto});
   }
 

@@ -104,7 +104,7 @@
                 <input
                   matInput
                   type="number"
-                  [(ngModel)]="filterState.pagesMin"
+                  [ngModel]="filterState.pagesMin"
                   (ngModelChange)="onPagesMinChange()"
                   placeholder="0">
               </mat-form-field>
@@ -115,7 +115,7 @@
                   type="number"
                   [(ngModel)]="filterState.pagesMax"
                   (ngModelChange)="onPagesMaxChange()"
-                  placeholder="5000">
+                  placeholder="500">
               </mat-form-field>
               <button mat-icon-button
                       (click)="clearPagesFilters()"
@@ -161,6 +161,7 @@
           </div>
         </div>
 
+        <app-sort-bar [options]="DEFAULT_SORT_OPTIONS" (sortChange)="onBooksSortChange($event)"/>
         <app-books-grid
           [books]="booksState.items"
           [totalElements]="booksState.pagination.totalElements"
@@ -168,8 +169,7 @@
           [pageIndex]="booksState.pagination.currentPage"
           [loading]="booksState.loading"
           [actionsMenu]="addBookAction"
-          (pageChange)="onBooksPageChange($event)"
-          (sortChange)="onBooksSortChange($event)"/>
+          (pageChange)="onBooksPageChange($event)"/>
       </div>
     </mat-tab>
 

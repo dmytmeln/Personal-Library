@@ -11,12 +11,14 @@ public class LibraryApplication {
     //  BE: dto validation
     //  BE: logging
 
-    // todo:
+    // todo tomorrow:
     //  BE + FE: library - searching and filtering in user library
     //  BE + FE: collection - recursive subtree view
     //  BE + FE: collection - collections pagination, sorting and filtering
     //  BE + FE: collection - create collection filled with books
     //  BE + FE: library - notes
+
+    // todo:
     //  BE + FE: library - statistics
     //  FE: enhance searching and filtering in search page
     //  FE: different ui layouts for searching and for library

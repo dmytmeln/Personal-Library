@@ -50,5 +50,5 @@
   <button mat-button color="warn" (click)="onReset()" matTooltip="Скинути всі зміни до початкових значень">Скинути до стандартних</button>
   <span class="spacer"></span>
   <button mat-button (click)="onCancel()">Скасувати</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid || form.pristine">Зберегти</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid || !form.dirty">Зберегти</button>
 </mat-dialog-actions>

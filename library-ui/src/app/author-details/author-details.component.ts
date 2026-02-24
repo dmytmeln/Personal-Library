@@ -11,6 +11,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {BooksGridComponent} from '../books-grid/books-grid.component';
 import {PageEvent} from '@angular/material/paginator';
+import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
+import {SortOption} from '../interfaces/sort-config';
 
 @Component({
   selector: 'app-author-details',
@@ -18,11 +20,20 @@ import {PageEvent} from '@angular/material/paginator';
     MatIconModule,
     MatMenuModule,
     BooksGridComponent,
+    SortBarComponent,
   ],
   templateUrl: './author-details.component.html',
   styleUrl: './author-details.component.scss'
 })
 export class AuthorDetailsComponent implements OnInit {
+
+  protected readonly bookSortOptions: SortOption[] = [
+    {field: 'title', label: 'Назва'},
+    {field: 'publishYear', label: 'Рік видання'},
+    {field: 'language', label: 'Мова'},
+    {field: 'pages', label: 'Сторінки'},
+    {field: 'category.name', label: 'Категорія'},
+  ];
 
   private authorId: number;
   private libraryBookIds: Set<number> = new Set<number>();

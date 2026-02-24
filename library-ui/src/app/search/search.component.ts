@@ -28,16 +28,8 @@ import {debounceTime, distinctUntilChanged, Subject, switchMap} from 'rxjs';
 import {BooksGridComponent} from '../books-grid/books-grid.component';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {MatMenu, MatMenuContent, MatMenuItem} from '@angular/material/menu';
-
-interface SortOption {
-  field: string;
-  label: string;
-}
-
-interface ActiveSort {
-  field: string;
-  direction: 'asc' | 'desc';
-}
+import {ActiveSort, SortOption} from '../interfaces/sort-config';
+import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 
 interface BooksState {
   items: Book[];
@@ -160,11 +152,20 @@ interface UiState {
     MatMenu,
     MatMenuContent,
     MatMenuItem,
+    SortBarComponent,
   ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
 })
 export class SearchComponent implements OnInit {
+
+  readonly DEFAULT_SORT_OPTIONS: SortOption[] = [
+    {field: 'title', label: 'Назва'},
+    {field: 'publishYear', label: 'Рік видання'},
+    {field: 'language', label: 'Мова'},
+    {field: 'pages', label: 'Сторінки'},
+    {field: 'category.name', label: 'Категорія'},
+  ];
 
   private readonly DEFAULT_DIRECTION = 'asc';
   private readonly SEARCH_DEBOUNCE = 450;
@@ -286,8 +287,8 @@ export class SearchComponent implements OnInit {
     private authorService: AuthorService,
     private categoryService: CategoryService,
     private libraryBookService: LibraryBookService,
-    private matSnackBar: MatSnackBar,
     private router: Router,
+    matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }

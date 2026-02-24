@@ -14,6 +14,7 @@
   }
   <div class="author-books">
     <p class="author-attribute-label">Всі книги автора</p>
+    <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
     <app-books-grid
       [books]="books"
       [totalElements]="totalElements"
@@ -21,8 +22,7 @@
       [pageIndex]="pageIndex"
       [loading]="loading"
       [actionsMenu]="addAction"
-      (pageChange)="onPageChange($event)"
-      (sortChange)="onSortChange($event)"/>
+      (pageChange)="onPageChange($event)"/>
   </div>
 </div>
 
