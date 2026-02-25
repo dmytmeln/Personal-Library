@@ -1,6 +1,7 @@
 package org.example.library.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.auth.dto.UserRegisterRequest;
 import org.example.library.exception.BadRequestException;
 import org.example.library.user.domain.Provider;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository repository;
@@ -27,6 +29,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         var savedUser = repository.save(user);
+        log.info("[REGISTER_SUCCESS] User: {}", savedUser.getEmail());
         return mapper.toResponse(savedUser);
     }
 

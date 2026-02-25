@@ -6,6 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String JWT_COOKIE = "jwt";
@@ -30,9 +32,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
-        getJwtToken(request)
-                .map(JwtTokenAuthentication::new)
-                .ifPresent(this::setSecurityContext);
+        var jwtToken = getJwtToken(request);
+        
+        if (jwtToken.isPresent()) {
+            log.debug("[JWT] Token extracted from request: {}", request.getRequestURI());
+            setSecurityContext(new JwtTokenAuthentication(jwtToken.get()));
+        } else {
+            log.debug("[JWT] No token found in request: {}", request.getRequestURI());
+        }
         filterChain.doFilter(request, response);
     }
 

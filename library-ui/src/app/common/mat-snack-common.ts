@@ -14,8 +14,18 @@ export class MatSnackCommon {
   }
 
   public showError(err: any): void {
-    const message = err?.error?.message || 'Щось пішло не так!';
-    this.matSnack.open(message, 'OK', {duration: this.DURATION})
+    const errorData = err?.error;
+    let message: string;
+
+    if (errorData?.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+      message = errorData.errors.map((e: { field: string; message: string }) => 
+        `${e.field}: ${e.message}`
+      ).join(', ');
+    } else {
+      message = errorData?.message || 'Щось пішло не так!';
+    }
+
+    this.matSnack.open(message, 'OK', { duration: this.DURATION });
   }
 
 }

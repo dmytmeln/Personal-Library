@@ -9,7 +9,6 @@ public class LibraryApplication {
     // todo:
     //  BE + FE: add possibility to update full name and email for HOST provided users
     //  BE: dto validation
-    //  BE: logging
 
     // todo:
     //  BE + FE: library - statistics
