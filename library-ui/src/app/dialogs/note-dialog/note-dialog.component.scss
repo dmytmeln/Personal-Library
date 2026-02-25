@@ -1,0 +1,46 @@
+.note-dialog-content {
+  min-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.book-title {
+  padding: 0 24px;
+  margin-bottom: 8px;
+  font-style: italic;
+  color: var(--mat-sys-primary);
+}
+
+.note-field {
+  width: 100%;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.note-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.btn-spinner {
+  margin: 0 auto;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}

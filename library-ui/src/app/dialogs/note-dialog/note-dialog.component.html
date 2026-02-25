@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>Нотатки до книги</h2>
+<div mat-dialog-subtitle class="book-title">{{ data.bookTitle }}</div>
+
+<mat-dialog-content class="note-dialog-content">
+  @if (loading) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  <mat-form-field appearance="outline" class="note-field">
+    <mat-label>Ваша нотатка</mat-label>
+    <textarea matInput [formControl]="noteControl" rows="12" placeholder="Напишіть щось..."></textarea>
+  </mat-form-field>
+
+  @if (note) {
+    <div class="note-info">
+      <span>Створено: {{ note.createdAt | date:'short' }}</span>
+      <span>Оновлено: {{ note.updatedAt | date:'short' }}</span>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button color="warn" (click)="onClear()" [disabled]="loading || saving || !noteControl.value">Очистити</button>
+  <span class="spacer"></span>
+  <button mat-button (click)="onCancel()" [disabled]="saving">Скасувати</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving || loading">
+    @if (saving) {
+      <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+    } @else {
+      Зберегти
+    }
+  </button>
+</mat-dialog-actions>

@@ -53,6 +53,7 @@ import {TextFilterComponent} from '../common/filters/text-filter/text-filter.com
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
 
 const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   title: '',
@@ -434,6 +435,21 @@ export class CollectionComponent implements OnInit {
       }
 
       dialogRef.close();
+    });
+  }
+
+  openNoteDialog(libraryBook: LibraryBook): void {
+    this.dialog.open(NoteDialogComponent, {
+      data: {
+        libraryBookId: libraryBook.id,
+        bookTitle: libraryBook.book.title
+      }
+    }).afterClosed().pipe(filter(Boolean)).subscribe(result => {
+      if (result === 'saved') {
+        this.snackCommon.showSuccess('Нотатку збережено');
+      } else if (result === 'deleted') {
+        this.snackCommon.showSuccess('Нотатку видалено');
+      }
     });
   }
 

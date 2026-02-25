@@ -6,4 +6,10 @@
       <mat-option [value]="option.value">{{ option.label }}</mat-option>
     }
   </mat-select>
+
+  @if (value()) {
+    <button mat-icon-button matSuffix (click)="onClear()">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
 </mat-form-field>

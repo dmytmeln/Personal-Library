@@ -132,6 +132,10 @@
       <mat-icon>info</mat-icon>
       <span>Деталі книги</span>
     </button>
+    <button mat-menu-item (click)="openNoteDialog(libraryBook)">
+      <mat-icon>note_alt</mat-icon>
+      <span>Мої нотатки</span>
+    </button>
     <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
       <mat-icon>edit</mat-icon>
       <span>Редагувати деталі</span>

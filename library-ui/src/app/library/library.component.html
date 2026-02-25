@@ -7,7 +7,8 @@
     </button>
   </div>
 
-  <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
+  <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
+                 mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
 
     <mat-tab label="Всі книги">
       <div class="tab-content">
@@ -23,7 +24,9 @@
               label="Статус"
               [value]="filters.state().status"
               [options]="statusOptions"
-              (valueChange)="filters.update('status', $event)"/>
+              (valueChange)="filters.update('status', $event)"
+              (clear)="filters.update('status', null)"
+            />
 
             <app-autocomplete-filter
               label="Автор"
@@ -118,6 +121,10 @@
       <mat-icon>info</mat-icon>
       <span>Деталі книги</span>
     </button>
+    <button mat-menu-item (click)="openNoteDialog(libraryBook)">
+      <mat-icon>note_alt</mat-icon>
+      <span>Мої нотатки</span>
+    </button>
     <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
       <mat-icon>edit</mat-icon>
       <span>Редагувати деталі</span>
@@ -126,11 +133,13 @@
       <mat-icon>playlist_add</mat-icon>
       <span>Додати до колекції</span>
     </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu"
+            [matMenuTriggerData]="{ libraryBook: libraryBook }">
       <mat-icon>label</mat-icon>
       <span>Змінити статус</span>
     </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu"
+            [matMenuTriggerData]="{ libraryBook: libraryBook }">
       <mat-icon>star</mat-icon>
       <span>Оцінити</span>
     </button>
@@ -146,7 +155,7 @@
 </mat-menu>
 
 <app-library-book-menu-items #sharedMenu
-  (statusChange)="changeLibraryBookStatus($event)"
-  (ratingChange)="changeLibraryBookRating($event)"
-  style="display: none;">
+                             (statusChange)="changeLibraryBookStatus($event)"
+                             (ratingChange)="changeLibraryBookRating($event)"
+                             style="display: none;">
 </app-library-book-menu-items>

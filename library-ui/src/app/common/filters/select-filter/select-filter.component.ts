@@ -3,6 +3,8 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 export interface SelectOption {
   value: any;
@@ -17,19 +19,30 @@ export interface SelectOption {
     FormsModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatIcon,
+    MatIconButton,
   ],
   templateUrl: './select-filter.component.html',
   styleUrl: './select-filter.component.scss'
 })
 export class SelectFilterComponent {
+
   label = input.required<string>();
   value = input<any>(null);
   options = input.required<SelectOption[]>();
   placeholder = input<string>('Будь-який');
-  
+  clear = output<void>();
+
   valueChange = output<any>();
 
   onModelChange(val: any): void {
     this.valueChange.emit(val);
   }
+
+  onClear(): void {
+    /*this.value = input(null);
+    this.valueChange.emit(null);*/
+    this.clear.emit();
+  }
+
 }

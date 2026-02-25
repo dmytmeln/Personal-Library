@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_notes
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: notes
+            columns:
+              - column:
+                  name: note_id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: notes_pk
+              - column:
+                  name: library_book_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: notes_library_books_fk
+                    referencedTableName: library_books
+                    referencedColumnNames: library_book_id
+              - column:
+                  name: content
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  constraints:
+                    nullable: false

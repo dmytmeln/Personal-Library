@@ -60,6 +60,7 @@ import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-detail
 
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {SelectionStore} from '../services/selection.store';
+import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
 
 const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
   title: '',
@@ -314,6 +315,7 @@ export class LibraryComponent implements OnInit {
       } as CollectionSelectorDialogData
     });
 
+    // todo duplicate code
     dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
       if (selection.id) {
         this.collectionBookService.bulkAdd(selection.id, ids).subscribe({
@@ -381,6 +383,22 @@ export class LibraryComponent implements OnInit {
         case 'reset':
           this.resetDetails(libraryBook);
           break;
+      }
+    });
+  }
+
+  // todo dulicate code
+  openNoteDialog(libraryBook: LibraryBook): void {
+    this.dialog.open(NoteDialogComponent, {
+      data: {
+        libraryBookId: libraryBook.id,
+        bookTitle: libraryBook.book.title
+      }
+    }).afterClosed().pipe(filter(Boolean)).subscribe(result => {
+      if (result === 'saved') {
+        this.snackCommon.showSuccess('Нотатку збережено');
+      } else if (result === 'deleted') {
+        this.snackCommon.showSuccess('Нотатку видалено');
       }
     });
   }

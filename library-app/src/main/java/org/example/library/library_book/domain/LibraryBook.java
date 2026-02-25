@@ -5,6 +5,7 @@ import lombok.*;
 import org.example.library.book.domain.Book;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.user.domain.User;
+import org.example.library.note.domain.Note;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -62,6 +63,9 @@ public class LibraryBook {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToOne(mappedBy = "libraryBook", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Note note;
 
     public static LibraryBook of(Book book, User user) {
         return LibraryBook.builder()

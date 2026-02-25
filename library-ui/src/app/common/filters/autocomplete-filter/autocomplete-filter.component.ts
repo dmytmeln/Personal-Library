@@ -42,9 +42,7 @@ export class AutocompleteFilterComponent {
   constructor() {
     effect(() => {
       const val = this.searchInput();
-      if (val === '' && this.inputControl.value !== '') {
-        this.inputControl.setValue('', {emitEvent: false});
-      }
+      this.inputControl.setValue(val, {emitEvent: false});
     });
   }
 
