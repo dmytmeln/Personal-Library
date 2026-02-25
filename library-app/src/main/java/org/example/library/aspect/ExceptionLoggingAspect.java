@@ -14,7 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class ExceptionLoggingAspect {
 
     @AfterThrowing(
-            pointcut = "(@within(org.springframework.stereotype.Service) || @within(org.springframework.web.bind.annotation.RestController))",
+            pointcut = "(@within(org.springframework.stereotype.Service))",
             throwing = "ex"
     )
     public void logException(JoinPoint joinPoint, Exception ex) {

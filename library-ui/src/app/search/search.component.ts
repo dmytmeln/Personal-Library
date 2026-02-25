@@ -21,7 +21,7 @@ import {Author} from '../interfaces/author';
 import {Category} from '../interfaces/category';
 import {Page} from '../interfaces/page';
 import {LanguageWithCount} from '../interfaces/language-with-count';
-import {BooksGridComponent} from '../books-grid/books-grid.component';
+import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {MatMenu, MatMenuContent, MatMenuItem} from '@angular/material/menu';
 import {SortOption} from '../interfaces/sort-config';
@@ -43,6 +43,7 @@ import {CategoryListComponent} from '../category-list/category-list.component';
 import {Router} from '@angular/router';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 interface BooksState {
   items: Book[];
@@ -80,7 +81,7 @@ const EMPTY_BOOK_FILTERS: BaseBookFilters = {
     MatTooltipModule,
     MatCheckboxModule,
     MatSelectModule,
-    BooksGridComponent,
+    BooksDisplayComponent,
     MatMenu,
     MatMenuContent,
     MatMenuItem,
@@ -95,6 +96,7 @@ const EMPTY_BOOK_FILTERS: BaseBookFilters = {
     SecondaryFiltersDirective,
     FooterFiltersDirective,
     BulkActionBarComponent,
+    MatButtonToggleModule,
   ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
@@ -126,6 +128,7 @@ export class SearchComponent implements OnInit {
 
   readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<BaseBookFilters>(EMPTY_BOOK_FILTERS);
+  readonly viewMode = signal<'grid' | 'list'>('grid');
 
   readonly authorSearch = new AutocompleteSearchStore<Author>(
     (q, p, s) => this.authorService.search({name: q, page: p, size: s}),

@@ -1,0 +1,38 @@
+<div class="content-wrapper">
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+  
+  <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
+    @for (item of books(); track item.id) {
+      @if (viewMode() === 'grid') {
+        <app-book-card
+          [book]="getBook(item)"
+          [actionsMenu]="actionsMenu()"
+          [menuData]="getMenuData(item)"
+          [isSelected]="selectionStore()?.isSelected(item.id) ?? false"
+          [selectionMode]="selectionStore()?.isSelectionMode() ?? false"
+          (toggleSelection)="selectionStore()?.toggle(item.id)"/>
+      } @else {
+        <app-book-list-item
+          [book]="getBook(item)"
+          [actionsMenu]="actionsMenu()"
+          [menuData]="getMenuData(item)"
+          [isSelected]="selectionStore()?.isSelected(item.id) ?? false"
+          [selectionMode]="selectionStore()?.isSelectionMode() ?? false"
+          (toggleSelection)="selectionStore()?.toggle(item.id)"/>
+      }
+    }
+  </div>
+
+  <mat-paginator
+    [length]="totalElements()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="onPageChange($event)"
+    aria-label="Вибрати сторінку">
+  </mat-paginator>
+</div>

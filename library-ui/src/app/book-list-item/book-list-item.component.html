@@ -1,0 +1,38 @@
+<div class="list-item" [class.selected]="isSelected()" (click)="toggleSelection.emit()">
+  <div class="cover">
+    @if (book().coverImageUrl) {
+      <img ngSrc="{{book().coverImageUrl}}" priority width="40" height="60" alt="Book cover"/>
+    } @else {
+      <div class="no-cover"><mat-icon>book</mat-icon></div>
+    }
+  </div>
+  
+  <div class="info">
+    <div class="main-info">
+      <span class="title" [matTooltip]="book().title">{{ book().title }}</span>
+      <span class="authors">
+        @for (author of book().authors | keyvalue; track author.key; let last = $last) {
+          <a class="link"
+             (click)="$event.stopPropagation(); goToAuthorDetails(author.key)">{{ author.value }}</a>{{ last ? '' : ', ' }}
+        }
+      </span>
+    </div>
+    
+    <div class="secondary-info">
+      <span class="category">{{ book().categoryName }}</span>
+      <span class="metadata">{{ book().publishYear }} • {{ book().pages }}p • {{ book().language }}</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    @if (actionsMenu() && !selectionMode()) {
+      <button mat-icon-button
+              [matMenuTriggerFor]="actionsMenu()"
+              [matMenuTriggerData]="menuData() || { $implicit: book() }"
+              (click)="$event.stopPropagation()"
+              class="menu-trigger">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    }
+  </div>
+</div>

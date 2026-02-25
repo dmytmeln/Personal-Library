@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {CollectionBookService} from '../services/collection-book.service';
 import {CollectionService} from '../services/collection.service';
 import {CollectionDetails} from '../interfaces/collection-details';
@@ -42,7 +42,7 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {SortOption} from '../interfaces/sort-config';
-import {BooksGridComponent} from '../books-grid/books-grid.component';
+import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {
   FilterShellComponent,
@@ -54,6 +54,7 @@ import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   title: '',
@@ -79,13 +80,14 @@ const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
     MatInputModule,
     FormsModule,
     SortBarComponent,
-    BooksGridComponent,
+    BooksDisplayComponent,
     FilterShellComponent,
     TextFilterComponent,
     SecondaryFiltersDirective,
     FooterFiltersDirective,
     BulkActionBarComponent,
     MatTooltipModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './collection.component.html',
   styleUrl: './collection.component.scss'
@@ -105,6 +107,7 @@ export class CollectionComponent implements OnInit {
 
   readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<CollectionBookSearchParams>(EMPTY_SEARCH_PARAMS);
+  readonly viewMode = signal<'grid' | 'list'>('grid');
 
   readonly bookSortOptions: SortOption[] = [
     {field: 'title', label: 'Назва'},

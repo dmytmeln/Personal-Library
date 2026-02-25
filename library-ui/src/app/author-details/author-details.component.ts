@@ -1,4 +1,5 @@
-import {Component, OnInit} from '@angular/core';
+
+import {Component, OnInit, signal} from '@angular/core';
 import {Author} from '../interfaces/author';
 import {Router} from '@angular/router';
 import {BookService} from '../services/book.service';
@@ -9,18 +10,28 @@ import {MatMenuModule} from '@angular/material/menu';
 import {LibraryBookService} from '../services/library-book.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSnackCommon} from '../common/mat-snack-common';
-import {BooksGridComponent} from '../books-grid/books-grid.component';
+import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {PageEvent} from '@angular/material/paginator';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {SortOption} from '../interfaces/sort-config';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {CommonModule} from '@angular/common';
+import {MatButtonModule} from '@angular/material/button';
+import {SelectionStore} from '../services/selection.store';
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 
 @Component({
   selector: 'app-author-details',
+  standalone: true,
   imports: [
+    CommonModule,
     MatIconModule,
     MatMenuModule,
-    BooksGridComponent,
+    BooksDisplayComponent,
     SortBarComponent,
+    MatButtonToggleModule,
+    MatButtonModule,
+    BulkActionBarComponent,
   ],
   templateUrl: './author-details.component.html',
   styleUrl: './author-details.component.scss'
@@ -46,6 +57,8 @@ export class AuthorDetailsComponent implements OnInit {
   pageSize = 15;
   pageIndex = 0;
   loading = false;
+  readonly viewMode = signal<'grid' | 'list'>('grid');
+  readonly selection = new SelectionStore();
 
   constructor(
     private router: Router,
@@ -75,10 +88,12 @@ export class AuthorDetailsComponent implements OnInit {
     this.loadBooks();
   }
 
+  // todo duplicate code
   addBookToLibrary(book: Book): void {
     this.libraryBookService.addBook(book.id).subscribe({
       next: () => {
         this.libraryBookIds.add(book.id);
+        this.snackCommon.showSuccess('Книгу додано до бібліотеки');
       },
       error: err => {
         this.snackCommon.showError(err);
@@ -86,6 +101,18 @@ export class AuthorDetailsComponent implements OnInit {
           this.libraryBookIds.add(book.id);
         }
       }
+    });
+  }
+
+  bulkAddBooks(): void {
+    const ids = this.selection.selectedIds();
+    this.libraryBookService.bulkAdd(ids).subscribe({
+      next: () => {
+        ids.forEach(id => this.libraryBookIds.add(id));
+        this.selection.clear();
+        this.snackCommon.showSuccess('Книги додано до бібліотеки');
+      },
+      error: err => this.snackCommon.showError(err)
     });
   }
 

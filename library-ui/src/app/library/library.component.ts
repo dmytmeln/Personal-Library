@@ -48,7 +48,7 @@ import {AutocompleteFilterComponent} from '../common/filters/autocomplete-filter
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {LanguageFilterComponent} from '../common/filters/language-filter/language-filter.component';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
-import {BooksGridComponent} from '../books-grid/books-grid.component';
+import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {MatSelectModule} from '@angular/material/select';
 import {FormsModule} from '@angular/forms';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -61,6 +61,7 @@ import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-detail
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {SelectionStore} from '../services/selection.store';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
   title: '',
@@ -92,7 +93,7 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     RangeFilterComponent,
     LanguageFilterComponent,
     SortBarComponent,
-    BooksGridComponent,
+    BooksDisplayComponent,
     MatSelectModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
@@ -102,6 +103,7 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     SecondaryFiltersDirective,
     FooterFiltersDirective,
     BulkActionBarComponent,
+    MatButtonToggleModule,
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
@@ -132,6 +134,7 @@ export class LibraryComponent implements OnInit {
 
   readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
+  readonly viewMode = signal<'grid' | 'list'>('grid');
 
   readonly authorSearch = new AutocompleteSearchStore<Author>(
     (q, p, s) => this.authorService.searchMe({name: q, page: p, size: s}),

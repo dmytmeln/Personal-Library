@@ -1,17 +1,27 @@
 <div class="search-container">
-  <h1 class="page-title">Пошук</h1>
+  <div class="header-row">
+    <h1 class="page-title">Пошук книг</h1>
+    <div class="header-actions">
+      <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
+        <mat-button-toggle value="grid">
+          <mat-icon>grid_view</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="list">
+          <mat-icon>view_list</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  </div>
 
-  <mat-tab-group [(selectedIndex)]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
+  <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
-
-    <mat-tab label="Книги">
+    <mat-tab label="Всі книги">
       <div class="tab-content">
-
         <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
           <div mainFilters>
             <app-text-filter
               label="Назва книги"
-              [value]="filters.state().title"
+              [value]="filters.state().title || ''"
               (valueChange)="filters.update('title', $event)"/>
 
             <app-autocomplete-filter
@@ -60,14 +70,15 @@
 
         <app-sort-bar [options]="DEFAULT_SORT_OPTIONS" (sortChange)="onBooksSortChange($event)"/>
 
-        <app-books-grid
+        <app-books-display
           [books]="booksState.items"
           [totalElements]="booksState.pagination.totalElements"
           [pageSize]="booksState.pagination.pageSize"
           [pageIndex]="booksState.pagination.currentPage"
           [loading]="booksState.loading"
-          [actionsMenu]="addBookAction"
+          [actionsMenu]="searchBookMenu"
           [selectionStore]="selection"
+          [viewMode]="viewMode()"
           (pageChange)="onBooksPageChange($event)"/>
       </div>
     </mat-tab>
@@ -76,29 +87,28 @@
       <app-author-list mode="search" (authorBooks)="showAuthorBooks($event)"/>
     </mat-tab>
 
-    <mat-tab label="Категорії">
+    <mat-tab label="Жанри">
       <app-category-list mode="search" (categoryBooks)="goToCategoryBooks($event)"/>
     </mat-tab>
-
   </mat-tab-group>
 </div>
 
 <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-  <button mat-flat-button color="accent" (click)="bulkAddBooks()">
-    <mat-icon>add</mat-icon>
+  <button mat-flat-button (click)="bulkAddBooks()">
+    <mat-icon>add_circle</mat-icon>
     <span>Додати до бібліотеки</span>
   </button>
 </app-bulk-action-bar>
 
-<mat-menu #addBookAction="matMenu">
+<mat-menu #searchBookMenu="matMenu">
   <ng-template matMenuContent let-book>
     <button mat-menu-item (click)="goToBookDetails(book)">
       <mat-icon>info</mat-icon>
       <span>Деталі книги</span>
     </button>
     <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
-      <mat-icon>add</mat-icon>
-      <span>{{ isBookInLibrary(book) ? 'Вже в бібліотеці' : 'Додати до бібліотеки' }}</span>
+      <mat-icon>add_circle</mat-icon>
+      <span>{{ isBookInLibrary(book) ? 'Вже у бібліотеці' : 'Додати до бібліотеки' }}</span>
     </button>
   </ng-template>
 </mat-menu>

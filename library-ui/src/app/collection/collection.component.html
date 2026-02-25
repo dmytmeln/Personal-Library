@@ -29,6 +29,15 @@
       </div>
 
       <div class="header-actions">
+        <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
+          <mat-button-toggle value="grid">
+            <mat-icon>grid_view</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="list">
+            <mat-icon>view_list</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        
         <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
           <mat-icon>add</mat-icon>
           Додати книгу
@@ -77,7 +86,7 @@
 
     <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
 
-    <app-books-grid
+    <app-books-display
       [books]="booksState.items"
       [totalElements]="booksState.totalElements"
       [pageSize]="booksState.pageSize"
@@ -85,6 +94,7 @@
       [loading]="booksState.loading"
       [actionsMenu]="collectionBookMenu"
       [selectionStore]="selection"
+      [viewMode]="viewMode()"
       (pageChange)="onPageChange($event)"/>
   </div>
 </div>
@@ -174,4 +184,3 @@
                              (ratingChange)="ratingChange($event)"
                              style="display: none;">
 </app-library-book-menu-items>
-
