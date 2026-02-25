@@ -1,4 +1,4 @@
-<mat-card (click)="goToBookDetails()" matTooltip="Деталі книги" matTooltipShowDelay="500">
+<mat-card [class.selected]="isSelected()" (click)="toggleSelection.emit()">
   <div class="cover">
     @if (book().coverImageUrl) {
       <img ngSrc="{{book().coverImageUrl}}" priority width="150" height="225" alt="Book cover"/>
@@ -17,7 +17,7 @@
       <span class="chip">{{ book().publishYear }}</span>
       <span class="chip">{{ book().pages }}p</span>
       <span class="chip">{{ book().language }}</span>
-      @if (actionsMenu()) {
+      @if (actionsMenu() && !selectionMode()) {
         <button mat-icon-button
                 [matMenuTriggerFor]="actionsMenu()"
                 [matMenuTriggerData]="menuData() || { $implicit: book() }"

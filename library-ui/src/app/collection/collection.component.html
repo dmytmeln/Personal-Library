@@ -24,7 +24,7 @@
           <p class="collection-description">{{ collection.description }}</p>
         }
         <p class="books-number">
-          {{ this.collection.books.length }} книг, {{ collection.children.length }} підколекцій
+          {{ booksState.totalElements }} книг, {{ collection.children.length }} підколекцій
         </p>
       </div>
 
@@ -41,7 +41,7 @@
     </div>
   </div>
 
-  @if (collection.children.length > 0) {
+  @if (collection.children && collection.children.length > 0) {
     <div class="sub-collections-section">
       <h4>Підколекції:</h4>
       <div class="sub-collections-list">
@@ -56,17 +56,51 @@
   }
 
   <div class="collection-books">
-    <h4>Книги в колекції:</h4>
-    <div class="books-list">
-      @for (collectionBook of this.collection.books; track collectionBook.libraryBook.id) {
-        <app-book
-          [book]="collectionBook.libraryBook.book"
-          [actionsMenu]="collectionBookMenu"
-          [menuData]="{ libraryBook: collectionBook.libraryBook }"/>
-      }
+    <div class="section-header">
+      <h4>Книги в колекції:</h4>
+      <mat-slide-toggle
+        [checked]="filters.state().recursive"
+        (change)="filters.update('recursive', $event.checked)"
+        color="primary">
+        Показувати підколекції
+      </mat-slide-toggle>
     </div>
+
+    <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
+      <div mainFilters>
+        <app-text-filter
+          label="Назва книги"
+          [value]="filters.state().title || ''"
+          (valueChange)="filters.update('title', $event)"/>
+      </div>
+    </app-filter-shell>
+
+    <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
+
+    <app-books-grid
+      [books]="booksState.items"
+      [totalElements]="booksState.totalElements"
+      [pageSize]="booksState.pageSize"
+      [pageIndex]="booksState.currentPage"
+      [loading]="booksState.loading"
+      [actionsMenu]="collectionBookMenu"
+      [selectionStore]="selection"
+      (pageChange)="onPageChange($event)"/>
   </div>
 </div>
+
+<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+  <button mat-flat-button (click)="openBulkAddToOtherCollectionDialog()">
+    <mat-icon>playlist_add</mat-icon>
+    <span>Додати до іншої колекції</span>
+  </button>
+  <button mat-flat-button color="warn" (click)="bulkRemoveFromCollection()"
+          [disabled]="filters.state().recursive"
+          [matTooltip]="filters.state().recursive ? 'Неможливо видалити книги в режимі рекурсивного перегляду' : ''">
+    <mat-icon>remove_circle</mat-icon>
+    <span>Видалити з цієї колекції</span>
+  </button>
+</app-bulk-action-bar>
 
 <mat-menu #collectionMenu="matMenu">
   <button mat-menu-item (click)="openUpdateDialog()">
@@ -110,11 +144,13 @@
       <mat-icon>drive_file_move</mat-icon>
       <span>Перемістити в іншу колекцію</span>
     </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu"
+            [matMenuTriggerData]="{ libraryBook: libraryBook }">
       <mat-icon>label</mat-icon>
       <span>Змінити статус</span>
     </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu" [matMenuTriggerData]="{ libraryBook: libraryBook }">
+    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu"
+            [matMenuTriggerData]="{ libraryBook: libraryBook }">
       <mat-icon>star</mat-icon>
       <span>Оцінити</span>
     </button>

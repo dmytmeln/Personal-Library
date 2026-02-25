@@ -127,15 +127,26 @@
 }
 
 .collection-books {
-  h4 {
-    margin: 0 0 16px 0;
-    font-size: 1.1rem;
-    color: var(--mat-sys-on-surface-variant);
-  }
-}
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 
-.books-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
+    h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  app-filter-shell {
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  app-sort-bar {
+    margin-bottom: 16px;
+    display: block;
+  }
 }

@@ -67,6 +67,7 @@
           [pageIndex]="booksState.pagination.currentPage"
           [loading]="booksState.loading"
           [actionsMenu]="addBookAction"
+          [selectionStore]="selection"
           (pageChange)="onBooksPageChange($event)"/>
       </div>
     </mat-tab>
@@ -82,8 +83,19 @@
   </mat-tab-group>
 </div>
 
+<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+  <button mat-flat-button color="accent" (click)="bulkAddBooks()">
+    <mat-icon>add</mat-icon>
+    <span>Додати до бібліотеки</span>
+  </button>
+</app-bulk-action-bar>
+
 <mat-menu #addBookAction="matMenu">
   <ng-template matMenuContent let-book>
+    <button mat-menu-item (click)="goToBookDetails(book)">
+      <mat-icon>info</mat-icon>
+      <span>Деталі книги</span>
+    </button>
     <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
       <mat-icon>add</mat-icon>
       <span>{{ isBookInLibrary(book) ? 'Вже в бібліотеці' : 'Додати до бібліотеки' }}</span>

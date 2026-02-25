@@ -1,0 +1,16 @@
+<div class="bulk-action-bar-container" [class.visible]="selectedCount() > 0">
+  <mat-toolbar color="primary" class="bulk-toolbar">
+    <div class="selection-info">
+      <button mat-icon-button (click)="clear.emit()" matTooltip="Скасувати вибір">
+        <mat-icon>close</mat-icon>
+      </button>
+      <span class="count-text">Вибрано: {{ selectedCount() }}</span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="actions">
+      <ng-content></ng-content>
+    </div>
+  </mat-toolbar>
+</div>

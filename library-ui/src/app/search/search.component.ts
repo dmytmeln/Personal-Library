@@ -29,13 +29,20 @@ import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {BaseBookFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {AutocompleteSearchStore} from '../services/autocomplete-search.store';
-import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
+import {
+  FilterShellComponent,
+  FooterFiltersDirective,
+  SecondaryFiltersDirective
+} from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {AutocompleteFilterComponent} from '../common/filters/autocomplete-filter/autocomplete-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {LanguageFilterComponent} from '../common/filters/language-filter/language-filter.component';
 import {AuthorListComponent} from '../author-list/author-list.component';
 import {CategoryListComponent} from '../category-list/category-list.component';
+import {Router} from '@angular/router';
+import {SelectionStore} from '../services/selection.store';
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 
 interface BooksState {
   items: Book[];
@@ -85,6 +92,9 @@ const EMPTY_BOOK_FILTERS: BaseBookFilters = {
     LanguageFilterComponent,
     AuthorListComponent,
     CategoryListComponent,
+    SecondaryFiltersDirective,
+    FooterFiltersDirective,
+    BulkActionBarComponent,
   ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
@@ -114,6 +124,7 @@ export class SearchComponent implements OnInit {
     loading: false,
   };
 
+  readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<BaseBookFilters>(EMPTY_BOOK_FILTERS);
 
   readonly authorSearch = new AutocompleteSearchStore<Author>(
@@ -135,6 +146,7 @@ export class SearchComponent implements OnInit {
   };
 
   constructor(
+    private router: Router,
     private bookService: BookService,
     private authorService: AuthorService,
     private categoryService: CategoryService,
@@ -149,8 +161,6 @@ export class SearchComponent implements OnInit {
     this.loadLanguages();
     this.setupSearchSubscriptions();
   }
-
-  //region Books Tab Methods
 
   onBooksPageChange(event: PageEvent): void {
     this.booksState.pagination.currentPage = event.pageIndex;
@@ -179,8 +189,24 @@ export class SearchComponent implements OnInit {
     });
   }
 
+  bulkAddBooks(): void {
+    const ids = this.selection.selectedIds();
+    this.libraryBookService.bulkAdd(ids).subscribe({
+      next: () => {
+        ids.forEach(id => this.libraryBookIds.add(id));
+        this.selection.clear();
+        this.snackCommon.showSuccess('Книги додано до бібліотеки');
+      },
+      error: err => this.snackCommon.showError(err)
+    });
+  }
+
   isBookInLibrary(book: Book): boolean {
     return this.libraryBookIds.has(book.id);
+  }
+
+  goToBookDetails(book: Book): void {
+    this.router.navigate(['/book-details'], {state: book});
   }
 
   private loadBooks(): void {
@@ -219,8 +245,6 @@ export class SearchComponent implements OnInit {
     });
   }
 
-  //endregion
-
   onTabChange(index: number): void {
     this.uiState.activeTabIndex = index;
   }
@@ -234,8 +258,6 @@ export class SearchComponent implements OnInit {
     this.uiState.activeTabIndex = 0;
     this.onCategorySelected(category);
   }
-
-  //region Filter Methods
 
   private setupSearchSubscriptions(): void {
     this.filters.filtersChanged$.subscribe(() => {
@@ -299,7 +321,5 @@ export class SearchComponent implements OnInit {
     this.authorSearch.clear();
     this.categorySearch.clear();
   }
-
-  //endregion
 
 }

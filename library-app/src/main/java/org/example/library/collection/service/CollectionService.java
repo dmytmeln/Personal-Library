@@ -82,11 +82,7 @@ public class CollectionService {
         var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
                 .orElseThrow(() -> new NotFoundException("Collection not found with id: " + collectionId));
 
-        var books = collectionBookRepository.findByIdCollectionId(collectionId);
-        var bookDtos = collectionBookMapper.toDto(books);
-
         var detailsDto = collectionMapper.toDetailsDto(collection);
-        detailsDto.setBooks(bookDtos);
         detailsDto.setAncestors(getAncestors(collection));
 
         return detailsDto;

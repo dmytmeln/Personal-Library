@@ -1,17 +1,18 @@
-import {Component, input} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 import {Book} from '../interfaces/book';
 import {MatCard} from '@angular/material/card';
-import {KeyValuePipe, NgOptimizedImage} from '@angular/common';
+import {CommonModule, KeyValuePipe, NgOptimizedImage} from '@angular/common';
 import {Router} from '@angular/router';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatMenuModule, MatMenuPanel} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
-import {LibraryBook} from '../interfaces/library-book';
 
 @Component({
   selector: 'app-book',
+  standalone: true,
   imports: [
+    CommonModule,
     MatCard,
     NgOptimizedImage,
     KeyValuePipe,
@@ -31,6 +32,10 @@ export class BookComponent {
   menuData = input<any>(null);
   actionsMenu = input<MatMenuPanel | null>(null);
 
+  isSelected = input<boolean>(false);
+  selectionMode = input<boolean>(false);
+  toggleSelection = output<void>();
+
   constructor(
     private router: Router,
   ) {
@@ -38,10 +43,6 @@ export class BookComponent {
 
   goToAuthorDetails(authorId: string | number): void {
     this.router.navigate(['/author-details'], {state: {id: Number(authorId)}});
-  }
-
-  goToBookDetails(): void {
-    this.router.navigate(['/book-details'], {state: this.book()});
   }
 
   truncateTitle(title: string): string {

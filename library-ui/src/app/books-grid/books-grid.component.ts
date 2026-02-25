@@ -6,6 +6,7 @@ import {Book} from '../interfaces/book';
 import {BookComponent} from '../book/book.component';
 import {MatMenuPanel} from '@angular/material/menu';
 import {LibraryBook} from '../interfaces/library-book';
+import {SelectionStore} from '../services/selection.store';
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [15, 20, 25, 30, 35, 40, 45, 50] as const;
 
@@ -31,6 +32,8 @@ export class BooksGridComponent {
   pageIndex = input<number>(0);
   loading = input<boolean>(false);
   actionsMenu = input<MatMenuPanel<any> | null>(null);
+
+  selectionStore = input<SelectionStore | null>(null);
 
   pageChange = output<PageEvent>();
 

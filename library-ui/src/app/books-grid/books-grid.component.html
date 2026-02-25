@@ -9,7 +9,10 @@
       <app-book 
         [book]="getBook(item)" 
         [actionsMenu]="actionsMenu()"
-        [menuData]="getMenuData(item)"/>
+        [menuData]="getMenuData(item)"
+        [isSelected]="selectionStore()?.isSelected(item.id) ?? false"
+        [selectionMode]="selectionStore()?.isSelectionMode() ?? false"
+        (toggleSelection)="selectionStore()?.toggle(item.id)"/>
     }
   </div>
 

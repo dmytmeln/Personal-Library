@@ -2,8 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {CollectionBookService} from '../services/collection-book.service';
 import {CollectionService} from '../services/collection.service';
 import {CollectionDetails} from '../interfaces/collection-details';
-import {CollectionBook} from '../interfaces/collection-book';
-import {NgStyle} from '@angular/common';
+import {CommonModule, NgStyle} from '@angular/common';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialog} from '@angular/material/dialog';
@@ -13,7 +12,6 @@ import {CreateCollection} from '../interfaces/create-collection';
 import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
 import {LibraryBookService} from '../services/library-book.service';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
-import {BookComponent} from '../book/book.component';
 import {LibraryBookMenuItemsComponent} from '../library-book-menu-items/library-book-menu-items.component';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
@@ -36,19 +34,57 @@ import {
   LibraryBookDetailsDialogResult
 } from '../dialogs/library-book-details-dialog/library-book-details-dialog.component';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
+import {CollectionBookSearchParams} from '../interfaces/collection-book-search-params';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
+import {SortOption} from '../interfaces/sort-config';
+import {BooksGridComponent} from '../books-grid/books-grid.component';
+import {EntityFilterStore} from '../services/entity-filter.store';
+import {
+  FilterShellComponent,
+  FooterFiltersDirective,
+  SecondaryFiltersDirective
+} from '../common/filter-shell/filter-shell.component';
+import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
+import {SelectionStore} from '../services/selection.store';
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
+import {MatTooltipModule} from '@angular/material/tooltip';
+
+const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
+  title: '',
+  recursive: false
+};
 
 @Component({
   selector: 'app-collection',
+  standalone: true,
   imports: [
+    CommonModule,
     NgStyle,
     MatButton,
     MatIconModule,
-    BookComponent,
     LibraryBookMenuItemsComponent,
     MatMenuModule,
     RouterLink,
     MatDividerModule,
     MatIconButton,
+    MatSlideToggleModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    SortBarComponent,
+    BooksGridComponent,
+    FilterShellComponent,
+    TextFilterComponent,
+    SecondaryFiltersDirective,
+    FooterFiltersDirective,
+    BulkActionBarComponent,
+    MatTooltipModule,
   ],
   templateUrl: './collection.component.html',
   styleUrl: './collection.component.scss'
@@ -56,6 +92,27 @@ import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-detail
 export class CollectionComponent implements OnInit {
 
   collection!: CollectionDetails;
+
+  booksState = {
+    items: [] as LibraryBook[],
+    totalElements: 0,
+    pageSize: 15,
+    currentPage: 0,
+    loading: false,
+    sort: undefined as string[] | undefined,
+  };
+
+  readonly selection = new SelectionStore();
+  readonly filters = new EntityFilterStore<CollectionBookSearchParams>(EMPTY_SEARCH_PARAMS);
+
+  readonly bookSortOptions: SortOption[] = [
+    {field: 'title', label: 'Назва'},
+    {field: 'publishYear', label: 'Рік видання'},
+    {field: 'rating', label: 'Оцінка'},
+    {field: 'addedAt', label: 'Дата додавання'},
+    {field: 'pages', label: 'Сторінки'},
+  ];
+
   private snackCommon: MatSnackCommon;
 
   constructor(
@@ -75,12 +132,56 @@ export class CollectionComponent implements OnInit {
       const collectionId = +params['id'];
       this.loadCollection(collectionId);
     });
+
+    this.filters.filtersChanged$.subscribe(() => {
+      this.booksState.currentPage = 0;
+      this.loadBooks();
+    });
   }
 
   private loadCollection(id: number): void {
     this.collectionService.getById(id).subscribe(collection => {
       this.collection = collection;
+      this.loadBooks();
     });
+  }
+
+  loadBooks(): void {
+    if (!this.collection) return;
+    this.booksState.loading = true;
+    this.collectionBookService.getCollectionBooks(this.collection.id, {
+      ...this.filters.state(),
+      page: this.booksState.currentPage,
+      size: this.booksState.pageSize,
+      sort: this.booksState.sort
+    }).subscribe({
+      next: page => {
+        this.booksState.items = page.content;
+        this.booksState.totalElements = page.page.totalElements;
+        this.booksState.loading = false;
+      },
+      error: () => this.booksState.loading = false
+    });
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.booksState.currentPage = event.pageIndex;
+    this.booksState.pageSize = event.pageSize;
+    this.loadBooks();
+  }
+
+  onSortChange(sort: string[] | undefined): void {
+    this.booksState.sort = sort;
+    this.booksState.currentPage = 0;
+    this.loadBooks();
+  }
+
+  hasActiveFilters(): boolean {
+    return this.filters.hasActiveFilters(f => f.title !== '' || f.recursive !== false);
+  }
+
+  clearAllFilters(): void {
+    this.filters.reset(EMPTY_SEARCH_PARAMS);
   }
 
   openUpdateDialog(): void {
@@ -198,7 +299,7 @@ export class CollectionComponent implements OnInit {
 
   openViewBookListDialog(): void {
     const data: ViewBookListDialogData = {
-      libraryBooks: this.collection.books.map(cd => cd.libraryBook),
+      libraryBooks: this.booksState.items,
       categoryColumn: 'categoryName',
       fetchBooksFn: (options) => this.libraryBookService.getAll(options),
     };
@@ -206,8 +307,8 @@ export class CollectionComponent implements OnInit {
     dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
       if (libraryBookId) {
         this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe({
-          next: (collectionBook: CollectionBook) => {
-            this.collection.books.push(collectionBook);
+          next: () => {
+            this.loadBooks();
             this.snackCommon.showSuccess('Книгу додано до колекції');
           },
           error: (err) => this.snackCommon.showError(err)
@@ -219,7 +320,7 @@ export class CollectionComponent implements OnInit {
   deleteBook(libraryBook: LibraryBook): void {
     this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe({
       next: () => {
-        this.collection.books = this.collection.books.filter(cb => cb.libraryBook.id !== libraryBook.id);
+        this.loadBooks();
         this.snackCommon.showSuccess('Книгу видалено з колекції');
       },
       error: (err) => this.snackCommon.showError(err)
@@ -228,8 +329,8 @@ export class CollectionComponent implements OnInit {
 
   statusChange(data: [LibraryBook, LibraryBookStatus]): void {
     this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe({
-      next: (libraryBook) => {
-        this.updateBook(libraryBook);
+      next: () => {
+        this.loadBooks();
         this.snackCommon.showSuccess('Статус змінено');
       },
       error: (err) => this.snackCommon.showError(err)
@@ -238,8 +339,8 @@ export class CollectionComponent implements OnInit {
 
   ratingChange(data: { libraryBookId: number; rating: number }): void {
     this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe({
-      next: (libraryBook) => {
-        this.updateBook(libraryBook);
+      next: () => {
+        this.loadBooks();
         this.snackCommon.showSuccess('Оцінку змінено');
       },
       error: (err) => this.snackCommon.showError(err)
@@ -256,7 +357,7 @@ export class CollectionComponent implements OnInit {
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
       this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
         next: () => {
-          this.collection.books = this.collection.books.filter(cb => cb.libraryBook.id !== libraryBook.id);
+          this.loadBooks();
           this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
         },
         error: (err) => this.snackCommon.showError(err)
@@ -276,6 +377,7 @@ export class CollectionComponent implements OnInit {
         }
       });
 
+      // todo duplicate code
       dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
         if (selection.id) {
           this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
@@ -305,7 +407,7 @@ export class CollectionComponent implements OnInit {
         if (selection.id) {
           this.collectionBookService.moveBookToOtherCollection(this.collection.id, libraryBook.id, selection.id).subscribe({
             next: () => {
-              this.collection.books = this.collection.books.filter(cb => cb.libraryBook.id !== libraryBook.id);
+              this.loadBooks();
               this.snackCommon.showSuccess('Книгу переміщено до іншої колекції');
             },
             error: (err) => this.snackCommon.showError(err)
@@ -339,18 +441,53 @@ export class CollectionComponent implements OnInit {
     this.router.navigate(['collections']);
   }
 
-  private updateBook(libraryBook: LibraryBook) {
-    this.collection.books.forEach(cb => {
-      if (cb.libraryBook.id === libraryBook.id) {
-        cb.libraryBook = libraryBook;
+  bulkRemoveFromCollection(): void {
+    const ids = this.selection.selectedIds();
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: `Ви впевнені, що хочете видалити ${ids.length} вибраних книг з цієї колекції?`
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
+      this.collectionBookService.bulkRemove(this.collection.id, ids).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.selection.clear();
+          this.snackCommon.showSuccess('Книги видалено з колекції');
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
+    });
+  }
+
+  openBulkAddToOtherCollectionDialog(): void {
+    const ids = this.selection.selectedIds();
+    const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+      data: {
+        initialSelectionId: null,
+        disabledIds: [this.collection.id],
+        showRoot: false
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+      if (selection.id) {
+        this.collectionBookService.bulkAdd(selection.id, ids).subscribe({
+          next: () => {
+            this.selection.clear();
+            this.snackCommon.showSuccess('Книги додано до колекції');
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
       }
     });
   }
 
   private updateBookDetails(libraryBookId: number, dto: Partial<UpdateLibraryBookDetails>): void {
     this.libraryBookService.updateDetails(libraryBookId, dto).subscribe({
-      next: (updatedBook) => {
-        this.updateBook(updatedBook);
+      next: () => {
+        this.loadBooks();
         this.snackCommon.showSuccess('Деталі книги оновлено');
       },
       error: (err) => this.snackCommon.showError(err)
@@ -359,8 +496,8 @@ export class CollectionComponent implements OnInit {
 
   private resetBookDetails(libraryBookId: number): void {
     this.libraryBookService.resetDetails(libraryBookId).subscribe({
-      next: (updatedBook: LibraryBook) => {
-        this.updateBook(updatedBook);
+      next: () => {
+        this.loadBooks();
         this.snackCommon.showSuccess('Деталі книги скинуто до стандартних');
       },
       error: (err) => this.snackCommon.showError(err)

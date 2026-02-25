@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_function_get_collection_subtree_ids
+      author: Dmytro Melnyk
+      changes:
+        - createProcedure:
+            procedureName: get_collection_subtree_ids
+            procedureText: |
+              CREATE OR REPLACE FUNCTION get_collection_subtree_ids(root_id INT)
+              RETURNS TABLE(collection_id INT) AS $$
+              BEGIN
+                  RETURN QUERY
+                  WITH RECURSIVE collection_tree AS (
+                      SELECT c.collection_id
+                      FROM collections c
+                      WHERE c.collection_id = root_id
+                      UNION ALL
+                      SELECT c.collection_id
+                      FROM collections c
+                      JOIN collection_tree ct ON c.parent_id = ct.collection_id
+                  )
+                  SELECT ct.collection_id FROM collection_tree ct;
+              END;
+              $$ LANGUAGE plpgsql;

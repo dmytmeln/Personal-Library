@@ -39,6 +39,14 @@ public class BookService {
                 .orElseThrow(() -> new NotFoundException("Book not found"));
     }
 
+    public List<Book> getExistingByIds(List<Integer> bookIds) {
+        var books = repository.findAllById(bookIds);
+        if (books.isEmpty())
+            throw new NotFoundException("None of the books were found");
+        
+        return books;
+    }
+
     public void verifyExistsById(Integer bookId) {
         if (!repository.existsById(bookId)) {
             throw new NotFoundException("Book not found");

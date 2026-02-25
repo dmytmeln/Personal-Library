@@ -1,0 +1,63 @@
+.bulk-action-bar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 24px 24px 24px;
+  pointer-events: none;
+  transform: translateY(100%);
+
+  &.visible {
+    transform: translateY(0);
+  }
+}
+
+.bulk-toolbar {
+  pointer-events: auto;
+  border-radius: 12px;
+  height: 64px;
+  max-width: 800px;
+  box-shadow: var(--mat-sys-level2);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    color: inherit;
+  }
+}
+
+.count-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+::ng-deep .bulk-toolbar {
+  .mat-mdc-button, .mat-mdc-outlined-button {
+    --mdc-outlined-button-outline-color: var(--mat-sys-outline);
+    --mdc-outlined-button-label-text-color: var(--mat-sys-on-primary);
+    color: var(--mat-sys-on-primary);
+  }
+}

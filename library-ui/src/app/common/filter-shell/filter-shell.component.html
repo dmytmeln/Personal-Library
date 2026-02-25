@@ -3,19 +3,23 @@
     <ng-content select="[mainFilters]"></ng-content>
   </div>
 
-  <div class="filter-row secondary-row">
-    <ng-content select="[secondaryFilters]"></ng-content>
-    
-    @if (hasActiveFilters()) {
-      <button mat-stroked-button (click)="resetAll.emit()" class="clear-filters-btn"
-              matTooltip="Скинути всі фільтри">
-        <mat-icon>filter_alt_off</mat-icon>
-        Скинути всі
-      </button>
-    }
-  </div>
+  @if (hasActiveFilters() || secondaryContent()) {
+    <div class="filter-row secondary-row">
+      <ng-content select="[secondaryFilters]"></ng-content>
 
-  <div class="filter-row footer-row">
-    <ng-content select="[footerFilters]"></ng-content>
-  </div>
+      @if (hasActiveFilters()) {
+        <button mat-stroked-button (click)="resetAll.emit()" class="clear-filters-btn"
+                matTooltip="Скинути всі фільтри">
+          <mat-icon>filter_alt_off</mat-icon>
+          Скинути всі
+        </button>
+      }
+    </div>
+  }
+
+  @if (footerContent()) {
+    <div class="filter-row footer-row">
+      <ng-content select="[footerFilters]"></ng-content>
+    </div>
+  }
 </div>

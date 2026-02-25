@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LibraryBookViewRepository extends JpaRepository<LibraryBookView, Integer>, JpaSpecificationExecutor<LibraryBookView> {
+public interface LibraryBookViewRepository extends JpaRepository<LibraryBookView, Integer>, JpaSpecificationExecutor<LibraryBookView>, LibraryBookViewRepositoryCustom {
 
     Page<LibraryBookView> findAllByUserId(Integer userId, Pageable pageable);
 

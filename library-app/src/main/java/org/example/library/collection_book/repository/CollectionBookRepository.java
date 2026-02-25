@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface CollectionBookRepository extends JpaRepository<CollectionBook, CollectionBookId> {
 
@@ -24,5 +25,16 @@ public interface CollectionBookRepository extends JpaRepository<CollectionBook, 
     @Modifying
     @Query("DELETE FROM CollectionBook cb WHERE cb.id.libraryBookId = :libraryBookId AND cb.libraryBook.user.id = :userId")
     void deleteByLibraryBookIdAndUserId(@Param("libraryBookId") Integer libraryBookId, @Param("userId") Integer userId);
+
+    @Modifying
+    @Query("DELETE FROM CollectionBook cb WHERE cb.id.libraryBookId IN :libraryBookIds AND cb.libraryBook.user.id = :userId")
+    void deleteAllByLibraryBookIdInAndUserId(List<Integer> libraryBookIds, Integer userId);
+
+    @Modifying
+    @Query("DELETE FROM CollectionBook cb WHERE cb.id.collectionId = :collectionId AND cb.id.libraryBookId IN :libraryBookIds AND cb.collection.user.id = :userId")
+    void deleteAllByCollectionIdAndLibraryBookIdInAndUserId(Integer collectionId, List<Integer> libraryBookIds, Integer userId);
+
+    @Query("SELECT cb.id.libraryBookId FROM CollectionBook cb WHERE cb.id.collectionId = :collectionId")
+    Set<Integer> findLibraryBookIdsByCollectionId(Integer collectionId);
 
 }

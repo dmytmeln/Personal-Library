@@ -12,9 +12,6 @@ public class LibraryApplication {
     //  BE: logging
 
     // todo tomorrow:
-    //  BE + FE: collection - recursive subtree view
-    //  BE + FE: collection - collections pagination, sorting and filtering
-    //  BE + FE: collection - create collection filled with books
     //  BE + FE: library - notes
 
     // todo:
@@ -27,7 +24,8 @@ public class LibraryApplication {
     //  FE: use MatSnackBar to show messages to user
     //  BE: JWT refresh tokens
     //  BE: password reset
-    //  JPA optimizations
+    //  localization
+    //  JPA optimizations + Hibernate bulk configuration
     //  indexes
     //  CI/CD
     //  AWS deployment

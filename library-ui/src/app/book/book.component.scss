@@ -8,6 +8,18 @@ mat-card {
   border-radius: 12px;
   background: transparent;
   cursor: pointer;
+  transition: background-color 0.2s, outline 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
+
+  &.selected {
+    background-color: var(--mat-sys-primary-container);
+    outline: 2px solid var(--mat-sys-primary);
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--mat-sys-level1);
+  }
 }
 
 .cover {

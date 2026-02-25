@@ -23,10 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +63,26 @@ public class LibraryBookService {
 
         var view = getViewById(saved.getId());
         return mapper.toDto(view);
+    }
+
+    @Transactional
+    public void bulkAdd(List<Integer> bookIds, User user) {
+        var existingIds = repository.findExistingBookIdsInLibrary(user.getId(), bookIds);
+        var newBookIds = bookIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .distinct()
+                .toList();
+
+        if (newBookIds.isEmpty()) return;
+
+        var books = bookService.getExistingByIds(newBookIds);
+        var libraryBooks = books.stream()
+                .map(book -> LibraryBook.of(book, user))
+                .toList();
+
+        if (!libraryBooks.isEmpty()) {
+            repository.saveAll(libraryBooks);
+        }
     }
 
     @Transactional
@@ -111,6 +128,12 @@ public class LibraryBookService {
     public void delete(Integer libraryBookId, Integer userId) {
         collectionBookRepository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
         repository.deleteByIdAndUserId(libraryBookId, userId);
+    }
+
+    @Transactional
+    public void bulkDelete(List<Integer> libraryBookIds, Integer userId) {
+        collectionBookRepository.deleteAllByLibraryBookIdInAndUserId(libraryBookIds, userId);
+        repository.deleteAllByIdInAndUserId(libraryBookIds, userId);
     }
 
     public Map.Entry<Double, Integer> getBookAverageRatingAndCount(Integer bookId) {

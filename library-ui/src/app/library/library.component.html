@@ -85,6 +85,7 @@
           [pageIndex]="booksState.currentPage"
           [loading]="booksState.loading"
           [actionsMenu]="libraryBookMenu"
+          [selectionStore]="selection"
           (pageChange)="onPageChange($event)"/>
       </div>
     </mat-tab>
@@ -99,6 +100,17 @@
 
   </mat-tab-group>
 </div>
+
+<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+  <button mat-flat-button (click)="openBulkAddToCollectionDialog()">
+    <mat-icon>playlist_add</mat-icon>
+    <span>Додати до колекції</span>
+  </button>
+  <button mat-flat-button color="warn" (click)="bulkRemoveFromLibrary()">
+    <mat-icon>delete</mat-icon>
+    <span>Видалити</span>
+  </button>
+</app-bulk-action-bar>
 
 <mat-menu #libraryBookMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
@@ -127,7 +139,7 @@
       <span>Видалити з усіх колекцій</span>
     </button>
     <button mat-menu-item (click)="deleteLibraryBook(libraryBook)">
-      <mat-icon>delete</mat-icon>
+      <mat-icon color="warn">delete</mat-icon>
       <span>Видалити з бібліотеки</span>
     </button>
   </ng-template>

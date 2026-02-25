@@ -38,7 +38,11 @@ import {AuthorService} from '../services/author.service';
 import {CategoryService} from '../services/category.service';
 import {SortOption} from '../interfaces/sort-config';
 import {CommonModule} from '@angular/common';
-import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
+import {
+  FilterShellComponent,
+  FooterFiltersDirective,
+  SecondaryFiltersDirective
+} from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {AutocompleteFilterComponent} from '../common/filters/autocomplete-filter/autocomplete-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
@@ -52,6 +56,10 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
 import {AuthorListComponent} from '../author-list/author-list.component';
 import {CategoryListComponent} from '../category-list/category-list.component';
+import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
+
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
+import {SelectionStore} from '../services/selection.store';
 
 const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
   title: '',
@@ -90,6 +98,9 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     SelectFilterComponent,
     AuthorListComponent,
     CategoryListComponent,
+    SecondaryFiltersDirective,
+    FooterFiltersDirective,
+    BulkActionBarComponent,
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
@@ -118,6 +129,7 @@ export class LibraryComponent implements OnInit {
     label: getStatusName(s)
   }));
 
+  readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
 
   readonly authorSearch = new AutocompleteSearchStore<Author>(
@@ -272,6 +284,49 @@ export class LibraryComponent implements OnInit {
     });
   }
 
+  bulkRemoveFromLibrary(): void {
+    const ids = this.selection.selectedIds();
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: `Ви впевнені, що хочете видалити ${ids.length} вибраних книг з бібліотеки?`
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
+      this.libraryBookService.bulkRemove(ids).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.selection.clear();
+          this.snackCommon.showSuccess('Книги видалено з бібліотеки');
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
+    });
+  }
+
+  openBulkAddToCollectionDialog(): void {
+    const ids = this.selection.selectedIds();
+    const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+      data: {
+        initialSelectionId: null,
+        disabledIds: [],
+        showRoot: false
+      } as CollectionSelectorDialogData
+    });
+
+    dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+      if (selection.id) {
+        this.collectionBookService.bulkAdd(selection.id, ids).subscribe({
+          next: () => {
+            this.selection.clear();
+            this.snackCommon.showSuccess('Книги додано до колекції');
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
   removeFromAllCollections(libraryBook: LibraryBook): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
@@ -321,24 +376,35 @@ export class LibraryComponent implements OnInit {
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((result: LibraryBookDetailsDialogResult) => {
       switch (result.action) {
         case 'save':
-          this.libraryBookService.updateDetails(libraryBook.id, result.payload).subscribe({
-            next: () => {
-              this.loadBooks();
-              this.snackCommon.showSuccess('Деталі книги оновлено');
-            },
-            error: (err) => this.snackCommon.showError(err)
-          });
+          this.updateDetails(libraryBook, result);
           break;
         case 'reset':
-          this.libraryBookService.resetDetails(libraryBook.id).subscribe({
-            next: () => {
-              this.loadBooks();
-              this.snackCommon.showSuccess('Деталі книги скинуто');
-            },
-            error: (err) => this.snackCommon.showError(err)
-          });
+          this.resetDetails(libraryBook);
           break;
       }
+    });
+  }
+
+  private resetDetails(libraryBook: LibraryBook) {
+    this.libraryBookService.resetDetails(libraryBook.id).subscribe({
+      next: () => {
+        this.loadBooks();
+        this.snackCommon.showSuccess('Деталі книги скинуто');
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
+  }
+
+  private updateDetails(libraryBook: LibraryBook, result: {
+    action: "save";
+    payload: Partial<UpdateLibraryBookDetails>
+  }) {
+    this.libraryBookService.updateDetails(libraryBook.id, result.payload).subscribe({
+      next: () => {
+        this.loadBooks();
+        this.snackCommon.showSuccess('Деталі книги оновлено');
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 

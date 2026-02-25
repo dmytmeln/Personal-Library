@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {Page} from '../interfaces/page';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
+import {BulkLibraryBookRequest} from '../interfaces/bulk-library-book-request';
 
 export interface LibraryBookQueryOptions {
   page?: number;
@@ -40,8 +41,18 @@ export class LibraryBookService {
     return this.apiService.post('/users/me/library-books', {params: {bookId}});
   }
 
+  bulkAdd(ids: number[]): Observable<void> {
+    const body: BulkLibraryBookRequest = {ids};
+    return this.apiService.post('/users/me/library-books/bulk', {body});
+  }
+
   removeBook(libraryBookId: number): Observable<void> {
     return this.apiService.delete(`/users/me/library-books/${libraryBookId}`, {});
+  }
+
+  bulkRemove(ids: number[]): Observable<void> {
+    const body: BulkLibraryBookRequest = {ids};
+    return this.apiService.post('/users/me/library-books/bulk-remove', {body});
   }
 
   changeStatus(libraryBookId: number, status: LibraryBookStatus): Observable<LibraryBook> {

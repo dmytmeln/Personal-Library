@@ -1,7 +1,9 @@
 package org.example.library.library_book.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.library.library_book.domain.LibraryBookStatus;
+import org.example.library.library_book.dto.BulkLibraryBookRequest;
 import org.example.library.library_book.dto.LibraryBookDto;
 import org.example.library.library_book.dto.LibraryBookSearchCriteria;
 import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
@@ -33,6 +35,12 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.CREATED)
     public LibraryBookDto create(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Integer bookId) {
         return service.create(bookId, userDetails.user());
+    }
+
+    @PostMapping("/bulk")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void bulkAdd(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkLibraryBookRequest request) {
+        service.bulkAdd(request.getIds(), userDetails.user());
     }
 
     @PutMapping("/{libraryBookId}/rating")
@@ -74,6 +82,12 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Integer libraryBookId) {
         service.delete(libraryBookId, userDetails.getId());
+    }
+
+    @PostMapping("/bulk-remove")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void bulkDelete(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkLibraryBookRequest request) {
+        service.bulkDelete(request.getIds(), userDetails.getId());
     }
 
 }

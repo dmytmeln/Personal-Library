@@ -8,7 +8,7 @@ export class EntityFilterStore<T extends object> {
 
   readonly filtersChanged$ = toObservable(this.state).pipe(
     skip(1),
-    debounceTime(350),
+    debounceTime(450),
     distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
   );
 
