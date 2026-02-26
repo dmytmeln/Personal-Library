@@ -1,4 +1,4 @@
-<div class="profile-container">
+<div class="profile-container" *transloco="let t; prefix: 'profile'">
   @if (!loading && user) {
     <mat-card class="profile-card">
       <mat-card-header>
@@ -15,34 +15,34 @@
         <mat-list>
           <mat-list-item>
             <mat-icon matListIcon>email</mat-icon>
-            <div matListItemTitle>Email</div>
+            <div matListItemTitle>{{ t('email') }}</div>
             <div matListItemLine>{{ user.email }}</div>
           </mat-list-item>
 
           <mat-list-item>
             <mat-icon matListIcon>badge</mat-icon>
-            <div matListItemTitle>Full Name</div>
+            <div matListItemTitle>{{ t('fullName') }}</div>
             <div matListItemLine>{{ user.fullName }}</div>
           </mat-list-item>
 
           <mat-list-item>
             <mat-icon matListIcon>admin_panel_settings</mat-icon>
-            <div matListItemTitle>Role</div>
+            <div matListItemTitle>{{ t('role') }}</div>
             <div matListItemLine>{{ user.role }}</div>
           </mat-list-item>
 
           <mat-list-item>
             <mat-icon matListIcon>login</mat-icon>
-            <div matListItemTitle>Provider</div>
+            <div matListItemTitle>{{ t('provider') }}</div>
             <div matListItemLine>{{ user.provider }}</div>
           </mat-list-item>
         </mat-list>
       </mat-card-content>
 
-      <mat-card-actions align="end">
+      <mat-card-actions align="end" *transloco="let c; prefix: 'common'">
         <button mat-raised-button color="warn" (click)="logout()">
           <mat-icon>logout</mat-icon>
-          Logout
+          {{ c('logout') }}
         </button>
       </mat-card-actions>
     </mat-card>
@@ -50,7 +50,7 @@
 
   @if (loading) {
     <div class="loading-message">
-      Loading profile...
+      {{ t('loading') }}
     </div>
   }
 

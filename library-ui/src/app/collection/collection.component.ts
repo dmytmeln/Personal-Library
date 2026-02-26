@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CollectionBookService} from '../services/collection-book.service';
 import {CollectionService} from '../services/collection.service';
 import {CollectionDetails} from '../interfaces/collection-details';
@@ -20,7 +20,7 @@ import {
   CollectionDialogData
 } from '../dialogs/collection-dialog/collection-dialog.component';
 import {UpdateCollection} from '../interfaces/update-collection';
-import {filter} from 'rxjs';
+import {filter, map} from 'rxjs';
 import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import {SelectedCollection} from '../interfaces/selected-collection';
 import {
@@ -41,20 +41,17 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
-import {SortOption} from '../interfaces/sort-config';
 import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {EntityFilterStore} from '../services/entity-filter.store';
-import {
-  FilterShellComponent,
-  FooterFiltersDirective,
-  SecondaryFiltersDirective
-} from '../common/filter-shell/filter-shell.component';
+import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   title: '',
@@ -83,16 +80,17 @@ const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
     BooksDisplayComponent,
     FilterShellComponent,
     TextFilterComponent,
-    SecondaryFiltersDirective,
-    FooterFiltersDirective,
     BulkActionBarComponent,
     MatTooltipModule,
     MatButtonToggleModule,
+    TranslocoDirective,
   ],
   templateUrl: './collection.component.html',
   styleUrl: './collection.component.scss'
 })
 export class CollectionComponent implements OnInit {
+
+  private translocoService = inject(TranslocoService);
 
   collection!: CollectionDetails;
 
@@ -109,13 +107,18 @@ export class CollectionComponent implements OnInit {
   readonly filters = new EntityFilterStore<CollectionBookSearchParams>(EMPTY_SEARCH_PARAMS);
   readonly viewMode = signal<'grid' | 'list'>('grid');
 
-  readonly bookSortOptions: SortOption[] = [
-    {field: 'title', label: 'Назва'},
-    {field: 'publishYear', label: 'Рік видання'},
-    {field: 'rating', label: 'Оцінка'},
-    {field: 'addedAt', label: 'Дата додавання'},
-    {field: 'pages', label: 'Сторінки'},
-  ];
+  readonly bookSortOptions = toSignal(
+    this.translocoService.selectTranslateObject('library.sort').pipe(
+      map(t => [
+        {field: 'title', label: t.title},
+        {field: 'publishYear', label: t.publishYear},
+        {field: 'rating', label: t.rating},
+        {field: 'addedAt', label: t.addedAt},
+        {field: 'pages', label: t.pages},
+      ])
+    ),
+    {initialValue: []}
+  );
 
   private snackCommon: MatSnackCommon;
 
@@ -200,7 +203,7 @@ export class CollectionComponent implements OnInit {
       this.collectionService.update(this.collection.id, updatedCollection).subscribe({
         next: () => {
           this.loadCollection(this.collection.id);
-          this.snackCommon.showSuccess('Колекцію оновлено успішно');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.updated'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -219,7 +222,7 @@ export class CollectionComponent implements OnInit {
       this.collectionService.create(collection).subscribe({
         next: () => {
           this.loadCollection(this.collection.id);
-          this.snackCommon.showSuccess('Підколекцію створено успішно');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.subcollectionCreated'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -247,7 +250,7 @@ export class CollectionComponent implements OnInit {
           this.collectionService.move(selection.id, this.collection.id).subscribe({
             next: () => {
               this.loadCollection(this.collection.id);
-              this.snackCommon.showSuccess('Колекцію додано успішно');
+              this.snackCommon.showSuccess(this.translocoService.translate('collections.success.added'));
             },
             error: (err) => this.snackCommon.showError(err)
           });
@@ -275,7 +278,7 @@ export class CollectionComponent implements OnInit {
         this.collectionService.move(this.collection.id, selection.id).subscribe({
           next: () => {
             this.loadCollection(this.collection.id);
-            this.snackCommon.showSuccess('Колекцію переміщено успішно');
+            this.snackCommon.showSuccess(this.translocoService.translate('collections.success.moved'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -286,14 +289,15 @@ export class CollectionComponent implements OnInit {
   deleteCollection(): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        message: `Ви впевнені, що хочете видалити колекцію "${this.collection.name}"? Це також призведе до видалення всіх її підколекцій та посилань на книги.`
+        message: this.translocoService.translate('collections.deleteConfirm', {name: this.collection.name}),
+        confirmLabel: 'common.delete'
       }
     });
 
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
       this.collectionService.delete(this.collection.id).subscribe({
         next: () => {
-          this.snackCommon.showSuccess('Колекцію видалено успішно');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.deleted'));
           this.goBack();
         },
         error: (err) => this.snackCommon.showError(err)
@@ -313,7 +317,7 @@ export class CollectionComponent implements OnInit {
         this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe({
           next: () => {
             this.loadBooks();
-            this.snackCommon.showSuccess('Книгу додано до колекції');
+            this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookAdded'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -322,12 +326,21 @@ export class CollectionComponent implements OnInit {
   }
 
   deleteBook(libraryBook: LibraryBook): void {
-    this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe({
-      next: () => {
-        this.loadBooks();
-        this.snackCommon.showSuccess('Книгу видалено з колекції');
-      },
-      error: (err) => this.snackCommon.showError(err)
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        message: this.translocoService.translate('collections.removeBookConfirm', {title: libraryBook.book.title}),
+        confirmLabel: 'common.remove'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
+      this.collectionBookService.removeBookFromCollection(this.collection.id, libraryBook.id).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookRemoved'));
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
     });
   }
 
@@ -335,7 +348,7 @@ export class CollectionComponent implements OnInit {
     this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Статус змінено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.statusChanged'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -345,7 +358,7 @@ export class CollectionComponent implements OnInit {
     this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Оцінку змінено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.ratingChanged'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -354,7 +367,8 @@ export class CollectionComponent implements OnInit {
   removeFromAllCollections(libraryBook: LibraryBook): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        message: `Ви впевнені, що хочете видалити книгу "${libraryBook.book.title}" з усіх колекцій?`
+        message: this.translocoService.translate('library.removeFromAllCollectionsConfirm', {title: libraryBook.book.title}),
+        confirmLabel: 'common.remove'
       }
     });
 
@@ -362,7 +376,7 @@ export class CollectionComponent implements OnInit {
       this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
         next: () => {
           this.loadBooks();
-          this.snackCommon.showSuccess('Книгу видалено з усіх колекцій');
+          this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookRemovedFromAllCollections'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -386,7 +400,7 @@ export class CollectionComponent implements OnInit {
         if (selection.id) {
           this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
             next: () => {
-              this.snackCommon.showSuccess('Книгу додано до колекції');
+              this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookAdded'));
             },
             error: (err) => this.snackCommon.showError(err)
           });
@@ -396,28 +410,24 @@ export class CollectionComponent implements OnInit {
   }
 
   moveBookToOtherCollection(libraryBook: LibraryBook): void {
-    this.collectionService.getCollectionsContainingBook(libraryBook.id).subscribe(collections => {
-      const disabledIds = collections.map(c => c.id);
+    const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
+      data: {
+        initialSelectionId: null,
+        disabledIds: [this.collection.id],
+        showRoot: false
+      }
+    });
 
-      const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
-        data: {
-          initialSelectionId: null,
-          disabledIds: disabledIds,
-          showRoot: false
-        }
-      });
-
-      dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
-        if (selection.id) {
-          this.collectionBookService.moveBookToOtherCollection(this.collection.id, libraryBook.id, selection.id).subscribe({
-            next: () => {
-              this.loadBooks();
-              this.snackCommon.showSuccess('Книгу переміщено до іншої колекції');
-            },
-            error: (err) => this.snackCommon.showError(err)
-          });
-        }
-      });
+    dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
+      if (selection.id) {
+        this.collectionBookService.moveBookToOtherCollection(this.collection.id, libraryBook.id, selection.id).subscribe({
+          next: () => {
+            this.loadBooks();
+            this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookMoved'));
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
     });
   }
 
@@ -436,8 +446,6 @@ export class CollectionComponent implements OnInit {
           this.resetBookDetails(libraryBook.id);
           break;
       }
-
-      dialogRef.close();
     });
   }
 
@@ -449,9 +457,9 @@ export class CollectionComponent implements OnInit {
       }
     }).afterClosed().pipe(filter(Boolean)).subscribe(result => {
       if (result === 'saved') {
-        this.snackCommon.showSuccess('Нотатку збережено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.noteSaved'));
       } else if (result === 'deleted') {
-        this.snackCommon.showSuccess('Нотатку видалено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.noteDeleted'));
       }
     });
   }
@@ -464,7 +472,8 @@ export class CollectionComponent implements OnInit {
     const ids = this.selection.selectedIds();
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        message: `Ви впевнені, що хочете видалити ${ids.length} вибраних книг з цієї колекції?`
+        message: this.translocoService.translate('collections.bulkRemoveFromCollectionConfirm', {count: ids.length}),
+        confirmLabel: 'common.remove'
       }
     });
 
@@ -473,7 +482,7 @@ export class CollectionComponent implements OnInit {
         next: () => {
           this.loadBooks();
           this.selection.clear();
-          this.snackCommon.showSuccess('Книги видалено з колекції');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.booksRemoved'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -495,7 +504,7 @@ export class CollectionComponent implements OnInit {
         this.collectionBookService.bulkAdd(selection.id, ids).subscribe({
           next: () => {
             this.selection.clear();
-            this.snackCommon.showSuccess('Книги додано до колекції');
+            this.snackCommon.showSuccess(this.translocoService.translate('library.success.booksAddedToCollection'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -507,7 +516,7 @@ export class CollectionComponent implements OnInit {
     this.libraryBookService.updateDetails(libraryBookId, dto).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Деталі книги оновлено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.detailsUpdated'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -517,7 +526,7 @@ export class CollectionComponent implements OnInit {
     this.libraryBookService.resetDetails(libraryBookId).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Деталі книги скинуто до стандартних');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.detailsReset'));
       },
       error: (err) => this.snackCommon.showError(err)
     });

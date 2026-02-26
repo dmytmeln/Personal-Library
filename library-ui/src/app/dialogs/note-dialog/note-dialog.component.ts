@@ -8,6 +8,7 @@ import {NoteService} from '../../services/note.service';
 import {Note} from '../../interfaces/note';
 import {CommonModule} from '@angular/common';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 export interface NoteDialogData {
   libraryBookId: number;
@@ -25,6 +26,7 @@ export interface NoteDialogData {
     MatInputModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
+    TranslocoDirective,
   ],
   templateUrl: './note-dialog.component.html',
   styleUrl: './note-dialog.component.scss'

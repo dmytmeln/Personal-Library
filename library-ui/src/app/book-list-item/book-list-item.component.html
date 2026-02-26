@@ -18,9 +18,9 @@
       </span>
     </div>
     
-    <div class="secondary-info">
+    <div class="secondary-info" *transloco="let c; prefix: 'common'">
       <span class="category">{{ book().categoryName }}</span>
-      <span class="metadata">{{ book().publishYear }} • {{ book().pages }}p • {{ book().language }}</span>
+      <span class="metadata">{{ book().publishYear }} • {{ book().pages }}{{ c('pagesShort') }} • {{ book().language }}</span>
     </div>
   </div>
 

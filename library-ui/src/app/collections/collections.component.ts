@@ -26,9 +26,11 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {CollectionBookService} from '../services/collection-book.service';
 import {LibraryBookService} from '../services/library-book.service';
 import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-list-dialog/view-book-list-dialog';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-collections',
+  standalone: true,
   imports: [
     MatTreeModule,
     MatIconModule,
@@ -36,6 +38,7 @@ import {ViewBookListDialog, ViewBookListDialogData} from '../dialogs/view-book-l
     MatMenuModule,
     RouterLink,
     MatTooltipModule,
+    TranslocoDirective,
   ],
   templateUrl: './collections.component.html',
   styleUrl: './collections.component.scss'
@@ -55,6 +58,7 @@ export class CollectionsComponent implements OnInit {
     private collectionBookService: CollectionBookService,
     private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
+    private translocoService: TranslocoService,
     matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
@@ -82,7 +86,7 @@ export class CollectionsComponent implements OnInit {
       this.collectionService.create(collection).subscribe({
         next: () => {
           this.getTree();
-          this.snackCommon.showSuccess('Колекцію створено успішно');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.created'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -102,7 +106,7 @@ export class CollectionsComponent implements OnInit {
         this.collectionService.update(node.id, updatedCollection).subscribe({
           next: () => {
             this.getTree();
-            this.snackCommon.showSuccess('Колекцію оновлено успішно');
+            this.snackCommon.showSuccess(this.translocoService.translate('collections.success.updated'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -111,9 +115,11 @@ export class CollectionsComponent implements OnInit {
   }
 
   deleteCollection(node: CollectionNode): void {
+    const message = this.translocoService.translate('collections.deleteConfirm', {name: node.name});
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        message: `Ви впевнені, що хочете видалити колекцію "${node.name}"? Це також призведе до видалення всіх її підколекцій та посилань на книги.`
+        message,
+        confirmLabel: 'common.delete'
       }
     });
 
@@ -121,7 +127,7 @@ export class CollectionsComponent implements OnInit {
       this.collectionService.delete(node.id).subscribe({
         next: () => {
           this.getTree();
-          this.snackCommon.showSuccess('Колекцію видалено успішно');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.deleted'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -148,7 +154,7 @@ export class CollectionsComponent implements OnInit {
         this.collectionService.move(selection.id, targetParent.id).subscribe({
           next: () => {
             this.getTree();
-            this.snackCommon.showSuccess('Колекцію додано успішно');
+            this.snackCommon.showSuccess(this.translocoService.translate('collections.success.added'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -174,7 +180,7 @@ export class CollectionsComponent implements OnInit {
       this.collectionService.move(collectionToMove.id, selection.id).subscribe({
         next: () => {
           this.getTree();
-          this.snackCommon.showSuccess('Колекцію переміщено успішно');
+          this.snackCommon.showSuccess(this.translocoService.translate('collections.success.moved'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -193,7 +199,7 @@ export class CollectionsComponent implements OnInit {
         if (libraryBookId) {
           this.collectionBookService.addBookToCollection(node.id, libraryBookId).subscribe({
             next: () => {
-              this.snackCommon.showSuccess('Книгу додано до колекції');
+              this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookAdded'));
             },
             error: (err) => this.snackCommon.showError(err)
           });

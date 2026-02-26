@@ -1,12 +1,14 @@
 <mat-menu #statusMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
-    @for (status of LIBRARY_BOOK_STATUSES; track status) {
-      <button mat-menu-item
-              [disabled]="libraryBook.status === status"
-              (click)="statusChange.emit([libraryBook, status])">
-        <span>{{ getStatusName(status) }}</span>
-      </button>
-    }
+    <ng-container *transloco="let s; prefix: 'library.statuses'">
+      @for (status of LIBRARY_BOOK_STATUSES; track status) {
+        <button mat-menu-item
+                [disabled]="libraryBook.status === status"
+                (click)="statusChange.emit([libraryBook, status])">
+          <span>{{ s(status) }}</span>
+        </button>
+      }
+    </ng-container>
   </ng-template>
 </mat-menu>
 

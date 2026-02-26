@@ -5,10 +5,10 @@ import {NgOptimizedImage} from '@angular/common';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
 import {BookDetails} from '../interfaces/book-details';
 import {BookService} from '../services/book.service';
-import {getStatusName} from '../interfaces/library-book';
 import {MatAnchor, MatButton} from '@angular/material/button';
 import {LibraryBookService} from '../services/library-book.service';
 import {BasicCollection} from '../interfaces/basic-collection';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-book-details',
@@ -17,13 +17,12 @@ import {BasicCollection} from '../interfaces/basic-collection';
     BookRatingComponent,
     MatButton,
     MatAnchor,
+    TranslocoDirective,
   ],
   templateUrl: './book-details.component.html',
   styleUrl: './book-details.component.scss'
 })
 export class BookDetailsComponent implements OnInit {
-
-  protected readonly getStatusName = getStatusName;
 
   book: Book;
   authors: Array<[number, string]> = [];

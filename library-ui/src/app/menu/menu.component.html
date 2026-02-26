@@ -1,17 +1,31 @@
-<mat-toolbar>
-  <a mat-button routerLink="/" routerLinkActive="active">BookTracker</a>
-  <a mat-button routerLink="/library" routerLinkActive="active">Бібліотека</a>
-  <a mat-button routerLink="/collections" routerLinkActive="active">Колекції</a>
-  <a mat-button routerLink="/recomendations" routerLinkActive="active">Рекомендації</a>
-  <a mat-button routerLink="/search" routerLinkActive="active">Пошук</a>
-  <span class="spacer"></span>
+<ng-container *transloco="let t">
+  <mat-toolbar>
+    <a mat-button routerLink="/" routerLinkActive="active">{{ t('appTitle') }}</a>
 
-  @if (isAuthenticated) {
-    <a mat-button routerLink="/profile" routerLinkActive="active">Профіль</a>
-    <button mat-button (click)="logout()">Вихід</button>
-  } @else {
-    <a mat-button routerLink="/login" routerLinkActive="active">Логін</a>
-    <a mat-button routerLink="/register" routerLinkActive="active">Реєстрація</a>
-  }
+    <ng-container *transloco="let m; prefix: 'menu'">
+      <a mat-button routerLink="/library" routerLinkActive="active">{{ m('library') }}</a>
+      <a mat-button routerLink="/collections" routerLinkActive="active">{{ m('collections') }}</a>
+      <a mat-button routerLink="/recommendations" routerLinkActive="active">{{ m('recommendations') }}</a>
+      <a mat-button routerLink="/search" routerLinkActive="active">{{ m('search') }}</a>
 
-</mat-toolbar>
+      <span class="spacer"></span>
+
+      @if (isAuthenticated) {
+        <a mat-button routerLink="/profile" routerLinkActive="active">{{ m('profile') }}</a>
+        <button mat-button (click)="logout()">{{ m('logout') }}</button>
+      } @else {
+        <a mat-button routerLink="/login" routerLinkActive="active">{{ m('login') }}</a>
+        <a mat-button routerLink="/register" routerLinkActive="active">{{ m('register') }}</a>
+      }
+    </ng-container>
+
+    <button mat-icon-button [matMenuTriggerFor]="langMenu" class="lang-button">
+      <mat-icon>language</mat-icon>
+    </button>
+    <mat-menu #langMenu="matMenu">
+      <button mat-menu-item (click)="changeLang('en')">EN</button>
+      <button mat-menu-item (click)="changeLang('uk')">UA</button>
+    </mat-menu>
+
+  </mat-toolbar>
+</ng-container>

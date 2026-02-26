@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatButtonModule} from '@angular/material/button';
 import {LanguageWithCount} from '../../../interfaces/language-with-count';
+import {TranslocoDirective, TranslocoPipe} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-language-filter',
@@ -11,6 +12,8 @@ import {LanguageWithCount} from '../../../interfaces/language-with-count';
     CommonModule,
     MatCheckboxModule,
     MatButtonModule,
+    TranslocoDirective,
+    TranslocoPipe,
   ],
   templateUrl: './language-filter.component.html',
   styleUrl: './language-filter.component.scss'

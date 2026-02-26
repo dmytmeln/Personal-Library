@@ -1,4 +1,5 @@
-import {Component, computed, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {AuthorService} from '../services/author.service';
 import {Author} from '../interfaces/author';
@@ -12,9 +13,10 @@ import {TextFilterComponent} from '../common/filters/text-filter/text-filter.com
 import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
-import {SortOption} from '../interfaces/sort-config';
 import {AuthorFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {map} from 'rxjs';
 
 const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
   name: '',
@@ -36,6 +38,7 @@ const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
     SelectFilterComponent,
     RangeFilterComponent,
     SortBarComponent,
+    TranslocoDirective,
   ],
   templateUrl: './author-list.component.html',
   styleUrl: './author-list.component.scss'
@@ -58,12 +61,19 @@ export class AuthorListComponent implements OnInit {
 
   readonly filters = new EntityFilterStore<AuthorFilters>(EMPTY_AUTHOR_FILTERS);
 
-  readonly authorSortOptions: SortOption[] = [
-    {field: 'fullName', label: 'ПІБ'},
-    {field: 'country', label: 'Країна'},
-    {field: 'birthYear', label: 'Рік народження'},
-    {field: 'booksCount', label: 'Кількість книг'},
-  ];
+  private translocoService = inject(TranslocoService);
+
+  readonly authorSortOptions = toSignal(
+    this.translocoService.selectTranslateObject('authors.sort').pipe(
+      map(t => [
+        {field: 'fullName', label: t.fullName},
+        {field: 'country', label: t.country},
+        {field: 'birthYear', label: t.birthYear},
+        {field: 'booksCount', label: t.booksCount},
+      ])
+    ),
+    {initialValue: []}
+  );
 
   readonly countryOptions = computed<SelectOption[]>(() =>
     this.countries().map(c => ({
@@ -75,7 +85,8 @@ export class AuthorListComponent implements OnInit {
   constructor(
     private authorService: AuthorService,
     private router: Router
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadAuthors();
@@ -147,13 +158,6 @@ export class AuthorListComponent implements OnInit {
       this.authorsState.currentPage = 0;
       this.loadAuthors();
     });
-  }
-
-  getBooksCountText(count: number): string {
-    if (count === 0) return '0 книг';
-    if (count === 1) return '1 книга';
-    if (count >= 2 && count <= 4) return `${count} книги`;
-    return `${count} книг`;
   }
 
   goToAuthorDetails(author: Author): void {

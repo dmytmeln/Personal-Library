@@ -1,13 +1,22 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
 import {MenuComponent} from './menu/menu.component';
+import {LangService} from './services/lang.service';
+import {TranslocoPipe} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet, MenuComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
-  title = 'library-ui';
+export class AppComponent implements OnInit {
+
+  constructor(private langService: LangService) {
+  }
+
+  ngOnInit() {
+    this.langService.loadSaved();
+  }
 }

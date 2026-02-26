@@ -1,70 +1,83 @@
-@if (author) {
-  <div class="container">
-    <div class="header-row">
-      <h1 class="page-title">{{ author.fullName }}</h1>
-      <div class="header-actions">
-        <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
-          <mat-button-toggle value="grid">
-            <mat-icon>grid_view</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle value="list">
-            <mat-icon>view_list</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-      </div>
-    </div>
-
-    <div class="author-info">
-      @if (author.birthYear) {
-        <p class="author-years">
-          <strong>Роки життя:</strong> {{ author.birthYear }} – {{ author.deathYear || 'теп. час' }}
-        </p>
-      }
-      @if (author.country) {
-        <p><strong>Країна:</strong> {{ author.country }}</p>
-      }
-      <p><strong>Кількість книг:</strong> {{ totalElements }}</p>
-    </div>
-
-    @if (author.biography) {
-      <div class="biography-container">
-        <h4 class="author-attribute-label">Біографія</h4>
-        <div class="author-biography-text">
-          {{ author.biography }}
+<ng-container *transloco="let t; prefix: 'authors'">
+  @if (author) {
+    <div class="container">
+      <div class="header-row">
+        <h1 class="page-title">{{ author.fullName }}</h1>
+        <div class="header-actions">
+          <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
+            <mat-button-toggle value="grid">
+              <mat-icon>grid_view</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle value="list">
+              <mat-icon>view_list</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
         </div>
       </div>
-    }
 
-    <div class="author-books">
-      <h4 class="author-attribute-label">Книги автора</h4>
-      <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
+      <div class="author-info">
+        @if (author.birthYear) {
+          <p class="author-years">
+            <strong>{{ t('lifeYears') }}:</strong> {{ author.birthYear }} – {{ author.deathYear || t('presentDay') }}
+          </p>
+        }
+        @if (author.country) {
+          <p><strong>{{ t('table.country') }}:</strong> {{ author.country }}</p>
+        }
+        <p>
+          <strong>{{ t('table.booksCount') }}:</strong>
+          @if (totalElements === 1) {
+            {{ t('booksCount.one', { count: 1 }) }}
+          } @else if (totalElements >= 2 && totalElements <= 4) {
+            {{ t('booksCount.few', { count: totalElements }) }}
+          } @else {
+            {{ t('booksCount.other', { count: totalElements }) }}
+          }
+        </p>
+      </div>
 
-      <app-books-display
-        [books]="books"
-        [totalElements]="totalElements"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        [loading]="loading"
-        [actionsMenu]="bookMenu"
-        [viewMode]="viewMode()"
-        [selectionStore]="selection"
-        (pageChange)="onPageChange($event)"/>
+      @if (author.biography) {
+        <div class="biography-container">
+          <h4 class="author-attribute-label">{{ t('biography') }}</h4>
+          <div class="author-biography-text">
+            {{ author.biography }}
+          </div>
+        </div>
+      }
+
+      <div class="author-books">
+        <h4 class="author-attribute-label">{{ t('authorBooks') }}</h4>
+        <app-sort-bar [options]="bookSortOptions()" (sortChange)="onSortChange($event)"/>
+
+        <app-books-display
+          [books]="books"
+          [totalElements]="totalElements"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [loading]="loading"
+          [actionsMenu]="bookMenu"
+          [viewMode]="viewMode()"
+          [selectionStore]="selection"
+          (pageChange)="onPageChange($event)"/>
+      </div>
     </div>
-  </div>
-}
+  }
 
-<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-  <button mat-flat-button (click)="bulkAddBooks()">
-    <mat-icon>add_circle</mat-icon>
-    <span>Додати до бібліотеки</span>
-  </button>
-</app-bulk-action-bar>
-
-<mat-menu #bookMenu="matMenu">
-  <ng-template matMenuContent let-book>
-    <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button (click)="bulkAddBooks()">
       <mat-icon>add_circle</mat-icon>
-      <span>{{ isBookInLibrary(book) ? 'Вже у бібліотеці' : 'Додати до бібліотеки' }}</span>
+      <span *transloco="let search; prefix: 'search.bulkActions'">{{ search('addToLibrary') }}</span>
     </button>
-  </ng-template>
-</mat-menu>
+  </app-bulk-action-bar>
+
+  <mat-menu #bookMenu="matMenu">
+    <ng-template matMenuContent let-book>
+      <ng-container *transloco="let menu; prefix: 'search.menu'">
+        <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+          <mat-icon>add_circle</mat-icon>
+          <span>{{ isBookInLibrary(book) ? menu('alreadyInLibrary') : menu('addToLibrary') }}</span>
+        </button>
+      </ng-container>
+    </ng-template>
+  </mat-menu>
+</ng-container>

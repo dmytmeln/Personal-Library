@@ -1,6 +1,6 @@
-<div class="search-container">
+<div class="search-container" *transloco="let t; prefix: 'search'">
   <div class="header-row">
-    <h1 class="page-title">Пошук книг</h1>
+    <h1 class="page-title">{{ t('title') }}</h1>
     <div class="header-actions">
       <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
         <mat-button-toggle value="grid">
@@ -15,17 +15,17 @@
 
   <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
-    <mat-tab label="Всі книги">
-      <div class="tab-content">
+    <mat-tab [label]="t('tabs.allBooks')">
+      <div class="tab-content" *transloco="let c; prefix: 'common'">
         <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-          <div mainFilters>
+          <div mainFilters *transloco="let f; prefix: 'search.filters'">
             <app-text-filter
-              label="Назва книги"
+              [label]="f('bookTitle')"
               [value]="filters.state().title || ''"
               (valueChange)="filters.update('title', $event)"/>
 
             <app-autocomplete-filter
-              label="Автор"
+              [label]="f('author')"
               [searchInput]="authorSearch.query()"
               [selected]="filters.state().author"
               [options]="authorSearch.results()"
@@ -35,7 +35,7 @@
               (clear)="clearAuthorFilter()"/>
 
             <app-autocomplete-filter
-              label="Категорія"
+              [label]="f('category')"
               [searchInput]="categorySearch.query()"
               [selected]="filters.state().category"
               [options]="categorySearch.results()"
@@ -45,15 +45,19 @@
               (clear)="clearCategoryFilter()"/>
           </div>
 
-          <div secondaryFilters>
+          <div secondaryFilters *transloco="let f; prefix: 'search.filters'">
             <app-range-filter
-              label="Рік видання"
+              [label]="f('publishYear')"
               [range]="filters.state().publishYear"
+              [minPlaceholder]="c('from')"
+              [maxPlaceholder]="c('to')"
               (rangeChange)="filters.update('publishYear', $event)"/>
 
             <app-range-filter
-              label="Кількість сторінок"
+              [label]="f('pages')"
               [range]="filters.state().pages"
+              [minPlaceholder]="c('from')"
+              [maxPlaceholder]="c('to')"
               (rangeChange)="filters.update('pages', $event)"/>
           </div>
 
@@ -68,7 +72,7 @@
           </div>
         </app-filter-shell>
 
-        <app-sort-bar [options]="DEFAULT_SORT_OPTIONS" (sortChange)="onBooksSortChange($event)"/>
+        <app-sort-bar [options]="DEFAULT_SORT_OPTIONS()" (sortChange)="onBooksSortChange($event)"/>
 
         <app-books-display
           [books]="booksState.items"
@@ -83,32 +87,34 @@
       </div>
     </mat-tab>
 
-    <mat-tab label="Автори">
+    <mat-tab [label]="t('tabs.authors')">
       <app-author-list mode="search" (authorBooks)="showAuthorBooks($event)"/>
     </mat-tab>
 
-    <mat-tab label="Жанри">
+    <mat-tab [label]="t('tabs.categories')">
       <app-category-list mode="search" (categoryBooks)="goToCategoryBooks($event)"/>
     </mat-tab>
   </mat-tab-group>
-</div>
 
-<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-  <button mat-flat-button (click)="bulkAddBooks()">
-    <mat-icon>add_circle</mat-icon>
-    <span>Додати до бібліотеки</span>
-  </button>
-</app-bulk-action-bar>
-
-<mat-menu #searchBookMenu="matMenu">
-  <ng-template matMenuContent let-book>
-    <button mat-menu-item (click)="goToBookDetails(book)">
-      <mat-icon>info</mat-icon>
-      <span>Деталі книги</span>
-    </button>
-    <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button (click)="bulkAddBooks()">
       <mat-icon>add_circle</mat-icon>
-      <span>{{ isBookInLibrary(book) ? 'Вже у бібліотеці' : 'Додати до бібліотеки' }}</span>
+      <span>{{ t('bulkActions.addToLibrary') }}</span>
     </button>
-  </ng-template>
-</mat-menu>
+  </app-bulk-action-bar>
+
+  <mat-menu #searchBookMenu="matMenu">
+    <ng-template matMenuContent let-book>
+      <ng-container *transloco="let m; prefix: 'search.menu'">
+        <button mat-menu-item (click)="goToBookDetails(book)">
+          <mat-icon>info</mat-icon>
+          <span>{{ m('bookDetails') }}</span>
+        </button>
+        <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+          <mat-icon>add_circle</mat-icon>
+          <span>{{ isBookInLibrary(book) ? m('alreadyInLibrary') : m('addToLibrary') }}</span>
+        </button>
+      </ng-container>
+    </ng-template>
+  </mat-menu>
+</div>

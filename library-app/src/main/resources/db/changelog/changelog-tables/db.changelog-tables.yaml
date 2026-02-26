@@ -23,8 +23,8 @@ databaseChangeLog:
       file: db/changelog/changelog-tables/changeset/create_view_library_books_view.yaml
   - include:
       file: db/changelog/changelog-tables/changeset/create_function_get_collection_subtree_ids.yaml
-    - include:
-        file: db/changelog/changelog-tables/changeset/create_table_notes.yaml
-    - include:
-        file: db/changelog/changelog-tables/changeset/seed_data.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/create_table_notes.yaml
+  - include:
+      file: db/changelog/changelog-tables/changeset/seed_data.yaml
   

@@ -3,9 +3,10 @@ import {CommonModule} from '@angular/common';
 import {MatMenuModule, MatMenuPanel} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
-import {getStatusName, LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
+import {LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {Router} from '@angular/router';
 import {Book} from '../interfaces/book';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-library-book-menu-items',
@@ -15,6 +16,7 @@ import {Book} from '../interfaces/book';
     MatMenuModule,
     MatIconModule,
     BookRatingComponent,
+    TranslocoDirective,
   ],
   templateUrl: './library-book-menu-items.component.html',
   styleUrl: './library-book-menu-items.component.scss'
@@ -22,7 +24,6 @@ import {Book} from '../interfaces/book';
 export class LibraryBookMenuItemsComponent {
 
   protected readonly LIBRARY_BOOK_STATUSES = LIBRARY_BOOK_STATUSES;
-  protected readonly getStatusName = getStatusName;
 
   @ViewChild('statusMenu', {static: true}) statusMenu!: MatMenuPanel<any>;
   @ViewChild('ratingMenu', {static: true}) ratingMenu!: MatMenuPanel<any>;

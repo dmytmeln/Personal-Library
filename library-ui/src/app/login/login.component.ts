@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../services/auth.service';
+import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,9 @@ import { AuthService } from '../services/auth.service';
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
-    RouterLink
+    RouterLink,
+    TranslocoDirective,
+    TranslocoPipe,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -33,7 +36,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translocoService: TranslocoService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -48,7 +52,7 @@ export class LoginComponent {
           this.router.navigate(['/']);
         },
         error: (error) => {
-          this.errorMessage = 'Invalid email or password';
+          this.errorMessage = this.translocoService.translate('auth.login.error');
           console.error('Login error:', error);
         }
       });

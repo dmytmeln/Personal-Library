@@ -7,6 +7,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatTree, MatTreeModule} from '@angular/material/tree';
 import {CommonModule} from '@angular/common';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-collection-selector',
@@ -16,7 +17,8 @@ import {CommonModule} from '@angular/common';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    MatTreeModule
+    MatTreeModule,
+    TranslocoDirective,
   ],
   templateUrl: './collection-selector.component.html',
   styleUrl: './collection-selector.component.scss'
@@ -40,6 +42,7 @@ export class CollectionSelectorComponent implements OnInit {
   constructor(
     private collectionService: CollectionService,
     private cdr: ChangeDetectorRef,
+    private translocoService: TranslocoService
   ) {
   }
 
@@ -54,7 +57,7 @@ export class CollectionSelectorComponent implements OnInit {
           this.onSelect.emit({id: found.id, name: found.name});
         }
       } else if (this.showRoot()) {
-        this.onSelect.emit({id: null, name: 'Root'});
+        this.onSelect.emit({id: null, name: this.translocoService.translate('collections.selector.root')});
       }
 
       this.cdr.detectChanges();

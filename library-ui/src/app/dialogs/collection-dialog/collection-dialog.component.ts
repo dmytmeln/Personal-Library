@@ -12,6 +12,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {SelectedCollection} from '../../interfaces/selected-collection';
 import {CollectionSelectorDialogComponent} from '../collection-selector-dialog/collection-selector-dialog.component';
 import {filter} from 'rxjs';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 export interface CollectionDialogData {
   isEdit: boolean;
@@ -29,6 +30,7 @@ export interface CollectionDialogData {
     NgStyle,
     FormsModule,
     MatIconModule,
+    TranslocoDirective,
   ],
   templateUrl: './collection-dialog.component.html',
   styleUrl: './collection-dialog.component.scss'
@@ -51,6 +53,7 @@ export class CollectionDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<CollectionDialogComponent>,
     private collectionService: CollectionService,
     private dialog: MatDialog,
+    private translocoService: TranslocoService,
   ) {
     this.isEdit = data.isEdit;
 
@@ -62,6 +65,7 @@ export class CollectionDialogComponent implements OnInit {
       description: new FormControl<string | null>(data.collection?.description || null),
     });
     this.selectedColor = data.collection?.color || this.colors[0];
+    this.selectedParent.name = this.translocoService.translate('collections.selector.root');
   }
 
   ngOnInit(): void {

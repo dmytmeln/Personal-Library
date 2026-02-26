@@ -13,9 +13,9 @@
       }
     </p>
     <p class="category">{{ book().categoryName }}</p>
-    <div class="metadata">
+    <div class="metadata" *transloco="let c; prefix: 'common'">
       <span class="chip">{{ book().publishYear }}</span>
-      <span class="chip">{{ book().pages }}p</span>
+      <span class="chip">{{ book().pages }}{{ c('pagesShort') }}</span>
       <span class="chip">{{ book().language }}</span>
       @if (actionsMenu() && !selectionMode()) {
         <button mat-icon-button

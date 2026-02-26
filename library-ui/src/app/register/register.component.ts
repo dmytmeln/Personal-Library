@@ -9,6 +9,8 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {AuthService} from '../services/auth.service';
 
+import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -20,7 +22,9 @@ import {AuthService} from '../services/auth.service';
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
-    RouterLink
+    RouterLink,
+    TranslocoDirective,
+    TranslocoPipe,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
@@ -34,7 +38,8 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translocoService: TranslocoService
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -53,14 +58,14 @@ export class RegisterComponent {
               this.router.navigate(['/']);
             },
             error: (error) => {
-              this.errorMessage = 'Registration successful but login failed. Please login manually.';
+              this.errorMessage = this.translocoService.translate('auth.register.loginFailed');
               console.error('Auto-login error:', error);
               this.router.navigate(['/login']);
             }
           });
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+          this.errorMessage = error.error?.message || this.translocoService.translate('auth.register.error');
           console.error('Registration error:', error);
         }
       });

@@ -8,6 +8,7 @@ import {MatDividerModule} from '@angular/material/divider';
 import {Router} from '@angular/router';
 import {AuthService} from '../services/auth.service';
 import {UserResponse} from '../interfaces/user-response';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-profile',
@@ -18,7 +19,8 @@ import {UserResponse} from '../interfaces/user-response';
     MatButtonModule,
     MatIconModule,
     MatListModule,
-    MatDividerModule
+    MatDividerModule,
+    TranslocoDirective,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
@@ -31,7 +33,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translocoService: TranslocoService
   ) {
   }
 
@@ -46,7 +49,7 @@ export class ProfileComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.errorMessage = 'Failed to load user profile';
+        this.errorMessage = this.translocoService.translate('profile.loadError');
         this.loading = false;
         console.error('Error loading profile:', error);
       }

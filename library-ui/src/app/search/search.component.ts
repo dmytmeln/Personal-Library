@@ -1,4 +1,5 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
@@ -44,6 +45,8 @@ import {Router} from '@angular/router';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {map} from 'rxjs';
 
 interface BooksState {
   items: Book[];
@@ -97,19 +100,27 @@ const EMPTY_BOOK_FILTERS: BaseBookFilters = {
     FooterFiltersDirective,
     BulkActionBarComponent,
     MatButtonToggleModule,
+    TranslocoDirective,
   ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
 })
 export class SearchComponent implements OnInit {
 
-  readonly DEFAULT_SORT_OPTIONS: SortOption[] = [
-    {field: 'title', label: 'Назва'},
-    {field: 'publishYear', label: 'Рік видання'},
-    {field: 'language', label: 'Мова'},
-    {field: 'pages', label: 'Сторінки'},
-    {field: 'category.name', label: 'Категорія'},
-  ];
+  private translocoService = inject(TranslocoService);
+
+  readonly DEFAULT_SORT_OPTIONS = toSignal(
+    this.translocoService.selectTranslateObject('search.sort').pipe(
+      map(t => [
+        {field: 'title', label: t.title},
+        {field: 'publishYear', label: t.publishYear},
+        {field: 'language', label: t.language},
+        {field: 'pages', label: t.pages},
+        {field: 'category.name', label: t.category},
+      ])
+    ),
+    {initialValue: []}
+  );
 
   private libraryBookIds: Set<number> = new Set<number>();
   private snackCommon: MatSnackCommon;
@@ -181,7 +192,7 @@ export class SearchComponent implements OnInit {
     this.libraryBookService.addBook(book.id).subscribe({
       next: () => {
         this.libraryBookIds.add(book.id);
-        this.snackCommon.showSuccess('Книгу додано до бібліотеки');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
       },
       error: err => {
         this.snackCommon.showError(err);
@@ -198,7 +209,7 @@ export class SearchComponent implements OnInit {
       next: () => {
         ids.forEach(id => this.libraryBookIds.add(id));
         this.selection.clear();
-        this.snackCommon.showSuccess('Книги додано до бібліотеки');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
       },
       error: err => this.snackCommon.showError(err)
     });

@@ -1,21 +1,21 @@
-<div class="tab-content">
+<div class="tab-content" *transloco="let t; prefix: 'categories'">
   <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
     <div mainFilters>
       <app-text-filter
-        label="Пошук за назвою"
+        [label]="t('filters.name')"
         [value]="filters.state().name"
         (valueChange)="filters.update('name', $event)"/>
     </div>
 
     <div secondaryFilters>
       <app-range-filter
-        label="Кількість книг"
+        [label]="t('filters.booksCount')"
         [range]="filters.state().booksCount"
         (rangeChange)="filters.update('booksCount', $event)"/>
     </div>
   </app-filter-shell>
 
-  <app-sort-bar [options]="categorySortOptions" (sortChange)="onSortChange($event)"/>
+  <app-sort-bar [options]="categorySortOptions()" (sortChange)="onSortChange($event)"/>
 
   <div class="content-wrapper">
     @if (categoriesState.loading) {
@@ -26,11 +26,11 @@
     <div class="authors-table-container">
       <table class="authors-table">
         <thead>
-        <tr>
-          <th>Назва</th>
-          <th>Опис</th>
-          <th>Кількість книг</th>
-          <th>Дії</th>
+        <tr *transloco="let col; prefix: 'categories.table'">
+          <th>{{ col('name') }}</th>
+          <th>{{ col('description') }}</th>
+          <th>{{ col('booksCount') }}</th>
+          <th>{{ col('actions') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -40,10 +40,18 @@
               <td [matTooltip]="category.description || '-'"
                   matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}
               </td>
-              <td>{{ getBooksCountText(category.booksCount || 0) }}</td>
               <td>
-                <button mat-stroked-button (click)="onShowBooks(category)" class="action-btn">
-                  Книги
+                @if (category.booksCount === 1) {
+                  {{ t('booksCount.one', { count: 1 }) }}
+                } @else if (category.booksCount && category.booksCount >= 2 && category.booksCount <= 4) {
+                  {{ t('booksCount.few', { count: category.booksCount }) }}
+                } @else {
+                  {{ t('booksCount.other', { count: category.booksCount || 0 }) }}
+                }
+              </td>
+              <td>
+                <button mat-stroked-button (click)="onShowBooks(category)" class="action-btn" *transloco="let c; prefix: 'common'">
+                  {{ c('books') }}
                 </button>
               </td>
             </tr>
@@ -57,8 +65,7 @@
       [pageSize]="categoriesState.pageSize"
       [pageIndex]="categoriesState.currentPage"
       [pageSizeOptions]="[12, 24, 48]"
-      (page)="onPageChange($event)"
-      aria-label="Вибрати сторінку">
+      (page)="onPageChange($event)">
     </mat-paginator>
   </div>
 </div>

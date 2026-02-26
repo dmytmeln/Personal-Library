@@ -121,7 +121,7 @@ databaseChangeLog:
                   value: J.K. Rowling
               - column:
                   name: country
-                  value: UK
+                  val
               - column:
                   name: birth_year
                   value: 1965

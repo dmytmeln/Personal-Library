@@ -1,8 +1,9 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 import {CollectionSelectorComponent} from '../../common/collection-selector/collection-selector.component';
 import {SelectedCollection} from '../../interfaces/selected-collection';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 export interface CollectionSelectorDialogData {
   initialSelectionId: number | null;
@@ -16,14 +17,19 @@ export interface CollectionSelectorDialogData {
   imports: [
     MatDialogModule,
     MatButtonModule,
-    CollectionSelectorComponent
+    CollectionSelectorComponent,
+    TranslocoDirective,
   ],
   templateUrl: './collection-selector-dialog.component.html',
   styleUrl: './collection-selector-dialog.component.scss'
 })
 export class CollectionSelectorDialogComponent {
 
-  tempSelection: SelectedCollection = { id: null, name: 'Root' };
+  private translocoService = inject(TranslocoService);
+  tempSelection: SelectedCollection = {
+    id: null,
+    name: this.translocoService.translate('collections.selector.root')
+  };
 
   constructor(
     public dialogRef: MatDialogRef<CollectionSelectorDialogComponent>,

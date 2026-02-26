@@ -4,6 +4,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {ActiveSort, SortOption} from '../../interfaces/sort-config';
+import {TranslocoDirective, TranslocoPipe} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-sort-bar',
@@ -13,6 +14,8 @@ import {ActiveSort, SortOption} from '../../interfaces/sort-config';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
+    TranslocoDirective,
+    TranslocoPipe,
   ],
   templateUrl: './sort-bar.component.html',
   styleUrl: './sort-bar.component.scss'

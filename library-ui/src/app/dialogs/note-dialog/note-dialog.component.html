@@ -1,35 +1,37 @@
-<h2 mat-dialog-title>Нотатки до книги</h2>
-<div mat-dialog-subtitle class="book-title">{{ data.bookTitle }}</div>
+<ng-container *transloco="let t; prefix: 'dialogs.notes'">
+  <h2 mat-dialog-title>{{ t('title') }}</h2>
+  <div mat-dialog-subtitle class="book-title">{{ data.bookTitle }}</div>
 
-<mat-dialog-content class="note-dialog-content">
-  @if (loading) {
-    <div class="loading-overlay">
-      <mat-spinner diameter="40"></mat-spinner>
-    </div>
-  }
-
-  <mat-form-field appearance="outline" class="note-field">
-    <mat-label>Ваша нотатка</mat-label>
-    <textarea matInput [formControl]="noteControl" rows="12" placeholder="Напишіть щось..."></textarea>
-  </mat-form-field>
-
-  @if (note) {
-    <div class="note-info">
-      <span>Створено: {{ note.createdAt | date:'short' }}</span>
-      <span>Оновлено: {{ note.updatedAt | date:'short' }}</span>
-    </div>
-  }
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button color="warn" (click)="onClear()" [disabled]="loading || saving || !noteControl.value">Очистити</button>
-  <span class="spacer"></span>
-  <button mat-button (click)="onCancel()" [disabled]="saving">Скасувати</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving || loading">
-    @if (saving) {
-      <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
-    } @else {
-      Зберегти
+  <mat-dialog-content class="note-dialog-content">
+    @if (loading) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
     }
-  </button>
-</mat-dialog-actions>
+
+    <mat-form-field appearance="outline" class="note-field">
+      <mat-label>{{ t('label') }}</mat-label>
+      <textarea matInput [formControl]="noteControl" rows="12" [placeholder]="t('placeholder')"></textarea>
+    </mat-form-field>
+
+    @if (note) {
+      <div class="note-info" *transloco="let c; prefix: 'common'">
+        <span>{{ c('created') }}: {{ note.createdAt | date:'short' }}</span>
+        <span>{{ c('updated') }}: {{ note.updatedAt | date:'short' }}</span>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" *transloco="let c; prefix: 'common'">
+    <button mat-button color="warn" (click)="onClear()" [disabled]="loading || saving || !noteControl.value">{{ c('clear') }}</button>
+    <span class="spacer"></span>
+    <button mat-button (click)="onCancel()" [disabled]="saving">{{ c('cancel') }}</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving || loading">
+      @if (saving) {
+        <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+      } @else {
+        {{ c('save') }}
+      }
+    </button>
+  </mat-dialog-actions>
+</ng-container>

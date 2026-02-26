@@ -1,8 +1,12 @@
-<h1 mat-dialog-title>Confirm Deletion</h1>
-<div mat-dialog-content>
-  <p>{{ data.message }}</p>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onDismiss()">Cancel</button>
-  <button mat-flat-button color="warn" (click)="onConfirm()">Delete</button>
-</div>
+<ng-container *transloco="let t">
+  <h1 mat-dialog-title>{{ t('dialogs.confirmation.title') }}</h1>
+  <div mat-dialog-content>
+    <p>{{ data.message }}</p>
+  </div>
+  <div mat-dialog-actions *transloco="let c; prefix: 'common'">
+    <button mat-button (click)="onDismiss()">{{ c('cancel') }}</button>
+    <button mat-flat-button color="warn" (click)="onConfirm()">
+      {{ data.confirmLabel ? (data.confirmLabel | transloco) : c('confirm') }}
+    </button>
+  </div>
+</ng-container>

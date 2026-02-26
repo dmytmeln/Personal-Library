@@ -1,31 +1,31 @@
-<form class="form" (ngSubmit)="save()" [formGroup]="form">
-  <h1 mat-dialog-title>{{ isEdit ? 'Edit Collection' : 'Create Collection' }}</h1>
+<form class="form" (ngSubmit)="save()" [formGroup]="form" *transloco="let t; prefix: 'collections.dialog'">
+  <h1 mat-dialog-title>{{ isEdit ? t('editTitle') : t('createTitle') }}</h1>
   <div mat-dialog-content>
     @if (!isEdit) {
       <div class="parent-selector-info">
-        <label>Parent Collection:</label>
+        <label>{{ t('parent') }}</label>
         <div class="selection-display">
           <mat-icon>{{ selectedParent.id === null ? 'home' : 'folder' }}</mat-icon>
           <strong>{{ selectedParent.name }}</strong>
           <button type="button" mat-stroked-button color="primary" (click)="openSelector()">
-            Change
+            {{ t('change') }}
           </button>
         </div>
       </div>
     }
 
     <mat-form-field>
-      <mat-label>Name</mat-label>
+      <mat-label>{{ t('name') }}</mat-label>
       <input matInput formControlName="name">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Description</mat-label>
+      <mat-label>{{ t('description') }}</mat-label>
       <textarea matInput formControlName="description"></textarea>
     </mat-form-field>
 
     <div class="color-picker">
-      <label>Color:</label>
+      <label>{{ t('color') }}</label>
       <div class="color-options">
         @for (color of colors; track color) {
           <button
@@ -39,8 +39,10 @@
       </div>
     </div>
   </div>
-  <div mat-dialog-actions>
-    <button type="button" mat-button (click)="close()">Cancel</button>
-    <button type="submit" mat-flat-button color="primary" [disabled]="form.invalid">{{ isEdit ? 'Save' : 'Create' }}</button>
+  <div mat-dialog-actions *transloco="let c; prefix: 'common'">
+    <button type="button" mat-button (click)="close()">{{ c('cancel') }}</button>
+    <button type="submit" mat-flat-button color="primary" [disabled]="form.invalid">
+      {{ isEdit ? t('save') : t('create') }}
+    </button>
   </div>
 </form>

@@ -1,23 +1,23 @@
-<div class="selector-container">
+<div class="selector-container" *transloco="let t; prefix: 'collections.selector'">
   <div class="tree-actions">
-    <button mat-button (click)="tree.expandAll()" matTooltip="Розгорнути всі гілки" [matTooltipShowDelay]="SHOW_DELAY">
+    <button mat-button (click)="tree.expandAll()" [matTooltip]="t('expandTooltip')" [matTooltipShowDelay]="SHOW_DELAY">
       <mat-icon>unfold_more</mat-icon>
-      <span>Розгорнути всі</span>
+      <span>{{ t('expandAll') }}</span>
     </button>
-    <button mat-button (click)="tree.collapseAll()" matTooltip="Згорнути всі гілки" [matTooltipShowDelay]="SHOW_DELAY">
+    <button mat-button (click)="tree.collapseAll()" [matTooltip]="t('collapseTooltip')" [matTooltipShowDelay]="SHOW_DELAY">
       <mat-icon>unfold_less</mat-icon>
-      <span>Згорнути всі</span>
+      <span>{{ t('collapseAll') }}</span>
     </button>
   </div>
 
   @if (showRoot()) {
     <div class="root-selection"
-         (click)="select(null, 'Root')"
+         (click)="select(null, t('root'))"
          [class.active]="selectedId === null"
-         matTooltip="Вибрати корінь (без батьківської колекції)"
+         [matTooltip]="t('rootTooltip')"
          [matTooltipShowDelay]="SHOW_DELAY">
       <mat-icon>home</mat-icon>
-      <span>Root (No Parent)</span>
+      <span>{{ t('root') }}</span>
     </div>
   }
 
@@ -30,7 +30,7 @@
                [class.active]="selectedId === node.id"
                [class.disabled]="isDisabled(node.id)"
                (click)="select(node.id, node.name)"
-               [matTooltip]="isDisabled(node.id) ? 'Книга вже в цій колекції' : 'Вибрати колекцію'"
+               [matTooltip]="isDisabled(node.id) ? t('alreadyInTooltip') : t('selectTooltip')"
                [matTooltipShowDelay]="SHOW_DELAY">
             <mat-icon>folder</mat-icon>
             <span>{{ node.name }}</span>
@@ -43,7 +43,7 @@
         <div class="node-container">
           <button mat-icon-button matTreeNodeToggle
                   [attr.aria-label]="'Toggle ' + node.name"
-                  [matTooltip]="tree.isExpanded(node) ? 'Згорнути' : 'Розгорнути'"
+                  [matTooltip]="tree.isExpanded(node) ? t('collapseNode') : t('expandNode')"
                   [matTooltipShowDelay]="SHOW_DELAY">
             <mat-icon class="mat-icon-rtl-mirror">
               {{ tree.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
@@ -53,7 +53,7 @@
                [class.active]="selectedId === node.id"
                [class.disabled]="isDisabled(node.id)"
                (click)="select(node.id, node.name)"
-               [matTooltip]="isDisabled(node.id) ? 'Книга вже в цій колекції' : 'Вибрати колекцію'"
+               [matTooltip]="isDisabled(node.id) ? t('alreadyInTooltip') : t('selectTooltip')"
                [matTooltipShowDelay]="SHOW_DELAY">
             <mat-icon>{{ tree.isExpanded(node) ? 'folder_open' : 'folder' }}</mat-icon>
             <span>{{ node.name }}</span>

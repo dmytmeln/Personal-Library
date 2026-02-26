@@ -1,54 +1,60 @@
-<h2 mat-dialog-title>Редагувати деталі книги</h2>
-<mat-dialog-content>
-  <form [formGroup]="form" class="details-form">
-    <mat-form-field appearance="outline">
-      <mat-label>Назва</mat-label>
-      <input matInput formControlName="title" placeholder="Введіть назву">
-      @if (form.get('title')?.hasError('required')) {
-        <mat-error>Назва обов'язкова</mat-error>
-      }
-    </mat-form-field>
-
-    <div class="row">
+<ng-container *transloco="let t; prefix: 'dialogs.bookDetails'">
+  <h2 mat-dialog-title>{{ t('title') }}</h2>
+  <mat-dialog-content>
+    <form [formGroup]="form" class="details-form" *transloco="let f; prefix: 'dialogs.bookDetails.fields'">
       <mat-form-field appearance="outline">
-        <mat-label>Рік видання</mat-label>
-        <input matInput type="number" formControlName="publishYear" placeholder="2024">
-        @if (form.get('publishYear')?.hasError('required')) {
-          <mat-error>Рік обов'язковий</mat-error>
+        <mat-label>{{ f('title') }}</mat-label>
+        <input matInput formControlName="title" [placeholder]="f('titlePlaceholder')">
+        @if (form.get('title')?.hasError('required')) {
+          <mat-error>{{ t('errors.titleRequired') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ f('publishYear') }}</mat-label>
+          <input matInput type="number" formControlName="publishYear" [placeholder]="f('publishYearPlaceholder')">
+          @if (form.get('publishYear')?.hasError('required')) {
+            <mat-error>{{ t('errors.yearRequired') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ f('pages') }}</mat-label>
+          <input matInput type="number" formControlName="pages" [placeholder]="f('pagesPlaceholder')">
+          @if (form.get('pages')?.hasError('required')) {
+            <mat-error>{{ t('errors.pagesRequired') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ f('language') }}</mat-label>
+        <input matInput formControlName="language" [placeholder]="f('languagePlaceholder')">
+        @if (form.get('language')?.hasError('required')) {
+          <mat-error>{{ t('errors.languageRequired') }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Кількість сторінок</mat-label>
-        <input matInput type="number" formControlName="pages" placeholder="300">
-        @if (form.get('pages')?.hasError('required')) {
-          <mat-error>Кількість сторінок обов'язкова</mat-error>
-        }
+        <mat-label>{{ f('coverUrl') }}</mat-label>
+        <input matInput formControlName="coverImageUrl" [placeholder]="f('coverUrlPlaceholder')">
       </mat-form-field>
-    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Мова</mat-label>
-      <input matInput formControlName="language" placeholder="Українська">
-      @if (form.get('language')?.hasError('required')) {
-        <mat-error>Мова обов'язкова</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>URL обкладинки</mat-label>
-      <input matInput formControlName="coverImageUrl" placeholder="https://example.com/cover.jpg">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Опис</mat-label>
-      <textarea matInput formControlName="description" rows="5" placeholder="Опис книги..."></textarea>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button color="warn" (click)="onReset()" matTooltip="Скинути всі зміни до початкових значень">Скинути до стандартних</button>
-  <span class="spacer"></span>
-  <button mat-button (click)="onCancel()">Скасувати</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid || !form.dirty">Зберегти</button>
-</mat-dialog-actions>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ f('description') }}</mat-label>
+        <textarea matInput formControlName="description" rows="5" [placeholder]="f('descriptionPlaceholder')"></textarea>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end" *transloco="let c; prefix: 'common'">
+    <button mat-button color="warn" (click)="onReset()" [matTooltip]="t('resetTooltip')">
+      {{ t('resetButton') }}
+    </button>
+    <span class="spacer"></span>
+    <button mat-button (click)="onCancel()">{{ c('cancel') }}</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid || !form.dirty">
+      {{ c('save') }}
+    </button>
+  </mat-dialog-actions>
+</ng-container>

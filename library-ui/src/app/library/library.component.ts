@@ -1,6 +1,7 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {LibraryBookService} from '../services/library-book.service';
-import {getStatusName, LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
+import {LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -19,7 +20,7 @@ import {
   CollectionSelectorDialogComponent,
   CollectionSelectorDialogData
 } from '../dialogs/collection-selector-dialog/collection-selector-dialog.component';
-import {filter} from 'rxjs';
+import {filter, map} from 'rxjs';
 import {SelectedCollection} from '../interfaces/selected-collection';
 import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import {
@@ -27,6 +28,7 @@ import {
   LibraryBookDetailsDialogData,
   LibraryBookDetailsDialogResult
 } from '../dialogs/library-book-details-dialog/library-book-details-dialog.component';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {AutocompleteSearchStore} from '../services/autocomplete-search.store';
 import {LibraryFilters} from '../interfaces/filters';
@@ -104,19 +106,27 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     FooterFiltersDirective,
     BulkActionBarComponent,
     MatButtonToggleModule,
+    TranslocoDirective,
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })
 export class LibraryComponent implements OnInit {
 
-  readonly bookSortOptions: SortOption[] = [
-    {field: 'title', label: 'Назва'},
-    {field: 'publishYear', label: 'Рік видання'},
-    {field: 'rating', label: 'Оцінка'},
-    {field: 'addedAt', label: 'Дата додавання'},
-    {field: 'pages', label: 'Сторінки'},
-  ];
+  private translocoService = inject(TranslocoService);
+
+  readonly bookSortOptions = toSignal(
+    this.translocoService.selectTranslateObject('library.sort').pipe(
+      map(t => [
+        {field: 'title', label: t.title},
+        {field: 'publishYear', label: t.publishYear},
+        {field: 'rating', label: t.rating},
+        {field: 'addedAt', label: t.addedAt},
+        {field: 'pages', label: t.pages},
+      ])
+    ),
+    {initialValue: []}
+  );
 
   booksState = {
     items: [] as LibraryBook[],
@@ -127,10 +137,15 @@ export class LibraryComponent implements OnInit {
     sort: undefined as string[] | undefined,
   };
 
-  readonly statusOptions: SelectOption[] = LIBRARY_BOOK_STATUSES.map(s => ({
-    value: s,
-    label: getStatusName(s)
-  }));
+  readonly statusOptions = toSignal(
+    this.translocoService.selectTranslateObject('library.statuses').pipe(
+      map(t => LIBRARY_BOOK_STATUSES.map(s => ({
+        value: s,
+        label: t[s]
+      })))
+    ),
+    {initialValue: []}
+  );
 
   readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
@@ -262,7 +277,7 @@ export class LibraryComponent implements OnInit {
     this.libraryBookService.removeBook(libraryBook.id).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Книгу видалено з бібліотеки');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookRemoved'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -272,7 +287,7 @@ export class LibraryComponent implements OnInit {
     this.libraryBookService.changeStatus(data[0].id, data[1]).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Статус змінено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.statusChanged'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -282,7 +297,7 @@ export class LibraryComponent implements OnInit {
     this.libraryBookService.changeRating(data.libraryBookId, data.rating).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Оцінку змінено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.ratingChanged'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -290,9 +305,11 @@ export class LibraryComponent implements OnInit {
 
   bulkRemoveFromLibrary(): void {
     const ids = this.selection.selectedIds();
+    const message = this.translocoService.translate('library.bulkRemoveConfirm', {count: ids.length});
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        message: `Ви впевнені, що хочете видалити ${ids.length} вибраних книг з бібліотеки?`
+        message,
+        confirmLabel: 'common.delete'
       }
     });
 
@@ -301,7 +318,7 @@ export class LibraryComponent implements OnInit {
         next: () => {
           this.loadBooks();
           this.selection.clear();
-          this.snackCommon.showSuccess('Книги видалено з бібліотеки');
+          this.snackCommon.showSuccess(this.translocoService.translate('library.success.booksRemoved'));
         },
         error: (err) => this.snackCommon.showError(err)
       });
@@ -324,7 +341,7 @@ export class LibraryComponent implements OnInit {
         this.collectionBookService.bulkAdd(selection.id, ids).subscribe({
           next: () => {
             this.selection.clear();
-            this.snackCommon.showSuccess('Книги додано до колекції');
+            this.snackCommon.showSuccess(this.translocoService.translate('library.success.booksAddedToCollection'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -333,15 +350,14 @@ export class LibraryComponent implements OnInit {
   }
 
   removeFromAllCollections(libraryBook: LibraryBook): void {
+    const message = this.translocoService.translate('library.removeFromAllCollectionsConfirm', {title: libraryBook.book.title});
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: {
-        message: `Ви впевнені, що хочете видалити книгу "${libraryBook.book.title}" з усіх колекцій?`
-      }
+      data: {message}
     });
 
     dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
       this.collectionBookService.removeFromAllCollections(libraryBook.id).subscribe({
-        next: () => this.snackCommon.showSuccess('Книгу видалено з усіх колекцій'),
+        next: () => this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookRemovedFromAllCollections')),
         error: (err) => this.snackCommon.showError(err)
       });
     });
@@ -364,7 +380,7 @@ export class LibraryComponent implements OnInit {
         if (selection.id) {
           this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
             next: () => {
-              this.snackCommon.showSuccess('Книгу додано до колекції');
+              this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAddedToCollection'));
             },
             error: (err) => this.snackCommon.showError(err)
           });
@@ -399,9 +415,9 @@ export class LibraryComponent implements OnInit {
       }
     }).afterClosed().pipe(filter(Boolean)).subscribe(result => {
       if (result === 'saved') {
-        this.snackCommon.showSuccess('Нотатку збережено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.noteSaved'));
       } else if (result === 'deleted') {
-        this.snackCommon.showSuccess('Нотатку видалено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.noteDeleted'));
       }
     });
   }
@@ -410,7 +426,7 @@ export class LibraryComponent implements OnInit {
     this.libraryBookService.resetDetails(libraryBook.id).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Деталі книги скинуто');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.detailsReset'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -423,7 +439,7 @@ export class LibraryComponent implements OnInit {
     this.libraryBookService.updateDetails(libraryBook.id, result.payload).subscribe({
       next: () => {
         this.loadBooks();
-        this.snackCommon.showSuccess('Деталі книги оновлено');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.detailsUpdated'));
       },
       error: (err) => this.snackCommon.showError(err)
     });
@@ -441,7 +457,7 @@ export class LibraryComponent implements OnInit {
         this.libraryBookService.addBook(bookId).subscribe({
           next: () => {
             this.loadBooks();
-            this.snackCommon.showSuccess('Книгу додано до бібліотеки');
+            this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
           },
           error: (err) => this.snackCommon.showError(err)
         });

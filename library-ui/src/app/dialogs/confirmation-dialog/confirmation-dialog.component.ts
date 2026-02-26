@@ -1,14 +1,16 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
+import {TranslocoDirective, TranslocoPipe} from '@jsverse/transloco';
 
 export interface ConfirmationDialogData {
   message: string;
+  confirmLabel?: string;
 }
 
 @Component({
   selector: 'app-confirmation-dialog',
-  imports: [MatDialogModule, MatButtonModule],
+  imports: [MatDialogModule, MatButtonModule, TranslocoDirective, TranslocoPipe],
   templateUrl: './confirmation-dialog.component.html',
   styleUrl: './confirmation-dialog.component.scss'
 })

@@ -7,6 +7,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatMenuModule, MatMenuPanel} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-book-card',
@@ -20,6 +21,7 @@ import {MatIconButton} from '@angular/material/button';
     MatMenuModule,
     MatIconModule,
     MatIconButton,
+    TranslocoDirective,
   ],
   templateUrl: './book-card.component.html',
   styleUrl: './book-card.component.scss'

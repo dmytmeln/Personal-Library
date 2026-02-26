@@ -13,6 +13,7 @@ import {Router} from '@angular/router';
 import {Page} from '../../interfaces/page';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-view-book-list-dialog',
@@ -28,6 +29,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
+    TranslocoDirective,
   ],
   templateUrl: './view-book-list-dialog.html',
   styleUrl: './view-book-list-dialog.scss'

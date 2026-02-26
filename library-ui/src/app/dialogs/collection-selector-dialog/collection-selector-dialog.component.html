@@ -1,13 +1,17 @@
-<h1 mat-dialog-title>Select Collection</h1>
-<div mat-dialog-content>
-  <app-collection-selector
-    [initialSelectionId]="data.initialSelectionId"
-    [disabledIds]="data.disabledIds || []"
-    [showRoot]="data.showRoot ?? true"
-    (onSelect)="onSelect($event)">
-  </app-collection-selector>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" [mat-dialog-close]="tempSelection" [disabled]="!isSelectionValid()">Select</button>
-</div>
+<ng-container *transloco="let t; prefix: 'collections.selector'">
+  <h1 mat-dialog-title>{{ t('title') }}</h1>
+  <div mat-dialog-content>
+    <app-collection-selector
+      [initialSelectionId]="data.initialSelectionId"
+      [disabledIds]="data.disabledIds || []"
+      [showRoot]="data.showRoot ?? true"
+      (onSelect)="onSelect($event)">
+    </app-collection-selector>
+  </div>
+  <div mat-dialog-actions *transloco="let c; prefix: 'common'">
+    <button mat-button (click)="onCancel()">{{ c('cancel') }}</button>
+    <button mat-flat-button color="primary" [mat-dialog-close]="tempSelection" [disabled]="!isSelectionValid()">
+      {{ t('select') }}
+    </button>
+  </div>
+</ng-container>

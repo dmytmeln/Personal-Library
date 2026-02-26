@@ -5,6 +5,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialogClose, MatDialogRef} from '@angular/material/dialog';
 import {NgStyle} from '@angular/common';
 import {CreateCollection} from '../../interfaces/create-collection';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-create-collection-dialog',
@@ -16,6 +17,7 @@ import {CreateCollection} from '../../interfaces/create-collection';
     MatIconButton,
     NgStyle,
     FormsModule,
+    TranslocoDirective,
   ],
   templateUrl: './create-collection-dialog.html',
   styleUrl: './create-collection-dialog.scss'

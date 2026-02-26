@@ -1,73 +1,78 @@
-<h4 mat-dialog-title>Оберіть книгу!</h4>
+<ng-container *transloco="let t; prefix: 'dialogs.viewBookList'">
+  <h4 mat-dialog-title>{{ t('title') }}</h4>
 
-<div mat-dialog-content>
-  <mat-form-field class="full-width">
-    <mat-label>Пошук за назвою</mat-label>
-    <input [(ngModel)]="searchText" matInput (keyup)="applyFilter($event)" placeholder="Назва книги"/>
-  </mat-form-field>
+  <div mat-dialog-content>
+    <mat-form-field class="full-width">
+      <mat-label>{{ t('searchLabel') }}</mat-label>
+      <input [(ngModel)]="searchText" matInput (keyup)="applyFilter($event)" [placeholder]="t('searchPlaceholder')"/>
+    </mat-form-field>
 
-  <div class="table-container mat-elevation-z8">
-    @if (loading) {
-      <div class="loading-overlay">
-        <mat-spinner diameter="50"></mat-spinner>
-      </div>
-    }
+    <div class="table-container mat-elevation-z8">
+      @if (loading) {
+        <div class="loading-overlay">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      }
 
-    <table mat-table matSort [dataSource]="dataSource">
-      <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Назва</th>
-        <td mat-cell *matCellDef="let item"
-            [matTooltip]="getBookFromItem(item).title"
-            [matTooltipDisabled]="!shouldShowTooltip(getBookFromItem(item).title)" class="title-cell">
-          {{ truncateTitle(getBookFromItem(item).title) }}
-        </td>
-      </ng-container>
+      <table mat-table matSort [dataSource]="dataSource" *transloco="let col; prefix: 'dialogs.viewBookList.columns'">
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ col('title') }}</th>
+          <td mat-cell *matCellDef="let item"
+              [matTooltip]="getBookFromItem(item).title"
+              [matTooltipDisabled]="!shouldShowTooltip(getBookFromItem(item).title)" class="title-cell">
+            {{ truncateTitle(getBookFromItem(item).title) }}
+          </td>
+        </ng-container>
 
-      <ng-container [matColumnDef]="data.categoryColumn">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Жанр</th>
-        <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).categoryName }}</td>
-      </ng-container>
+        <ng-container [matColumnDef]="data.categoryColumn">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ col('genre') }}</th>
+          <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).categoryName }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="publishYear">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">Рік</th>
-        <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).publishYear }}</td>
-      </ng-container>
+        <ng-container matColumnDef="publishYear">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">{{ col('year') }}</th>
+          <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).publishYear }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="language">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Мова</th>
-        <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).language }}</td>
-      </ng-container>
+        <ng-container matColumnDef="language">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ col('language') }}</th>
+          <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).language }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="pages">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">Сторінки</th>
-        <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).pages }}</td>
-      </ng-container>
+        <ng-container matColumnDef="pages">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header start="desc">{{ col('pages') }}</th>
+          <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).pages }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Дії</th>
-        <td mat-cell *matCellDef="let item">
-          <button mat-button color="accent" [mat-dialog-close]="getItemId(item)"
-                  [disabled]="isBookInLibrary(getBookFromItem(item))">
-            Додати
-          </button>
-          <button mat-button color="primary" (click)="goToBookDetails(getBookFromItem(item))" mat-dialog-close>Деталі
-          </button>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>{{ col('actions') }}</th>
+          <td mat-cell *matCellDef="let item">
+            <ng-container *transloco="let common; prefix: 'common'">
+              <button mat-button color="accent" [mat-dialog-close]="getItemId(item)"
+                      [disabled]="isBookInLibrary(getBookFromItem(item))">
+                {{ common('add') }}
+              </button>
+              <button mat-button color="primary" (click)="goToBookDetails(getBookFromItem(item))" mat-dialog-close>
+                {{ common('details') }}
+              </button>
+            </ng-container>
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
 
-    <mat-paginator (page)="onPageChange($event)"
-                   [length]="totalElements"
-                   [pageSizeOptions]="[SIZE]"
-                   showFirstLastButtons
-                   hidePageSize>
-    </mat-paginator>
+      <mat-paginator (page)="onPageChange($event)"
+                     [length]="totalElements"
+                     [pageSizeOptions]="[SIZE]"
+                     showFirstLastButtons
+                     hidePageSize>
+      </mat-paginator>
+    </div>
   </div>
-</div>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Закрити</button>
-</mat-dialog-actions>
+  <mat-dialog-actions align="end" *transloco="let common; prefix: 'common'">
+    <button mat-button mat-dialog-close>{{ common('close') }}</button>
+  </mat-dialog-actions>
+</ng-container>

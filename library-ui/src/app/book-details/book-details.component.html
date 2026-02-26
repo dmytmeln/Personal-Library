@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" *transloco="let t; prefix: 'bookDetails'">
   <div class="book-header">
     @if (book.coverImageUrl) {
       <div class="card-image">
@@ -14,40 +14,40 @@
         }
       </div>
       @if (!bookDetails.isInLibrary) {
-        <button mat-flat-button (click)="addBookToLibrary()">Додати до бібліотеки</button>
+        <button mat-flat-button (click)="addBookToLibrary()">{{ t('addToLibrary') }}</button>
       }
-      <div>Моя оцінка:
+      <div>{{ t('myRating') }}:
         <app-book-rating [rating]="bookDetails.myRating" (ratingChange)="changeRating($event)"/>
       </div>
       <div>
-        Середня оцінка
+        {{ t('averageRating') }}
         <div class="average-rating">
           <app-book-rating [rating]="bookDetails.averageRating" [disabled]="true"/>
-          <span>Кількість відгуків: {{ bookDetails.ratingsNumber }}</span>
+          <span>{{ t('ratingsCount', { count: bookDetails.ratingsNumber }) }}</span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="book-details">
-    <h4>Інформація про книгу</h4>
+    <h4>{{ t('info') }}</h4>
     <div class="book-details-info">
       <div class="book-details-group">
-        <div><span class="book-attribute-label">Жанр:</span> {{ book.categoryName }}</div>
-        <div><span class="book-attribute-label">Кількість сторінок:</span> {{ book.pages }}</div>
-        <div><span class="book-attribute-label">Мова:</span> {{ book.language }}</div>
-        <div><span class="book-attribute-label">Рік видання:</span> {{ book.publishYear }}</div>
-        <div>
-          <span class="book-attribute-label">Статус: </span>
+        <div><span class="book-attribute-label">{{ t('genre') }}:</span> {{ book.categoryName }}</div>
+        <div><span class="book-attribute-label">{{ t('pages') }}:</span> {{ book.pages }}</div>
+        <div><span class="book-attribute-label">{{ t('language') }}:</span> {{ book.language }}</div>
+        <div><span class="book-attribute-label">{{ t('publishYear') }}:</span> {{ book.publishYear }}</div>
+        <div *transloco="let s; prefix: 'library.statuses'">
+          <span class="book-attribute-label">{{ t('status') }}: </span>
           @if (bookDetails && bookDetails.status) {
-            {{ getStatusName(bookDetails.status) }}
+            {{ s(bookDetails.status) }}
           } @else {
-            Не в бібліотеці
+            {{ t('notInLibrary') }}
           }
         </div>
       </div>
       <div class="book-collections">
-        <span class="book-attribute-label">У колекціях:</span>
+        <span class="book-attribute-label">{{ t('inCollections') }}</span>
         @for (collection of bookDetails.collections; track collection.id) {
           <div class="collections">
             <a mat-button (click)="goToCollection(collection)">{{ collection.name }}</a>
@@ -59,7 +59,7 @@
 
   @if (book.description) {
     <div class="book-description">
-      <span class="book-attribute-label">Опис:</span>
+      <span class="book-attribute-label">{{ t('description') }}:</span>
       <p class="book-description-text">{{ book.description }}</p>
     </div>
   }

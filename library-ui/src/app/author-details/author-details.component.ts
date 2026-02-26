@@ -1,5 +1,5 @@
 
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {Author} from '../interfaces/author';
 import {Router} from '@angular/router';
 import {BookService} from '../services/book.service';
@@ -19,6 +19,9 @@ import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {map} from 'rxjs';
 
 @Component({
   selector: 'app-author-details',
@@ -32,19 +35,27 @@ import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.
     MatButtonToggleModule,
     MatButtonModule,
     BulkActionBarComponent,
+    TranslocoDirective,
   ],
   templateUrl: './author-details.component.html',
   styleUrl: './author-details.component.scss'
 })
 export class AuthorDetailsComponent implements OnInit {
 
-  protected readonly bookSortOptions: SortOption[] = [
-    {field: 'title', label: 'Назва'},
-    {field: 'publishYear', label: 'Рік видання'},
-    {field: 'language', label: 'Мова'},
-    {field: 'pages', label: 'Сторінки'},
-    {field: 'category.name', label: 'Категорія'},
-  ];
+  private translocoService = inject(TranslocoService);
+
+  protected readonly bookSortOptions = toSignal(
+    this.translocoService.selectTranslateObject('search.sort').pipe(
+      map(t => [
+        {field: 'title', label: t.title},
+        {field: 'publishYear', label: t.publishYear},
+        {field: 'language', label: t.language},
+        {field: 'pages', label: t.pages},
+        {field: 'category.name', label: t.category},
+      ])
+    ),
+    {initialValue: []}
+  );
 
   private authorId: number;
   private libraryBookIds: Set<number> = new Set<number>();
@@ -93,7 +104,7 @@ export class AuthorDetailsComponent implements OnInit {
     this.libraryBookService.addBook(book.id).subscribe({
       next: () => {
         this.libraryBookIds.add(book.id);
-        this.snackCommon.showSuccess('Книгу додано до бібліотеки');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
       },
       error: err => {
         this.snackCommon.showError(err);
@@ -110,7 +121,7 @@ export class AuthorDetailsComponent implements OnInit {
       next: () => {
         ids.forEach(id => this.libraryBookIds.add(id));
         this.selection.clear();
-        this.snackCommon.showSuccess('Книги додано до бібліотеки');
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
       },
       error: err => this.snackCommon.showError(err)
     });

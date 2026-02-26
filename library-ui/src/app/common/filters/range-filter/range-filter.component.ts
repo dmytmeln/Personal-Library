@@ -8,6 +8,8 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {Range} from '../../../interfaces/filters';
 
+import {TranslocoDirective} from '@jsverse/transloco';
+
 @Component({
   selector: 'app-range-filter',
   standalone: true,
@@ -19,6 +21,7 @@ import {Range} from '../../../interfaces/filters';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
+    TranslocoDirective,
   ],
   templateUrl: './range-filter.component.html',
   styleUrl: './range-filter.component.scss'
@@ -26,8 +29,8 @@ import {Range} from '../../../interfaces/filters';
 export class RangeFilterComponent {
   label = input.required<string>();
   range = input.required<Range<number>>();
-  minPlaceholder = input<string>('Від');
-  maxPlaceholder = input<string>('До');
+  minPlaceholder = input<string>('Any');
+  maxPlaceholder = input<string>('Any');
   
   rangeChange = output<Range<number>>();
 

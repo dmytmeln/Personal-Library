@@ -1,9 +1,9 @@
-<div class="language-filter">
+<div class="language-filter" *transloco="let t; prefix: 'library.filters'">
   <div class="language-filter-header">
-    <span class="filter-label">Мови:</span>
+    <span class="filter-label">{{ t('languages') }}:</span>
     @if (selected().length > 0) {
       <button mat-stroked-button (click)="clear.emit()" class="language-action-btn">
-        Очистити
+        {{ 'common.clear' | transloco }}
       </button>
     }
   </div>
@@ -19,7 +19,7 @@
   </div>
   @if (hasMore) {
     <button mat-stroked-button (click)="toggleShowAll.emit()" class="show-more-btn">
-      {{ showAll() ? 'Показати менше' : 'Показати більше' }}
+      {{ (showAll() ? 'common.showLess' : 'common.showMore') | transloco }}
     </button>
   }
 </div>

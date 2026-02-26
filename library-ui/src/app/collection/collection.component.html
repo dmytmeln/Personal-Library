@@ -1,8 +1,8 @@
-<div class="container">
+<div class="container" *transloco="let t; prefix: 'collections'">
   <div class="breadcrumbs">
     <a routerLink="/collections" class="breadcrumb-item">
       <mat-icon>home</mat-icon>
-      <span>Колекції</span>
+      <span>{{ t('title') }}</span>
     </a>
     @for (ancestor of collection.ancestors; track ancestor.id) {
       <mat-icon class="separator">chevron_right</mat-icon>
@@ -24,7 +24,7 @@
           <p class="collection-description">{{ collection.description }}</p>
         }
         <p class="books-number">
-          {{ booksState.totalElements }} книг, {{ collection.children.length }} підколекцій
+          {{ t('stats', {books: booksState.totalElements, subcollections: collection.children.length}) }}
         </p>
       </div>
 
@@ -37,10 +37,10 @@
             <mat-icon>view_list</mat-icon>
           </mat-button-toggle>
         </mat-button-toggle-group>
-        
+
         <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
           <mat-icon>add</mat-icon>
-          Додати книгу
+          {{ t('addBook') }}
         </button>
 
         <button mat-icon-button [matMenuTriggerFor]="collectionMenu" class="more-btn">
@@ -52,7 +52,7 @@
 
   @if (collection.children && collection.children.length > 0) {
     <div class="sub-collections-section">
-      <h4>Підколекції:</h4>
+      <h4>{{ t('subcollections') }}</h4>
       <div class="sub-collections-list">
         @for (child of collection.children; track child.id) {
           <a [routerLink]="['/collections', child.id]" class="sub-collection-card">
@@ -66,25 +66,25 @@
 
   <div class="collection-books">
     <div class="section-header">
-      <h4>Книги в колекції:</h4>
+      <h4>{{ t('booksInCollection') }}</h4>
       <mat-slide-toggle
         [checked]="filters.state().recursive"
         (change)="filters.update('recursive', $event.checked)"
         color="primary">
-        Показувати підколекції
+        {{ t('showSubcollections') }}
       </mat-slide-toggle>
     </div>
 
     <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
       <div mainFilters>
         <app-text-filter
-          label="Назва книги"
+          [label]="t('bookTitle')"
           [value]="filters.state().title || ''"
           (valueChange)="filters.update('title', $event)"/>
       </div>
     </app-filter-shell>
 
-    <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
+    <app-sort-bar [options]="bookSortOptions()" (sortChange)="onSortChange($event)"/>
 
     <app-books-display
       [books]="booksState.items"
@@ -97,87 +97,89 @@
       [viewMode]="viewMode()"
       (pageChange)="onPageChange($event)"/>
   </div>
-</div>
 
-<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-  <button mat-flat-button (click)="openBulkAddToOtherCollectionDialog()">
-    <mat-icon>playlist_add</mat-icon>
-    <span>Додати до іншої колекції</span>
-  </button>
-  <button mat-flat-button color="warn" (click)="bulkRemoveFromCollection()"
-          [disabled]="filters.state().recursive"
-          [matTooltip]="filters.state().recursive ? 'Неможливо видалити книги в режимі рекурсивного перегляду' : ''">
-    <mat-icon>remove_circle</mat-icon>
-    <span>Видалити з цієї колекції</span>
-  </button>
-</app-bulk-action-bar>
-
-<mat-menu #collectionMenu="matMenu">
-  <button mat-menu-item (click)="openUpdateDialog()">
-    <mat-icon>edit</mat-icon>
-    <span>Редагувати</span>
-  </button>
-  <button mat-menu-item (click)="openCreateSubDialog()">
-    <mat-icon>add</mat-icon>
-    <span>Створити підколекцію</span>
-  </button>
-  <button mat-menu-item (click)="addChildCollection()">
-    <mat-icon>playlist_add</mat-icon>
-    <span>Додати існуючу колекцію</span>
-  </button>
-  <button mat-menu-item (click)="moveCollection()">
-    <mat-icon>drive_file_move</mat-icon>
-    <span>Перемістити</span>
-  </button>
-  <mat-divider></mat-divider>
-  <button mat-menu-item (click)="deleteCollection()">
-    <mat-icon color="warn">delete</mat-icon>
-    <span>Видалити</span>
-  </button>
-</mat-menu>
-
-<mat-menu #collectionBookMenu="matMenu">
-  <ng-template matMenuContent let-libraryBook="libraryBook">
-    <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
-      <mat-icon>info</mat-icon>
-      <span>Деталі книги</span>
-    </button>
-    <button mat-menu-item (click)="openNoteDialog(libraryBook)">
-      <mat-icon>note_alt</mat-icon>
-      <span>Мої нотатки</span>
-    </button>
-    <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
-      <mat-icon>edit</mat-icon>
-      <span>Редагувати деталі</span>
-    </button>
-    <button mat-menu-item (click)="addToCollection(libraryBook)">
+  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button (click)="openBulkAddToOtherCollectionDialog()">
       <mat-icon>playlist_add</mat-icon>
-      <span>Додати до колекції</span>
+      <span>{{ t('addToOtherCollection') }}</span>
     </button>
-    <button mat-menu-item (click)="moveBookToOtherCollection(libraryBook)">
-      <mat-icon>drive_file_move</mat-icon>
-      <span>Перемістити в іншу колекцію</span>
-    </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu"
-            [matMenuTriggerData]="{ libraryBook: libraryBook }">
-      <mat-icon>label</mat-icon>
-      <span>Змінити статус</span>
-    </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu"
-            [matMenuTriggerData]="{ libraryBook: libraryBook }">
-      <mat-icon>star</mat-icon>
-      <span>Оцінити</span>
-    </button>
-    <button mat-menu-item (click)="removeFromAllCollections(libraryBook)">
-      <mat-icon>folder_delete</mat-icon>
-      <span>Видалити з усіх колекцій</span>
-    </button>
-    <button mat-menu-item (click)="deleteBook(libraryBook)">
+    <button mat-flat-button color="warn" (click)="bulkRemoveFromCollection()"
+            [disabled]="filters.state().recursive"
+            [matTooltip]="filters.state().recursive ? t('cannotRemoveRecursive') : ''">
       <mat-icon>remove_circle</mat-icon>
-      <span>Видалити з цієї колекції</span>
+      <span>{{ t('removeFromCollection') }}</span>
     </button>
-  </ng-template>
-</mat-menu>
+  </app-bulk-action-bar>
+
+  <mat-menu #collectionMenu="matMenu">
+    <ng-container *transloco="let c; prefix: 'common'">
+      <button mat-menu-item (click)="openUpdateDialog()">
+        <mat-icon>edit</mat-icon>
+        <span>{{ c('edit') }}</span>
+      </button>
+      <button mat-menu-item (click)="openCreateSubDialog()">
+        <mat-icon>add</mat-icon>
+        <span>{{ t('createSubcollection') }}</span>
+      </button>
+      <button mat-menu-item (click)="addChildCollection()">
+        <mat-icon>playlist_add</mat-icon>
+        <span>{{ t('addExistingCollection') }}</span>
+      </button>
+      <button mat-menu-item (click)="moveCollection()">
+        <mat-icon>drive_file_move</mat-icon>
+        <span>{{ c('move') }}</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="deleteCollection()">
+        <mat-icon color="warn">delete</mat-icon>
+        <span>{{ c('delete') }}</span>
+      </button>
+    </ng-container>
+  </mat-menu>
+
+  <mat-menu #collectionBookMenu="matMenu">
+    <ng-template matMenuContent let-libraryBook="libraryBook">
+      <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
+        <mat-icon>info</mat-icon>
+        <span>{{ t('bookDetails') }}</span>
+      </button>
+      <button mat-menu-item (click)="openNoteDialog(libraryBook)">
+        <mat-icon>note_alt</mat-icon>
+        <span>{{ t('myNotes') }}</span>
+      </button>
+      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
+        <mat-icon>edit</mat-icon>
+        <span>{{ t('editDetails') }}</span>
+      </button>
+      <button mat-menu-item (click)="addToCollection(libraryBook)">
+        <mat-icon>playlist_add</mat-icon>
+        <span>{{ t('addBook') }}</span>
+      </button>
+      <button mat-menu-item (click)="moveBookToOtherCollection(libraryBook)">
+        <mat-icon>drive_file_move</mat-icon>
+        <span>{{ t('moveToOtherCollection') }}</span>
+      </button>
+      <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu"
+              [matMenuTriggerData]="{ libraryBook: libraryBook }">
+        <mat-icon>label</mat-icon>
+        <span>{{ t('changeStatus') }}</span>
+      </button>
+      <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu"
+              [matMenuTriggerData]="{ libraryBook: libraryBook }">
+        <mat-icon>star</mat-icon>
+        <span>{{ t('rate') }}</span>
+      </button>
+      <button mat-menu-item (click)="removeFromAllCollections(libraryBook)">
+        <mat-icon>folder_delete</mat-icon>
+        <span>{{ t('removeFromAllCollections') }}</span>
+      </button>
+      <button mat-menu-item (click)="deleteBook(libraryBook)">
+        <mat-icon>remove_circle</mat-icon>
+        <span>{{ t('removeFromCollection') }}</span>
+      </button>
+    </ng-template>
+  </mat-menu>
+</div>
 
 <app-library-book-menu-items #sharedMenu
                              (statusChange)="statusChange($event)"

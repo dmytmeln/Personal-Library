@@ -1,0 +1,386 @@
+{
+  "appTitle": "Personal Library",
+  "menu": {
+    "library": "Library",
+    "collections": "Collections",
+    "recommendations": "Recommendations",
+    "search": "Search",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "move": "Move",
+    "status": "Status",
+    "rating": "Rating",
+    "details": "Details",
+    "notes": "Notes",
+    "any": "Any",
+    "clear": "Clear",
+    "created": "Created",
+    "updated": "Updated",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "logout": "Logout",
+    "books": "Books",
+    "sortBy": "Sort by",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "from": "From",
+    "to": "To",
+    "pagesShort": "p.",
+    "pagination": {
+      "itemsPerPage": "Items per page:",
+      "nextPage": "Next page",
+      "previousPage": "Previous page",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "range": "{{startIndex}} – {{endIndex}} of {{length}}"
+    }
+  },
+  "dialogs": {
+    "confirmation": {
+      "title": "Confirm Action"
+    },
+    "deleteBook": {
+      "title": "Delete Book",
+      "confirmMessage": "Are you sure you want to delete the book <strong>{{title}}</strong> from your library?",
+      "collectionsWarning": "Warning! This book is in the following collections:",
+      "deleteWarning": "The book will be removed from all these collections."
+    },
+    "notes": {
+      "title": "Book Notes",
+      "label": "Your note",
+      "placeholder": "Write something..."
+    },
+    "viewBookList": {
+      "title": "Select a book!",
+      "searchLabel": "Search by title",
+      "searchPlaceholder": "Book title",
+      "columns": {
+        "title": "Title",
+        "genre": "Genre",
+        "year": "Year",
+        "language": "Language",
+        "pages": "Pages",
+        "actions": "Actions"
+      }
+    },
+    "bookDetails": {
+      "title": "Edit Book Details",
+      "resetTooltip": "Reset all changes to original values",
+      "noChangesMessage": "You haven't changed any field. Do you want to exit?",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "Enter title",
+        "publishYear": "Publish Year",
+        "publishYearPlaceholder": "2024",
+        "pages": "Pages",
+        "pagesPlaceholder": "300",
+        "language": "Language",
+        "languagePlaceholder": "English",
+        "coverUrl": "Cover URL",
+        "coverUrlPlaceholder": "https://example.com/cover.jpg",
+        "description": "Description",
+        "descriptionPlaceholder": "Book description..."
+      },
+      "errors": {
+        "titleRequired": "Title is required",
+        "yearRequired": "Year is required",
+        "pagesRequired": "Pages count is required",
+        "languageRequired": "Language is required"
+      },
+      "resetButton": "Reset to Defaults"
+    }
+  },
+  "library": {
+    "title": "My Library",
+    "sortTooltip": "Click to change direction or cancel",
+    "tabs": {
+      "allBooks": "All Books",
+      "authors": "Authors",
+      "categories": "Categories"
+    },
+    "filters": {
+      "bookTitle": "Book Title",
+      "status": "Status",
+      "author": "Author",
+      "category": "Category",
+      "publishYear": "Publish Year",
+      "pages": "Pages",
+      "rating": "Rating",
+      "from": "From {{val}}",
+      "to": "To {{val}}",
+      "languages": "Languages"
+    },
+    "sort": {
+      "title": "Title",
+      "publishYear": "Publish Year",
+      "rating": "Rating",
+      "addedAt": "Added At",
+      "pages": "Pages"
+    },
+    "bulkActions": {
+      "addToCollection": "Add to collection",
+      "removeFromLibrary": "Remove from library"
+    },
+    "menu": {
+      "bookDetails": "Book Details",
+      "myNotes": "My Notes",
+      "editDetails": "Edit Details",
+      "addToCollection": "Add to Collection",
+      "changeStatus": "Change Status",
+      "rate": "Rate",
+      "removeFromAllCollections": "Remove from all collections",
+      "removeFromLibrary": "Remove from Library"
+    },
+    "bulkRemoveConfirm": "Are you sure you want to remove {{count}} selected books from the library?",
+    "removeFromAllCollectionsConfirm": "Are you sure you want to remove the book \"{{title}}\" from all collections?",
+    "success": {
+      "ratingChanged": "Rating changed",
+      "statusChanged": "Status changed",
+      "bookRemoved": "Book removed from library",
+      "booksRemoved": "Books removed from library",
+      "booksAddedToCollection": "Books added to collection",
+      "bookRemovedFromAllCollections": "Book removed from all collections",
+      "bookAddedToCollection": "Book added to collection",
+      "detailsReset": "Book details reset",
+      "detailsUpdated": "Book details updated",
+      "bookAdded": "Book added to library",
+      "noteSaved": "Note saved",
+      "noteDeleted": "Note deleted"
+    },
+    "statuses": {
+      "TO_READ": "Want to read",
+      "READING": "Reading now",
+      "READ": "Read",
+      "NO_TAG": "No tag",
+      "STOP": "Stopped reading",
+      "FAVORITE": "Favorites"
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "createCollection": "Create collection",
+    "goToCollection": "Go to collection",
+    "addBook": "Add book",
+    "updateCollection": "Update collection",
+    "createSubcollection": "Create subcollection",
+    "addExistingCollection": "Add collection",
+    "moveCollection": "Move collection",
+    "deleteCollection": "Delete collection",
+    "deleteConfirm": "Are you sure you want to delete the collection \"{{name}}\"? This will also delete all its subcollections and book references.",
+    "bulkRemoveFromCollectionConfirm": "Are you sure you want to remove {{count}} selected books from this collection?",
+    "stats": "{{books}} books, {{subcollections}} subcollections",
+    "subcollections": "Subcollections:",
+    "booksInCollection": "Books in collection:",
+    "showSubcollections": "Show subcollections",
+    "bookTitle": "Book title",
+    "addToOtherCollection": "Add to another collection",
+    "removeFromCollection": "Remove from this collection",
+    "removeBookConfirm": "Are you sure you want to remove the book \"{{title}}\" from this collection?",
+    "cannotRemoveRecursive": "Cannot remove books in recursive view mode",
+    "bookDetails": "Book details",
+    "myNotes": "My notes",
+    "editDetails": "Edit details",
+    "moveToOtherCollection": "Move to another collection",
+    "changeStatus": "Change status",
+    "rate": "Rate",
+    "removeFromAllCollections": "Remove from all collections",
+    "dialog": {
+      "createTitle": "Create Collection",
+      "editTitle": "Edit Collection",
+      "name": "Collection Name",
+      "description": "Collection Description",
+      "color": "Collection Color:",
+      "parent": "Parent Collection:",
+      "change": "Change",
+      "create": "Create",
+      "save": "Save"
+    },
+    "selector": {
+      "title": "Select Collection",
+      "select": "Select",
+      "root": "Root (No Parent)",
+      "rootTooltip": "Select root (no parent collection)",
+      "alreadyInTooltip": "Book is already in this collection",
+      "selectTooltip": "Select collection",
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all",
+      "expandTooltip": "Expand all branches",
+      "collapseTooltip": "Collapse all branches",
+      "expandNode": "Expand",
+      "collapseNode": "Collapse"
+    },
+    "success": {
+      "created": "Collection created successfully",
+      "subcollectionCreated": "Subcollection created successfully",
+      "updated": "Collection updated successfully",
+      "deleted": "Collection deleted successfully",
+      "added": "Collection added successfully",
+      "moved": "Collection moved successfully",
+      "bookAdded": "Book added to collection",
+      "bookRemoved": "Book removed from collection",
+      "bookMoved": "Book moved to another collection",
+      "booksRemoved": "Books removed from collection",
+      "detailsReset": "Book details reset to defaults"
+    }
+  },
+  "bookDetails": {
+    "pages": "Pages",
+    "language": "Language",
+    "addedAt": "Added at",
+    "status": "Status",
+    "myRating": "My rating",
+    "averageRating": "Average rating",
+    "ratingsCount": "Ratings count: {{count}}",
+    "info": "Book information",
+    "publishYear": "Publish year",
+    "notInLibrary": "Not in library",
+    "inCollections": "In collections:",
+    "genre": "Genre",
+    "description": "Description",
+    "addToLibrary": "Add to Library",
+    "noDescription": "No description available"
+  },
+  "profile": {
+    "title": "User Profile",
+    "fullName": "Full Name",
+    "email": "Email",
+    "role": "Role",
+    "provider": "Provider",
+    "loadError": "Failed to load user profile",
+    "loading": "Loading profile..."
+  },
+  "search": {
+    "title": "Search Books",
+    "tabs": {
+      "allBooks": "All Books",
+      "authors": "Authors",
+      "categories": "Categories"
+    },
+    "filters": {
+      "bookTitle": "Book Title",
+      "author": "Author",
+      "category": "Category",
+      "publishYear": "Publish Year",
+      "pages": "Pages",
+      "from": "From {{val}}",
+      "to": "To {{val}}"
+    },
+    "sort": {
+      "title": "Title",
+      "publishYear": "Publish Year",
+      "language": "Language",
+      "pages": "Pages",
+      "category": "Category"
+    },
+    "bulkActions": {
+      "addToLibrary": "Add to library"
+    },
+    "menu": {
+      "bookDetails": "Book Details",
+      "addToLibrary": "Add to Library",
+      "alreadyInLibrary": "Already in library"
+    }
+  },
+  "auth": {
+    "or": "OR",
+    "login": {
+      "title": "Login",
+      "submit": "Sign In",
+      "google": "Login with Google",
+      "noAccount": "Don't have an account?",
+      "error": "Invalid email or password"
+    },
+    "register": {
+      "title": "Register",
+      "submit": "Sign Up",
+      "haveAccount": "Already have an account?",
+      "error": "Registration failed",
+      "loginFailed": "Registration successful but login failed. Please login manually."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "fullName": "Full Name"
+    },
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least {{min}} characters",
+      "fullNameRequired": "Full name is required",
+      "fullNameMinLength": "Full name must be at least {{min}} characters"
+    }
+  },
+  "authors": {
+    "lifeYears": "Life Years",
+    "presentDay": "present day",
+    "biography": "Biography",
+    "authorBooks": "Author's Books",
+    "filters": {
+      "name": "Search by name",
+      "country": "Country",
+      "birthYear": "Birth year",
+      "booksCount": "Books count"
+    },
+    "sort": {
+      "fullName": "Full Name",
+      "country": "Country",
+      "birthYear": "Birth Year",
+      "booksCount": "Books Count"
+    },
+    "actions": {
+      "showBooks": "Show books"
+    },
+    "table": {
+      "fullName": "Full Name",
+      "country": "Country",
+      "birthYear": "Birth Year",
+      "deathYear": "Death Year",
+      "booksCount": "Books Count",
+      "actions": "Actions"
+    },
+    "booksCount": {
+      "one": "{{count}} book",
+      "few": "{{count}} books",
+      "other": "{{count}} books"
+    }
+  },
+  "categories": {
+    "filters": {
+      "name": "Search by name",
+      "booksCount": "Books count"
+    },
+    "sort": {
+      "name": "Name",
+      "booksCount": "Books Count"
+    },
+    "actions": {
+      "showBooks": "Show books"
+    },
+    "table": {
+      "name": "Name",
+      "description": "Description",
+      "booksCount": "Books Count",
+      "actions": "Actions"
+    },
+    "booksCount": {
+      "one": "{{count}} book",
+      "few": "{{count}} books",
+      "other": "{{count}} books"
+    }
+  }
+}

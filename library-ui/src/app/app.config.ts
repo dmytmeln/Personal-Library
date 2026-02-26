@@ -1,15 +1,38 @@
-import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, isDevMode, provideZoneChangeDetection} from '@angular/core';
 import {provideRouter} from '@angular/router';
 
 import {routes} from './app.routes';
-import {provideHttpClient} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {MAT_DIALOG_DEFAULT_OPTIONS} from '@angular/material/dialog';
+import {TranslocoHttpLoader} from './transloco-loader';
+import {provideTransloco} from '@jsverse/transloco';
+import {LangInterceptor} from './services/lang.interceptor';
+import {MatPaginatorIntl} from '@angular/material/paginator';
+import {TranslocoPaginatorIntl} from './services/transloco-paginator-intl';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
     {provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: true, maxWidth: '1440px'}},
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LangInterceptor,
+      multi: true,
+    },
+    {
+      provide: MatPaginatorIntl,
+      useClass: TranslocoPaginatorIntl,
+    },
+    provideTransloco({
+      config: {
+        availableLangs: ['en', 'uk'],
+        defaultLang: 'en',
+        reRenderOnLangChange: true,
+        prodMode: !isDevMode(),
+      },
+      loader: TranslocoHttpLoader
+    }),
   ]
 };

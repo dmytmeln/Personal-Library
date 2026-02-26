@@ -1,6 +1,6 @@
-<div class="library-container">
+<div class="library-container" *transloco="let t; prefix: 'library'">
   <div class="header-row">
-    <h1 class="page-title">Моя бібліотека</h1>
+    <h1 class="page-title">{{ t('title') }}</h1>
     <div class="header-actions">
       <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
         <mat-button-toggle value="grid">
@@ -12,7 +12,7 @@
       </mat-button-toggle-group>
       <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
         <mat-icon>add</mat-icon>
-        Додати книгу
+        {{ t('menu.addToCollection') }}
       </button>
     </div>
   </div>
@@ -20,26 +20,26 @@
   <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
 
-    <mat-tab label="Всі книги">
+    <mat-tab [label]="t('tabs.allBooks')">
       <div class="tab-content">
 
         <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-          <div mainFilters>
+          <div mainFilters *transloco="let f; prefix: 'library.filters'">
             <app-text-filter
-              label="Назва книги"
+              [label]="f('bookTitle')"
               [value]="filters.state().title"
               (valueChange)="filters.update('title', $event)"/>
 
             <app-select-filter
-              label="Статус"
+              [label]="f('status')"
               [value]="filters.state().status"
-              [options]="statusOptions"
+              [options]="statusOptions()"
               (valueChange)="filters.update('status', $event)"
               (clear)="filters.update('status', null)"
             />
 
             <app-autocomplete-filter
-              label="Автор"
+              [label]="f('author')"
               [searchInput]="authorSearch.query()"
               [selected]="filters.state().author"
               [options]="authorSearch.results()"
@@ -49,7 +49,7 @@
               (clear)="clearAuthorFilter()"/>
 
             <app-autocomplete-filter
-              label="Категорія"
+              [label]="f('category')"
               [searchInput]="categorySearch.query()"
               [selected]="filters.state().category"
               [options]="categorySearch.results()"
@@ -59,23 +59,29 @@
               (clear)="clearCategoryFilter()"/>
           </div>
 
-          <div secondaryFilters>
-            <app-range-filter
-              label="Рік видання"
-              [range]="filters.state().publishYear"
-              (rangeChange)="filters.update('publishYear', $event)"/>
+          <div secondaryFilters *transloco="let f; prefix: 'library.filters'">
+            <ng-container *transloco="let c; prefix: 'common'">
+              <app-range-filter
+                [label]="f('publishYear')"
+                [range]="filters.state().publishYear"
+                [minPlaceholder]="c('from')"
+                [maxPlaceholder]="c('to')"
+                (rangeChange)="filters.update('publishYear', $event)"/>
 
-            <app-range-filter
-              label="Кількість сторінок"
-              [range]="filters.state().pages"
-              (rangeChange)="filters.update('pages', $event)"/>
+              <app-range-filter
+                [label]="f('pages')"
+                [range]="filters.state().pages"
+                [minPlaceholder]="c('from')"
+                [maxPlaceholder]="c('to')"
+                (rangeChange)="filters.update('pages', $event)"/>
 
-            <app-range-filter
-              label="Оцінка"
-              [range]="filters.state().rating"
-              minPlaceholder="Від 0"
-              maxPlaceholder="До 5"
-              (rangeChange)="filters.update('rating', $event)"/>
+              <app-range-filter
+                [label]="f('rating')"
+                [range]="filters.state().rating"
+                [minPlaceholder]="c('from')"
+                [maxPlaceholder]="c('to')"
+                (rangeChange)="filters.update('rating', $event)"/>
+            </ng-container>
           </div>
 
           <div footerFilters>
@@ -89,7 +95,7 @@
           </div>
         </app-filter-shell>
 
-        <app-sort-bar [options]="bookSortOptions" (sortChange)="onSortChange($event)"/>
+        <app-sort-bar [options]="bookSortOptions()" (sortChange)="onSortChange($event)"/>
 
         <app-books-display
           [books]="booksState.items"
@@ -104,11 +110,11 @@
       </div>
     </mat-tab>
 
-    <mat-tab label="Автори">
+    <mat-tab [label]="t('tabs.authors')">
       <app-author-list mode="library" (authorBooks)="goToAuthorBooks($event)"/>
     </mat-tab>
 
-    <mat-tab label="Жанри">
+    <mat-tab [label]="t('tabs.categories')">
       <app-category-list mode="library" (categoryBooks)="goToCategoryBooks($event)"/>
     </mat-tab>
 
@@ -116,52 +122,56 @@
 </div>
 
 <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-  <button mat-flat-button (click)="openBulkAddToCollectionDialog()">
-    <mat-icon>playlist_add</mat-icon>
-    <span>Додати до колекції</span>
-  </button>
-  <button mat-flat-button color="warn" (click)="bulkRemoveFromLibrary()">
-    <mat-icon>delete</mat-icon>
-    <span>Видалити</span>
-  </button>
+  <ng-container *transloco="let b; prefix: 'library.bulkActions'">
+    <button mat-flat-button (click)="openBulkAddToCollectionDialog()">
+      <mat-icon>playlist_add</mat-icon>
+      <span>{{ b('addToCollection') }}</span>
+    </button>
+    <button mat-flat-button color="warn" (click)="bulkRemoveFromLibrary()">
+      <mat-icon>delete</mat-icon>
+      <span>{{ b('removeFromLibrary') }}</span>
+    </button>
+  </ng-container>
 </app-bulk-action-bar>
 
 <mat-menu #libraryBookMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
-    <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
-      <mat-icon>info</mat-icon>
-      <span>Деталі книги</span>
-    </button>
-    <button mat-menu-item (click)="openNoteDialog(libraryBook)">
-      <mat-icon>note_alt</mat-icon>
-      <span>Мої нотатки</span>
-    </button>
-    <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
-      <mat-icon>edit</mat-icon>
-      <span>Редагувати деталі</span>
-    </button>
-    <button mat-menu-item (click)="addToCollection(libraryBook)">
-      <mat-icon>playlist_add</mat-icon>
-      <span>Додати до колекції</span>
-    </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu"
-            [matMenuTriggerData]="{ libraryBook: libraryBook }">
-      <mat-icon>label</mat-icon>
-      <span>Змінити статус</span>
-    </button>
-    <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu"
-            [matMenuTriggerData]="{ libraryBook: libraryBook }">
-      <mat-icon>star</mat-icon>
-      <span>Оцінити</span>
-    </button>
-    <button mat-menu-item (click)="removeFromAllCollections(libraryBook)">
-      <mat-icon>folder_delete</mat-icon>
-      <span>Видалити з усіх колекцій</span>
-    </button>
-    <button mat-menu-item (click)="deleteLibraryBook(libraryBook)">
-      <mat-icon color="warn">delete</mat-icon>
-      <span>Видалити з бібліотеки</span>
-    </button>
+    <ng-container *transloco="let m; prefix: 'library.menu'">
+      <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
+        <mat-icon>info</mat-icon>
+        <span>{{ m('bookDetails') }}</span>
+      </button>
+      <button mat-menu-item (click)="openNoteDialog(libraryBook)">
+        <mat-icon>note_alt</mat-icon>
+        <span>{{ m('myNotes') }}</span>
+      </button>
+      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
+        <mat-icon>edit</mat-icon>
+        <span>{{ m('editDetails') }}</span>
+      </button>
+      <button mat-menu-item (click)="addToCollection(libraryBook)">
+        <mat-icon>playlist_add</mat-icon>
+        <span>{{ m('addToCollection') }}</span>
+      </button>
+      <button mat-menu-item [matMenuTriggerFor]="sharedMenu.statusMenu"
+              [matMenuTriggerData]="{ libraryBook: libraryBook }">
+        <mat-icon>label</mat-icon>
+        <span>{{ m('changeStatus') }}</span>
+      </button>
+      <button mat-menu-item [matMenuTriggerFor]="sharedMenu.ratingMenu"
+              [matMenuTriggerData]="{ libraryBook: libraryBook }">
+        <mat-icon>star</mat-icon>
+        <span>{{ m('rate') }}</span>
+      </button>
+      <button mat-menu-item (click)="removeFromAllCollections(libraryBook)">
+        <mat-icon>folder_delete</mat-icon>
+        <span>{{ m('removeFromAllCollections') }}</span>
+      </button>
+      <button mat-menu-item (click)="deleteLibraryBook(libraryBook)">
+        <mat-icon color="warn">delete</mat-icon>
+        <span>{{ m('removeFromLibrary') }}</span>
+      </button>
+    </ng-container>
   </ng-template>
 </mat-menu>
 

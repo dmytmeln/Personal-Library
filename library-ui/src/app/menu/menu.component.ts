@@ -1,10 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatToolbar} from '@angular/material/toolbar';
-import {MatAnchor, MatButton} from '@angular/material/button';
+import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {AuthService} from '../services/auth.service';
+import {LangService} from '../services/lang.service';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {MatIcon} from '@angular/material/icon';
+import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
   selector: 'app-menu',
@@ -15,7 +19,13 @@ import {AuthService} from '../services/auth.service';
     RouterLink,
     MatAnchor,
     RouterLinkActive,
-    MatButton
+    MatButton,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    MatIcon,
+    MatIconButton,
+    TranslocoDirective
   ],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.scss'
@@ -25,7 +35,10 @@ export class MenuComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   private authSubscription?: Subscription;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private langService: LangService
+  ) {}
 
   ngOnInit(): void {
     this.authSubscription = this.authService.isAuthenticated$.subscribe(
@@ -39,6 +52,10 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.logout().subscribe();
+  }
+
+  changeLang(lang: string): void {
+    this.langService.setLang(lang);
   }
 
 }

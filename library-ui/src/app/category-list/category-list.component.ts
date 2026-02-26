@@ -1,4 +1,5 @@
-import {Component, input, OnInit, output} from '@angular/core';
+import {Component, inject, input, OnInit, output} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {CategoryService} from '../services/category.service';
 import {Category} from '../interfaces/category';
@@ -10,9 +11,10 @@ import {FilterShellComponent} from '../common/filter-shell/filter-shell.componen
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
-import {SortOption} from '../interfaces/sort-config';
 import {CategoryFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
+import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+import {map} from 'rxjs';
 
 const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
   name: '',
@@ -32,6 +34,8 @@ const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
     TextFilterComponent,
     RangeFilterComponent,
     SortBarComponent,
+    TranslocoDirective,
+
   ],
   templateUrl: './category-list.component.html',
   styleUrl: './category-list.component.scss'
@@ -52,12 +56,22 @@ export class CategoryListComponent implements OnInit {
 
   readonly filters = new EntityFilterStore<CategoryFilters>(EMPTY_CATEGORY_FILTERS);
 
-  readonly categorySortOptions: SortOption[] = [
-    {field: 'name', label: 'Назва'},
-    {field: 'booksCount', label: 'Кількість книг'},
-  ];
+  private translocoService = inject(TranslocoService);
 
-  constructor(private categoryService: CategoryService) {}
+  readonly categorySortOptions = toSignal(
+    this.translocoService.selectTranslateObject('categories.sort').pipe(
+      map(t => [
+        {field: 'name', label: t.name},
+        {field: 'booksCount', label: t.booksCount},
+      ])
+    ),
+    {initialValue: []}
+  );
+
+  constructor(
+    private categoryService: CategoryService
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadCategories();
@@ -119,14 +133,8 @@ export class CategoryListComponent implements OnInit {
     });
   }
 
-  getBooksCountText(count: number): string {
-    if (count === 0) return '0 книг';
-    if (count === 1) return '1 книга';
-    if (count >= 2 && count <= 4) return `${count} книги`;
-    return `${count} книг`;
-  }
-
   onShowBooks(category: Category): void {
     this.categoryBooks.emit(category);
   }
 }
+

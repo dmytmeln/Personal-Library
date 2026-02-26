@@ -1,59 +1,61 @@
-<div class="register-container">
+<div class="register-container" *transloco="let t; prefix: 'auth.register'">
   <mat-card class="register-card">
     <mat-card-header>
-      <mat-card-title>Register</mat-card-title>
+      <mat-card-title>{{ t('title') }}</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="Enter your email">
-          @if (registerForm.get('email')?.hasError('required')) {
-            <mat-error>
-              Email is required
-            </mat-error>
-          }
-          @if (registerForm.get('email')?.hasError('email')) {
-            <mat-error>
-              Please enter a valid email
-            </mat-error>
-          }
-        </mat-form-field>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" *transloco="let f; prefix: 'auth.fields'">
+        <ng-container *transloco="let e; prefix: 'auth.errors'">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ f('email') }}</mat-label>
+            <input matInput type="email" formControlName="email" [placeholder]="f('email')">
+            @if (registerForm.get('email')?.hasError('required')) {
+              <mat-error>
+                {{ e('emailRequired') }}
+              </mat-error>
+            }
+            @if (registerForm.get('email')?.hasError('email')) {
+              <mat-error>
+                {{ e('emailInvalid') }}
+              </mat-error>
+            }
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Full Name</mat-label>
-          <input matInput type="text" formControlName="fullName" placeholder="Enter your full name">
-          @if (registerForm.get('fullName')?.hasError('required')) {
-            <mat-error>
-              Full name is required
-            </mat-error>
-          }
-          @if (registerForm.get('fullName')?.hasError('minlength')) {
-            <mat-error>
-              Full name must be at least 2 characters
-            </mat-error>
-          }
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ f('fullName') }}</mat-label>
+            <input matInput type="text" formControlName="fullName" [placeholder]="f('fullName')">
+            @if (registerForm.get('fullName')?.hasError('required')) {
+              <mat-error>
+                {{ e('fullNameRequired') }}
+              </mat-error>
+            }
+            @if (registerForm.get('fullName')?.hasError('minlength')) {
+              <mat-error>
+                {{ e('fullNameMinLength', { min: 2 }) }}
+              </mat-error>
+            }
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
-                 placeholder="Enter your password">
-          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          @if (registerForm.get('password')?.hasError('required')) {
-            <mat-error>
-              Password is required
-            </mat-error>
-          }
-          @if (registerForm.get('password')?.hasError('minlength')) {
-            <mat-error>
-              Password must be at least 6 characters
-            </mat-error>
-          }
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ f('password') }}</mat-label>
+            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                   [placeholder]="f('password')">
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (registerForm.get('password')?.hasError('required')) {
+              <mat-error>
+                {{ e('passwordRequired') }}
+              </mat-error>
+            }
+            @if (registerForm.get('password')?.hasError('minlength')) {
+              <mat-error>
+                {{ e('passwordMinLength', { min: 6 }) }}
+              </mat-error>
+            }
+          </mat-form-field>
+        </ng-container>
 
         @if (errorMessage) {
           <div class="error-message">
@@ -62,12 +64,12 @@
         }
 
         <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="registerForm.invalid">
-          Register
+          {{ t('submit') }}
         </button>
       </form>
 
       <div class="login-link">
-        Already have an account? <a routerLink="/login">Login</a>
+        {{ t('haveAccount') }} <a routerLink="/login">{{ 'auth.login.title' | transloco }}</a>
       </div>
     </mat-card-content>
   </mat-card>

@@ -1,4 +1,4 @@
-<div class="range-filter-container">
+<div class="range-filter-container" *transloco="let t; prefix: 'common'">
   <span class="range-label">{{ label() }}</span>
   <div class="range-inputs">
     <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
@@ -22,7 +22,7 @@
     <button mat-icon-button
             (click)="clear()"
             [style.visibility]="hasValue() ? 'visible' : 'hidden'"
-            matTooltip="Очистити фільтр">
+            [matTooltip]="t('clear')">
       <mat-icon>close</mat-icon>
     </button>
   </div>

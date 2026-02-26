@@ -8,6 +8,7 @@ import {LibraryBook} from '../../interfaces/library-book';
 import {UpdateLibraryBookDetails} from '../../interfaces/update-library-book-details';
 import {MatTooltip} from '@angular/material/tooltip';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 export interface LibraryBookDetailsDialogData {
   libraryBook: LibraryBook;
@@ -28,6 +29,7 @@ export type LibraryBookDetailsDialogResult =
     MatInputModule,
     ReactiveFormsModule,
     MatTooltip,
+    TranslocoDirective,
   ],
   templateUrl: './library-book-details-dialog.component.html',
   styleUrl: './library-book-details-dialog.component.scss'
@@ -40,6 +42,7 @@ export class LibraryBookDetailsDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: LibraryBookDetailsDialogData,
     private fb: FormBuilder,
     private dialog: MatDialog,
+    private translocoService: TranslocoService,
   ) {
     const book = data.libraryBook.book;
     this.form = this.fb.group({
@@ -64,7 +67,7 @@ export class LibraryBookDetailsDialogComponent {
 
     const confRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        message: 'Ви не змінили жодного поля. Бажаєте вийти?'
+        message: this.translocoService.translate('dialogs.bookDetails.noChangesMessage')
       }
     });
 

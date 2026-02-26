@@ -1,20 +1,20 @@
-<div class="container">
+<div class="container" *transloco="let t; prefix: 'collections'">
   <div class="header">
-    <h1>Колекції</h1>
+    <h1>{{ t('title') }}</h1>
   </div>
 
   <div class="tree-actions">
     <button mat-button (click)="tree.expandAll()">
       <mat-icon>unfold_more</mat-icon>
-      <span>Розгорнути всі</span>
+      <span>{{ t('expandAll') }}</span>
     </button>
     <button mat-button (click)="tree.collapseAll()">
       <mat-icon>unfold_less</mat-icon>
-      <span>Згорнути всі</span>
+      <span>{{ t('collapseAll') }}</span>
     </button>
     <button mat-flat-button color="primary" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
-      <span>Створити колекцію</span>
+      <span>{{ t('createCollection') }}</span>
     </button>
   </div>
 
@@ -22,7 +22,7 @@
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
       <li class="mat-tree-node">
         <button mat-icon-button disabled></button>
-        <div [routerLink]="['/collections', node.id]" matTooltip="Перейти до колекції"
+        <div [routerLink]="['/collections', node.id]" [matTooltip]="t('goToCollection')"
              [matTooltipShowDelay]="this.SHOW_DELAY" (click)="$event.stopPropagation()">
           <mat-icon>{{ 'folder' }}</mat-icon>
           <span>{{ node.name }}</span>
@@ -42,7 +42,7 @@
             {{ tree.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
         </button>
-        <div [routerLink]="['/collections', node.id]" matTooltip="Перейти до колекції"
+        <div [routerLink]="['/collections', node.id]" [matTooltip]="t('goToCollection')"
              [matTooltipShowDelay]="this.SHOW_DELAY" (click)="$event.stopPropagation()">
           <mat-icon>{{ tree.isExpanded(node) ? 'folder_open' : 'folder' }}</mat-icon>
           <span>{{ node.name }}</span>
@@ -59,27 +59,27 @@
     <ng-template matMenuContent let-node="node">
       <button mat-menu-item (click)="openAddBookDialog(node)">
         <mat-icon>library_add</mat-icon>
-        <span>Додати книгу</span>
+        <span>{{ t('addBook') }}</span>
       </button>
       <button mat-menu-item (click)="openUpdateDialog(node)">
         <mat-icon>edit</mat-icon>
-        <span>Оновити колекцію</span>
+        <span>{{ t('updateCollection') }}</span>
       </button>
       <button mat-menu-item (click)="openCreateDialog(node.id)">
         <mat-icon>add</mat-icon>
-        <span>Створити підколекцію</span>
+        <span>{{ t('createSubcollection') }}</span>
       </button>
       <button mat-menu-item (click)="addChildCollection(node)">
         <mat-icon>playlist_add</mat-icon>
-        <span>Додати колекцію</span>
+        <span>{{ t('addExistingCollection') }}</span>
       </button>
       <button mat-menu-item (click)="moveCollection(node)">
         <mat-icon>drive_file_move</mat-icon>
-        <span>Перемістити колекцію</span>
+        <span>{{ t('moveCollection') }}</span>
       </button>
       <button mat-menu-item (click)="deleteCollection(node)">
         <mat-icon color="warn">delete</mat-icon>
-        <span>Видалити колекцію</span>
+        <span>{{ t('deleteCollection') }}</span>
       </button>
     </ng-template>
   </mat-menu>

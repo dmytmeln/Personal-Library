@@ -1,0 +1,386 @@
+{
+  "appTitle": "Особиста бібліотека",
+  "menu": {
+    "library": "Бібліотека",
+    "collections": "Колекції",
+    "recommendations": "Рекомендації",
+    "search": "Пошук",
+    "profile": "Профіль",
+    "logout": "Вихід",
+    "login": "Логін",
+    "register": "Реєстрація"
+  },
+  "common": {
+    "confirm": "Підтвердити",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "save": "Зберегти",
+    "edit": "Редагувати",
+    "add": "Додати",
+    "remove": "Видалити",
+    "move": "Перемістити",
+    "status": "Статус",
+    "rating": "Оцінка",
+    "details": "Деталі",
+    "notes": "Нотатки",
+    "any": "Будь-який",
+    "clear": "Очистити",
+    "created": "Створено",
+    "updated": "Оновлено",
+    "close": "Закрити",
+    "loading": "Завантаження...",
+    "error": "Помилка",
+    "logout": "Вихід",
+    "books": "Книги",
+    "sortBy": "Сортувати за",
+    "showMore": "Показати більше",
+    "showLess": "Показати менше",
+    "from": "Від",
+    "to": "До",
+    "pagesShort": "стор.",
+    "pagination": {
+      "itemsPerPage": "Кількість на сторінці:",
+      "nextPage": "Наступна сторінка",
+      "previousPage": "Попередня сторінка",
+      "firstPage": "Перша сторінка",
+      "lastPage": "Остання сторінка",
+      "range": "{{startIndex}} – {{endIndex}} з {{length}}"
+    }
+  },
+  "dialogs": {
+    "confirmation": {
+      "title": "Підтвердження дії"
+    },
+    "deleteBook": {
+      "title": "Видалити книгу",
+      "confirmMessage": "Ви впевнені, що хочете видалити книгу <strong>{{title}}</strong> з вашої бібліотеки?",
+      "collectionsWarning": "Увага! Ця книга знаходиться в наступних колекціях:",
+      "deleteWarning": "Книга буде видалена з усіх цих колекцій."
+    },
+    "notes": {
+      "title": "Нотатки до книги",
+      "label": "Ваша нотатка",
+      "placeholder": "Напишіть щось..."
+    },
+    "viewBookList": {
+      "title": "Оберіть книгу!",
+      "searchLabel": "Пошук за назвою",
+      "searchPlaceholder": "Назва книги",
+      "columns": {
+        "title": "Назва",
+        "genre": "Жанр",
+        "year": "Рік",
+        "language": "Мова",
+        "pages": "Сторінки",
+        "actions": "Дії"
+      }
+    },
+    "bookDetails": {
+      "title": "Редагувати деталі книги",
+      "resetTooltip": "Скинути всі зміни до початкових значень",
+      "noChangesMessage": "Ви не змінили жодного поля. Бажаєте вийти?",
+      "fields": {
+        "title": "Назва",
+        "titlePlaceholder": "Введіть назву",
+        "publishYear": "Рік видання",
+        "publishYearPlaceholder": "2024",
+        "pages": "Кількість сторінок",
+        "pagesPlaceholder": "300",
+        "language": "Мова",
+        "languagePlaceholder": "Українська",
+        "coverUrl": "URL обкладинки",
+        "coverUrlPlaceholder": "https://example.com/cover.jpg",
+        "description": "Опис",
+        "descriptionPlaceholder": "Опис книги..."
+      },
+      "errors": {
+        "titleRequired": "Назва обов'язкова",
+        "yearRequired": "Рік обов'язковий",
+        "pagesRequired": "Кількість сторінок обов'язкова",
+        "languageRequired": "Мова обов'язкова"
+      },
+      "resetButton": "Скинути до стандартних"
+    }
+  },
+  "library": {
+    "title": "Моя бібліотека",
+    "sortTooltip": "Натисніть для зміни напрямку або скасування",
+    "tabs": {
+      "allBooks": "Всі книги",
+      "authors": "Автори",
+      "categories": "Жанри"
+    },
+    "filters": {
+      "bookTitle": "Назва книги",
+      "status": "Статус",
+      "author": "Автор",
+      "category": "Категорія",
+      "publishYear": "Рік видання",
+      "pages": "Кількість сторінок",
+      "rating": "Оцінка",
+      "from": "Від {{val}}",
+      "to": "До {{val}}",
+      "languages": "Мови"
+    },
+    "sort": {
+      "title": "Назва",
+      "publishYear": "Рік видання",
+      "rating": "Оцінка",
+      "addedAt": "Дата додавання",
+      "pages": "Сторінки"
+    },
+    "bulkActions": {
+      "addToCollection": "Додати до колекції",
+      "removeFromLibrary": "Видалити"
+    },
+    "menu": {
+      "bookDetails": "Деталі книги",
+      "myNotes": "Мої нотатки",
+      "editDetails": "Редагувати деталі",
+      "addToCollection": "Додати до колекції",
+      "changeStatus": "Змінити статус",
+      "rate": "Оцінити",
+      "removeFromAllCollections": "Видалити з усіх колекцій",
+      "removeFromLibrary": "Видалити з бібліотеки"
+    },
+    "bulkRemoveConfirm": "Ви впевнені, що хочете видалити {{count}} вибраних книг з бібліотеки?",
+    "removeFromAllCollectionsConfirm": "Ви впевнені, що хочете видалити книгу \"{{title}}\" з усіх колекцій?",
+    "success": {
+      "ratingChanged": "Оцінку змінено",
+      "statusChanged": "Статус змінено",
+      "bookRemoved": "Книгу видалено з бібліотеки",
+      "booksRemoved": "Книги видалено з бібліотеки",
+      "booksAddedToCollection": "Книги додано до колекції",
+      "bookRemovedFromAllCollections": "Книгу видалено з усіх колекцій",
+      "bookAddedToCollection": "Книгу додано до колекції",
+      "detailsReset": "Деталі книги скинуто",
+      "detailsUpdated": "Деталі книги оновлено",
+      "bookAdded": "Книгу додано до бібліотеки",
+      "noteSaved": "Нотатку збережено",
+      "noteDeleted": "Нотатку видалено"
+    },
+    "statuses": {
+      "TO_READ": "Хочу прочитати",
+      "READING": "Читаю зараз",
+      "READ": "Прочитано",
+      "NO_TAG": "Без тегу",
+      "STOP": "Перестав читати",
+      "FAVORITE": "Улюблені"
+    }
+  },
+  "collections": {
+    "title": "Колекції",
+    "expandAll": "Розгорнути всі",
+    "collapseAll": "Згорнути всі",
+    "createCollection": "Створити колекцію",
+    "goToCollection": "Перейти до колекції",
+    "addBook": "Додати книгу",
+    "updateCollection": "Оновити колекцію",
+    "createSubcollection": "Створити підколекцію",
+    "addExistingCollection": "Додати колекцію",
+    "moveCollection": "Перемістити колекцію",
+    "deleteCollection": "Видалити колекцію",
+    "deleteConfirm": "Ви впевнені, що хочете видалити колекцію \"{{name}}\"? Це також призведе до видалення всіх її підколекцій та посилань на книги.",
+    "bulkRemoveFromCollectionConfirm": "Ви впевнені, що хочете видалити {{count}} вибраних книг з цієї колекції?",
+    "stats": "{{books}} книг, {{subcollections}} підколекцій",
+    "subcollections": "Підколекції:",
+    "booksInCollection": "Книги в колекції:",
+    "showSubcollections": "Показувати підколекції",
+    "bookTitle": "Назва книги",
+    "addToOtherCollection": "Додати до іншої колекції",
+    "removeFromCollection": "Видалити з цієї колекції",
+    "removeBookConfirm": "Ви впевнені, що хочете видалити книгу \"{{title}}\" з цієї колекції?",
+    "cannotRemoveRecursive": "Неможливо видалити книги в режимі рекурсивного перегляду",
+    "bookDetails": "Деталі книги",
+    "myNotes": "Мої нотатки",
+    "editDetails": "Редагувати деталі",
+    "moveToOtherCollection": "Перемістити в іншу колекцію",
+    "changeStatus": "Змінити статус",
+    "rate": "Оцінити",
+    "removeFromAllCollections": "Видалити з усіх колекцій",
+    "dialog": {
+      "createTitle": "Створити колекцію",
+      "editTitle": "Редагувати колекцію",
+      "name": "Назва колекції",
+      "description": "Опис колекції",
+      "color": "Колір колекції:",
+      "parent": "Батьківська колекція:",
+      "change": "Змінити",
+      "create": "Створити",
+      "save": "Зберегти"
+    },
+    "selector": {
+      "title": "Виберіть колекцію",
+      "select": "Вибрати",
+      "root": "Корінь (без батьківської)",
+      "rootTooltip": "Вибрати корінь (без батьківської колекції)",
+      "alreadyInTooltip": "Книга вже в цій колекції",
+      "selectTooltip": "Вибрати колекцію",
+      "expandAll": "Розгорнути всі",
+      "collapseAll": "Згорнути всі",
+      "expandTooltip": "Розгорнути всі гілки",
+      "collapseTooltip": "Згорнути всі гілки",
+      "expandNode": "Розгорнути",
+      "collapseNode": "Згорнути"
+    },
+    "success": {
+      "created": "Колекцію створено успішно",
+      "subcollectionCreated": "Підколекцію створено успішно",
+      "updated": "Колекцію оновлено успішно",
+      "deleted": "Колекцію видалено успішно",
+      "added": "Колекцію додано успішно",
+      "moved": "Колекцію переміщено успішно",
+      "bookAdded": "Книгу додано до колекції",
+      "bookRemoved": "Книгу видалено з колекції",
+      "bookMoved": "Книгу переміщено до іншої колекції",
+      "booksRemoved": "Книги видалено з колекції",
+      "detailsReset": "Деталі книги скинуто до стандартних"
+    }
+  },
+  "bookDetails": {
+    "pages": "Сторінки",
+    "language": "Мова",
+    "addedAt": "Дата додавання",
+    "status": "Статус",
+    "myRating": "Моя оцінка",
+    "averageRating": "Середня оцінка",
+    "ratingsCount": "Кількість відгуків: {{count}}",
+    "info": "Інформація про книгу",
+    "publishYear": "Рік видання",
+    "notInLibrary": "Не в бібліотеці",
+    "inCollections": "У колекціях:",
+    "genre": "Жанр",
+    "description": "Опис",
+    "addToLibrary": "Додати до бібліотеки",
+    "noDescription": "Опис відсутній"
+  },
+  "profile": {
+    "title": "Профіль користувача",
+    "fullName": "Повне ім'я",
+    "email": "Email",
+    "role": "Роль",
+    "provider": "Провайдер",
+    "loadError": "Помилка завантаження профілю",
+    "loading": "Завантаження профілю..."
+  },
+  "search": {
+    "title": "Пошук книг",
+    "tabs": {
+      "allBooks": "Всі книги",
+      "authors": "Автори",
+      "categories": "Жанри"
+    },
+    "filters": {
+      "bookTitle": "Назва книги",
+      "author": "Автор",
+      "category": "Категорія",
+      "publishYear": "Рік видання",
+      "pages": "Кількість сторінок",
+      "from": "Від {{val}}",
+      "to": "До {{val}}"
+    },
+    "sort": {
+      "title": "Назва",
+      "publishYear": "Рік видання",
+      "language": "Мова",
+      "pages": "Сторінки",
+      "category": "Категорія"
+    },
+    "bulkActions": {
+      "addToLibrary": "Додати до бібліотеки"
+    },
+    "menu": {
+      "bookDetails": "Деталі книги",
+      "addToLibrary": "Додати до бібліотеки",
+      "alreadyInLibrary": "Вже у бібліотеці"
+    }
+  },
+  "authors": {
+    "lifeYears": "Роки життя",
+    "presentDay": "теп. час",
+    "biography": "Біографія",
+    "authorBooks": "Книги автора",
+    "filters": {
+      "name": "Пошук за ім'ям",
+      "country": "Країна",
+      "birthYear": "Рік народження",
+      "booksCount": "Кількість книг"
+    },
+    "sort": {
+      "fullName": "ПІБ",
+      "country": "Країна",
+      "birthYear": "Рік народження",
+      "booksCount": "Кількість книг"
+    },
+    "actions": {
+      "showBooks": "Книги"
+    },
+    "table": {
+      "fullName": "ПІБ",
+      "country": "Країна",
+      "birthYear": "Рік народження",
+      "deathYear": "Рік смерті",
+      "booksCount": "Кількість книг",
+      "actions": "Дії"
+    },
+    "booksCount": {
+      "one": "{{count}} книга",
+      "few": "{{count}} книги",
+      "other": "{{count}} книг"
+    }
+  },
+  "categories": {
+    "filters": {
+      "name": "Пошук за назвою",
+      "booksCount": "Кількість книг"
+    },
+    "sort": {
+      "name": "Назва",
+      "booksCount": "Кількість книг"
+    },
+    "actions": {
+      "showBooks": "Книги"
+    },
+    "table": {
+      "name": "Назва",
+      "description": "Опис",
+      "booksCount": "Кількість книг",
+      "actions": "Дії"
+    },
+    "booksCount": {
+      "one": "{{count}} книга",
+      "few": "{{count}} книги",
+      "other": "{{count}} книг"
+    }
+  },
+  "auth": {
+    "or": "АБО",
+    "login": {
+      "title": "Вхід",
+      "submit": "Увійти",
+      "google": "Увійти через Google",
+      "noAccount": "Ще не маєте акаунту?",
+      "error": "Невірний email або пароль"
+    },
+    "register": {
+      "title": "Реєстрація",
+      "submit": "Зареєструватися",
+      "haveAccount": "Вже маєте акаунт?",
+      "error": "Помилка реєстрації",
+      "loginFailed": "Реєстрація успішна, але вхід не вдався. Будь ласка, увійдіть вручну."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Пароль",
+      "fullName": "Повне ім'я"
+    },
+    "errors": {
+      "emailRequired": "Email обов'язковий",
+      "emailInvalid": "Будь ласка, введіть коректний email",
+      "passwordRequired": "Пароль обов'язковий",
+      "passwordMinLength": "Пароль має бути не менше {{min}} символів",
+      "fullNameRequired": "Повне ім'я обов'язкове",
+      "fullNameMinLength": "Повне ім'я має бути не менше {{min}} символів"
+    }
+  }
+}

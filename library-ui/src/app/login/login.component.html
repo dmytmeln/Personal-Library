@@ -1,44 +1,46 @@
-<div class="login-container">
+<div class="login-container" *transloco="let t; prefix: 'auth.login'">
   <mat-card class="login-card">
     <mat-card-header>
-      <mat-card-title>Login</mat-card-title>
+      <mat-card-title>{{ t('title') }}</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="Enter your email">
-          @if (loginForm.get('email')?.hasError('required')) {
-            <mat-error>
-              Email is required
-            </mat-error>
-          }
-          @if (loginForm.get('email')?.hasError('email')) {
-            <mat-error>
-              Please enter a valid email
-            </mat-error>
-          }
-        </mat-form-field>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" *transloco="let f; prefix: 'auth.fields'">
+        <ng-container *transloco="let e; prefix: 'auth.errors'">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ f('email') }}</mat-label>
+            <input matInput type="email" formControlName="email" [placeholder]="f('email')">
+            @if (loginForm.get('email')?.hasError('required')) {
+              <mat-error>
+                {{ e('emailRequired') }}
+              </mat-error>
+            }
+            @if (loginForm.get('email')?.hasError('email')) {
+              <mat-error>
+                {{ e('emailInvalid') }}
+              </mat-error>
+            }
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
-                 placeholder="Enter your password">
-          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          @if (loginForm.get('password')?.hasError('required')) {
-            <mat-error>
-              Password is required
-            </mat-error>
-          }
-          @if (loginForm.get('password')?.hasError('minlength')) {
-            <mat-error>
-              Password must be at least 6 characters
-            </mat-error>
-          }
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ f('password') }}</mat-label>
+            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                   [placeholder]="f('password')">
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (loginForm.get('password')?.hasError('required')) {
+              <mat-error>
+                {{ e('passwordRequired') }}
+              </mat-error>
+            }
+            @if (loginForm.get('password')?.hasError('minlength')) {
+              <mat-error>
+                {{ e('passwordMinLength', { min: 6 }) }}
+              </mat-error>
+            }
+          </mat-form-field>
+        </ng-container>
 
         @if (errorMessage) {
           <div class="error-message">
@@ -47,21 +49,21 @@
         }
 
         <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loginForm.invalid">
-          Login
+          {{ t('submit') }}
         </button>
       </form>
 
       <div class="divider">
-        <span>OR</span>
+        <span>{{ 'auth.or' | transloco }}</span>
       </div>
 
       <button mat-stroked-button class="full-width google-btn" (click)="loginWithGoogle()">
         <mat-icon>login</mat-icon>
-        Login with Google
+        {{ t('google') }}
       </button>
 
       <div class="register-link">
-        Don't have an account? <a routerLink="/register">Register</a>
+        {{ t('noAccount') }} <a routerLink="/register">{{ 'auth.register.title' | transloco }}</a>
       </div>
     </mat-card-content>
   </mat-card>

@@ -1,13 +1,13 @@
-<div class="tab-content">
+<div class="tab-content" *transloco="let t; prefix: 'authors'">
   <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
     <div mainFilters>
       <app-text-filter
-        label="Пошук за ім'ям"
+        [label]="t('filters.name')"
         [value]="filters.state().name"
         (valueChange)="filters.update('name', $event)"/>
 
       <app-select-filter
-        label="Країна"
+        [label]="t('filters.country')"
         [value]="filters.state().country"
         [options]="countryOptions()"
         (valueChange)="filters.update('country', $event)"/>
@@ -15,18 +15,18 @@
 
     <div secondaryFilters>
       <app-range-filter
-        label="Рік народження"
+        [label]="t('filters.birthYear')"
         [range]="filters.state().birthYear"
         (rangeChange)="filters.update('birthYear', $event)"/>
 
       <app-range-filter
-        label="Кількість книг"
+        [label]="t('filters.booksCount')"
         [range]="filters.state().booksCount"
         (rangeChange)="filters.update('booksCount', $event)"/>
     </div>
   </app-filter-shell>
 
-  <app-sort-bar [options]="authorSortOptions" (sortChange)="onSortChange($event)"/>
+  <app-sort-bar [options]="authorSortOptions()" (sortChange)="onSortChange($event)"/>
 
   <div class="content-wrapper">
     @if (authorsState.loading) {
@@ -37,13 +37,13 @@
     <div class="authors-table-container">
       <table class="authors-table">
         <thead>
-        <tr>
-          <th>ПІБ</th>
-          <th>Країна</th>
-          <th>Рік народження</th>
-          <th>Рік смерті</th>
-          <th>Кількість книг</th>
-          <th>Дії</th>
+        <tr *transloco="let col; prefix: 'authors.table'">
+          <th>{{ col('fullName') }}</th>
+          <th>{{ col('country') }}</th>
+          <th>{{ col('birthYear') }}</th>
+          <th>{{ col('deathYear') }}</th>
+          <th>{{ col('booksCount') }}</th>
+          <th>{{ col('actions') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -55,14 +55,22 @@
               <td>{{ author.country }}</td>
               <td>{{ author.birthYear }}</td>
               <td>{{ author.deathYear || '-' }}</td>
-              <td>{{ getBooksCountText(author.booksCount || 0) }}</td>
               <td>
+                @if (author.booksCount === 1) {
+                  {{ t('booksCount.one', { count: 1 }) }}
+                } @else if (author.booksCount && author.booksCount >= 2 && author.booksCount <= 4) {
+                  {{ t('booksCount.few', { count: author.booksCount }) }}
+                } @else {
+                  {{ t('booksCount.other', { count: author.booksCount || 0 }) }}
+                }
+              </td>
+              <td *transloco="let c; prefix: 'common'">
                 <div class="action-buttons">
                   <button mat-stroked-button (click)="goToAuthorDetails(author)" class="action-btn">
-                    Деталі
+                    {{ c('details') }}
                   </button>
                   <button mat-stroked-button (click)="onShowBooks(author)" class="action-btn">
-                    Книги
+                    {{ c('books') }}
                   </button>
                 </div>
               </td>
@@ -77,8 +85,7 @@
       [pageSize]="authorsState.pageSize"
       [pageIndex]="authorsState.currentPage"
       [pageSizeOptions]="[12, 24, 48]"
-      (page)="onPageChange($event)"
-      aria-label="Вибрати сторінку">
+      (page)="onPageChange($event)">
     </mat-paginator>
   </div>
 </div>
