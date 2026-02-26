@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record NoteRequest(
-    @NotNull @Positive Integer libraryBookId,
-    @NotBlank String content
-) {}
+    @NotNull(message = "{validation.note.library_book_id.required}") @Positive Integer libraryBookId,
+    @NotBlank(message = "{validation.note.content.required}") String content
+) {
+}
+

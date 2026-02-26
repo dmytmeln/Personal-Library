@@ -45,13 +45,13 @@ public class PageRequestBuilder {
 
         if (size < paginationProperties.getMinPageSize()) {
             throw new InvalidPaginationParameterException(
-                    "Page size must be at least " + paginationProperties.getMinPageSize()
+                    "error.pagination.min_page_size", paginationProperties.getMinPageSize()
             );
         }
 
         if (size > paginationProperties.getMaxPageSize()) {
             throw new InvalidPaginationParameterException(
-                    "Page size cannot exceed " + paginationProperties.getMaxPageSize()
+                    "error.pagination.max_page_size", paginationProperties.getMaxPageSize()
             );
         }
 

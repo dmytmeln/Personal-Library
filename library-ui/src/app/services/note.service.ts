@@ -17,7 +17,7 @@ export class NoteService {
   }
 
   upsert(request: NoteRequest): Observable<Note> {
-    return this.api.put(this.API_URL, request);
+    return this.api.put(this.API_URL, {body: request});
   }
 
   delete(libraryBookId: number): Observable<void> {

@@ -23,7 +23,7 @@ public class UserService {
 
     public UserResponse register(UserRegisterRequest request) {
         if (repository.existsByEmail(request.getEmail()))
-            throw new BadRequestException("Email already registered");
+            throw new BadRequestException("error.auth.email_already_registered");
 
         var user = mapper.toHostUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));

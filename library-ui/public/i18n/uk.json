@@ -38,6 +38,8 @@
     "from": "Від",
     "to": "До",
     "pagesShort": "стор.",
+    "viewMode": "Режим перегляду",
+    "selectPage": "Вибрати сторінку",
     "pagination": {
       "itemsPerPage": "Кількість на сторінці:",
       "nextPage": "Наступна сторінка",
@@ -182,7 +184,7 @@
     "deleteCollection": "Видалити колекцію",
     "deleteConfirm": "Ви впевнені, що хочете видалити колекцію \"{{name}}\"? Це також призведе до видалення всіх її підколекцій та посилань на книги.",
     "bulkRemoveFromCollectionConfirm": "Ви впевнені, що хочете видалити {{count}} вибраних книг з цієї колекції?",
-    "stats": "{{books}} книг, {{subcollections}} підколекцій",
+    "stats": "{books, plural, one {# книга} few {# книги} other {# книг}}, {subcollections, plural, one {# підколекція} few {# підколекції} other {# підколекцій}}",
     "subcollections": "Підколекції:",
     "booksInCollection": "Книги в колекції:",
     "showSubcollections": "Показувати підколекції",
@@ -323,11 +325,7 @@
       "booksCount": "Кількість книг",
       "actions": "Дії"
     },
-    "booksCount": {
-      "one": "{{count}} книга",
-      "few": "{{count}} книги",
-      "other": "{{count}} книг"
-    }
+    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}"
   },
   "categories": {
     "filters": {
@@ -347,11 +345,7 @@
       "booksCount": "Кількість книг",
       "actions": "Дії"
     },
-    "booksCount": {
-      "one": "{{count}} книга",
-      "few": "{{count}} книги",
-      "other": "{{count}} книг"
-    }
+    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}"
   },
   "auth": {
     "or": "АБО",

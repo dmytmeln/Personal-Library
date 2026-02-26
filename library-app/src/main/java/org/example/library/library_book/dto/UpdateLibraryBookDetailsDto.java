@@ -1,14 +1,18 @@
 package org.example.library.library_book.dto;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
+import org.example.library.validation.AtLeastOneNotNull;
 
+@AtLeastOneNotNull(fieldNames = {"title", "publishYear", "pages", "language", "description", "coverImageUrl"})
 @Builder
 public record UpdateLibraryBookDetailsDto(
-        String title,
-        Short publishYear,
-        Short pages,
-        String language,
-        String description,
-        String coverImageUrl
+        @Size(min = 1, max = 500, message = "{validation.library_book.title.size}") String title,
+        @Positive(message = "{validation.library_book.year.positive}") Short publishYear,
+        @Positive(message = "{validation.library_book.pages.positive}") Short pages,
+        @Size(max = 50, message = "{validation.library_book.language.size}") String language,
+        @Size(max = 2000, message = "{validation.library_book.description.size}") String description,
+        @Size(max = 500, message = "{validation.library_book.cover_image_url.size}") String coverImageUrl
 ) {
 }

@@ -1,6 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {MatPaginatorIntl} from '@angular/material/paginator';
 import {TranslocoService} from '@jsverse/transloco';
+import {combineLatest} from 'rxjs';
 
 @Injectable()
 export class TranslocoPaginatorIntl extends MatPaginatorIntl {
@@ -14,18 +15,24 @@ export class TranslocoPaginatorIntl extends MatPaginatorIntl {
 
   constructor() {
     super();
-    this.translocoService.langChanges$.subscribe(() => {
-      this.localizeLabels();
-    });
+    this.initializeTranslations();
   }
 
-  private localizeLabels(): void {
-    this.itemsPerPageLabel = this.translocoService.translate('common.pagination.itemsPerPage');
-    this.nextPageLabel = this.translocoService.translate('common.pagination.nextPage');
-    this.previousPageLabel = this.translocoService.translate('common.pagination.previousPage');
-    this.firstPageLabel = this.translocoService.translate('common.pagination.firstPage');
-    this.lastPageLabel = this.translocoService.translate('common.pagination.lastPage');
-    this.changes.next();
+  private initializeTranslations(): void {
+    combineLatest([
+      this.translocoService.selectTranslate('common.pagination.itemsPerPage'),
+      this.translocoService.selectTranslate('common.pagination.nextPage'),
+      this.translocoService.selectTranslate('common.pagination.previousPage'),
+      this.translocoService.selectTranslate('common.pagination.firstPage'),
+      this.translocoService.selectTranslate('common.pagination.lastPage')
+    ]).subscribe(([itemsPerPage, nextPage, previousPage, firstPage, lastPage]) => {
+      this.itemsPerPageLabel = itemsPerPage;
+      this.nextPageLabel = nextPage;
+      this.previousPageLabel = previousPage;
+      this.firstPageLabel = firstPage;
+      this.lastPageLabel = lastPage;
+      this.changes.next();
+    });
   }
 
   override getRangeLabel = (page: number, pageSize: number, length: number): string => {

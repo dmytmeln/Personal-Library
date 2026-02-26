@@ -63,9 +63,9 @@ public class LibraryBookController {
 
     @PutMapping("/{libraryBookId}/details")
     @ResponseStatus(HttpStatus.OK)
-    public LibraryBookDto updateDetails(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                        @PathVariable Integer libraryBookId,
-                                        @RequestBody UpdateLibraryBookDetailsDto dto
+public LibraryBookDto updateDetails(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                         @PathVariable Integer libraryBookId,
+                                         @Valid @RequestBody UpdateLibraryBookDetailsDto dto
     ) {
         return service.updateDetails(libraryBookId, userDetails.getId(), dto);
     }

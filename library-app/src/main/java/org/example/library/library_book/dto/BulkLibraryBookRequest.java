@@ -13,8 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class BulkLibraryBookRequest {
 
-    @NotEmpty(message = "List of IDs cannot be empty")
-    @Size(max = 50, message = "Cannot process more than 50 items at once")
+    @NotEmpty(message = "{validation.bulk.not_empty}")
+    @Size(max = 50, message = "{validation.bulk.max_items}")
     private List<Integer> ids;
 
 }

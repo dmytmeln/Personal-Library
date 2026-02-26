@@ -44,7 +44,7 @@ public class CollectionBookService {
     public Page<LibraryBookDto> getCollectionBooksPaginated(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, PaginationParams paginationParams) {
         var collection = collectionService.getExistingById(collectionId);
         if (!collection.getUser().getId().equals(userId))
-            throw new BadRequestException("Collection does not belong to user");
+            throw new BadRequestException("error.collection.not_belong_to_user");
 
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.LIBRARY_BOOK_FIELDS);
 
@@ -56,12 +56,12 @@ public class CollectionBookService {
     public CollectionBookDto addBookToCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
         var collection = collectionService.getExistingById(collectionId);
         if (!collection.getUser().getId().equals(userId))
-            throw new BadRequestException("Collection does not belong to user");
+            throw new BadRequestException("error.collection.not_belong_to_user");
 
         var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
         var id = new CollectionBookId(collection.getId(), libraryBook.getId());
         if (repository.existsById(id))
-            throw new BadRequestException("Book is already added to collection");
+            throw new BadRequestException("error.collection.book_already_added");
 
         var managedEntity = repository.saveAndFlush(CollectionBook.builder()
                 .id(id)
@@ -76,11 +76,11 @@ public class CollectionBookService {
     public void bulkAddBooksToCollection(Integer userId, Integer collectionId, List<Integer> libraryBookIds) {
         var collection = collectionService.getExistingById(collectionId);
         if (!collection.getUser().getId().equals(userId))
-            throw new BadRequestException("Collection does not belong to user");
+            throw new BadRequestException("error.collection.not_belong_to_user");
 
         var libraryBooks = libraryBookRepository.findAllByIdInAndUserId(libraryBookIds, userId);
         if (libraryBooks.isEmpty())
-            throw new NotFoundException("None of the library books were found");
+            throw new NotFoundException("error.library_book.none_found");
 
         var existingInCollection = repository.findLibraryBookIdsByCollectionId(collectionId);
 
@@ -101,7 +101,7 @@ public class CollectionBookService {
     public void removeBookFromCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
         var collection = collectionService.getExistingById(collectionId);
         if (!collection.getUser().getId().equals(userId))
-            throw new BadRequestException("Collection does not belong to user");
+            throw new BadRequestException("error.collection.not_belong_to_user");
 
         var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
         repository.deleteById(new CollectionBookId(collection.getId(), libraryBook.getId()));

@@ -25,15 +25,13 @@ public class SortValidator {
 
             if (parts.length > 2) {
                 throw new InvalidSortParameterException(
-                        "Invalid sort parameter format: " + sortParam +
-                                ". Expected format: field,direction"
+                        "error.pagination.invalid_sort_format", sortParam
                 );
             }
 
             if (!allowedFields.contains(field)) {
                 throw new InvalidSortParameterException(
-                        "Invalid sort field: " + field +
-                                ". Allowed fields: " + allowedFields
+                        "error.pagination.invalid_sort_field", field, allowedFields
                 );
             }
 
@@ -41,8 +39,7 @@ public class SortValidator {
                 var direction = parts[1].trim().toUpperCase();
                 if (!ALLOWED_DIRECTIONS.contains(direction)) {
                     throw new InvalidSortParameterException(
-                            "Invalid sort direction: " + direction +
-                                    ". Use some of " + ALLOWED_DIRECTIONS
+                            "error.pagination.invalid_sort_direction", direction, ALLOWED_DIRECTIONS
                     );
                 }
             }

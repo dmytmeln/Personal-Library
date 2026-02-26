@@ -26,13 +26,7 @@
         }
         <p>
           <strong>{{ t('table.booksCount') }}:</strong>
-          @if (totalElements === 1) {
-            {{ t('booksCount.one', { count: 1 }) }}
-          } @else if (totalElements >= 2 && totalElements <= 4) {
-            {{ t('booksCount.few', { count: totalElements }) }}
-          } @else {
-            {{ t('booksCount.other', { count: totalElements }) }}
-          }
+          {{ t('booksCount', { count: totalElements }) }}
         </p>
       </div>
 

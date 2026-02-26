@@ -12,11 +12,11 @@ import lombok.*;
 @ToString(exclude = "password")
 public class AuthenticationRequest {
 
-    @NotNull
-    @Email
+    @NotNull(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "{validation.password.required}")
     private String password;
 
 }

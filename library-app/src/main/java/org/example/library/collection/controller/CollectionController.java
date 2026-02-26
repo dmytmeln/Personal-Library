@@ -1,6 +1,7 @@
 
 package org.example.library.collection.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.library.collection.dto.*;
 import org.example.library.collection.service.CollectionService;
@@ -43,7 +44,7 @@ public class CollectionController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BasicCollectionDto create(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                     @RequestBody CreateCollectionRequest dto) {
+                                     @Valid @RequestBody CreateCollectionRequest dto) {
         return service.createCollection(dto, userDetails.getId());
     }
 
@@ -51,7 +52,7 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.OK)
     public BasicCollectionDto update(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                      @PathVariable Integer collectionId,
-                                     @RequestBody UpdateCollectionDto dto) {
+                                     @Valid @RequestBody UpdateCollectionDto dto) {
         return service.updateCollection(collectionId, dto, userDetails.getId());
     }
 
@@ -59,14 +60,14 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.OK)
     public void moveCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                @PathVariable Integer collectionId,
-                               @RequestBody MoveCollectionRequest request) {
+                               @Valid @RequestBody MoveCollectionRequest request) {
         service.moveCollection(collectionId, request.getNewParentId(), userDetails.getId());
     }
 
     @PatchMapping("/bulk-move")
     @ResponseStatus(HttpStatus.OK)
     public void bulkMoveCollections(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                    @RequestBody BulkMoveRequest request) {
+                                    @Valid @RequestBody BulkMoveRequest request) {
         service.bulkMoveCollections(request.getCollectionIdsToMove(), request.getNewParentId(), userDetails.getId());
     }
 
@@ -80,7 +81,7 @@ public class CollectionController {
     @PostMapping("/books")
     @ResponseStatus(HttpStatus.OK)
     public void addBookToCollections(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                     @RequestBody AddBookToCollectionsRequest request) {
+                                     @Valid @RequestBody AddBookToCollectionsRequest request) {
         service.addBookToCollections(request.getLibraryBookId(), request.getCollectionIds(), userDetails.getId());
     }
 
@@ -89,7 +90,7 @@ public class CollectionController {
     public void moveBookBetweenCollections(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @PathVariable Integer sourceCollectionId,
                                            @PathVariable Integer bookId,
-                                           @RequestBody MoveCollectionRequest request) {
+                                           @Valid @RequestBody MoveCollectionRequest request) {
         service.moveBook(sourceCollectionId, request.getNewParentId(), bookId, userDetails.getId());
     }
 

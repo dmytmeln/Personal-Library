@@ -9,6 +9,7 @@ import {provideTransloco} from '@jsverse/transloco';
 import {LangInterceptor} from './services/lang.interceptor';
 import {MatPaginatorIntl} from '@angular/material/paginator';
 import {TranslocoPaginatorIntl} from './services/transloco-paginator-intl';
+import {provideTranslocoMessageformat} from '@jsverse/transloco-messageformat';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,6 +34,9 @@ export const appConfig: ApplicationConfig = {
         prodMode: !isDevMode(),
       },
       loader: TranslocoHttpLoader
+    }),
+    provideTranslocoMessageformat({
+      locales: ['en-GB', 'uk-UA']
     }),
   ]
 };

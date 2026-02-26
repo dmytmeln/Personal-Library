@@ -1,7 +1,11 @@
 package org.example.library.exception;
 
 import jakarta.validation.ValidationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,27 +24,30 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class RestControllerExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private final MessageSource messageSource;
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(NOT_FOUND)
     public ExceptionResponse handleNotFoundException(NotFoundException exception) {
         log.warn("[NOT_FOUND] {}", exception.getMessage());
-        return ExceptionResponse.of(exception.getMessage());
+        return ExceptionResponse.of(tryLocalize(exception.getMessage()));
     }
 
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(BAD_REQUEST)
     public ExceptionResponse handleBadRequestException(BadRequestException exception) {
         log.warn("[BAD_REQUEST] {}", exception.getMessage());
-        return ExceptionResponse.of(exception.getMessage());
+        return ExceptionResponse.of(tryLocalize(exception.getMessage()));
     }
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(BAD_REQUEST)
     public ExceptionResponse handleValidationException(ValidationException exception) {
         log.warn("[VALIDATION] {}", exception.getMessage());
-        return ExceptionResponse.of(exception.getMessage());
+        return ExceptionResponse.of(tryLocalize(exception.getMessage()));
     }
 
     @Override
@@ -58,28 +65,45 @@ public class RestControllerExceptionHandler extends ResponseEntityExceptionHandl
     @ResponseStatus(UNAUTHORIZED)
     public ExceptionResponse handleBadCredentialsException() {
         log.warn("[BAD_CREDENTIALS] Invalid username or password");
-        return ExceptionResponse.of("Invalid username or password");
+        return ExceptionResponse.of(getMessage("error.auth.invalid_credentials"));
     }
 
     @ExceptionHandler(InvalidSortParameterException.class)
     @ResponseStatus(BAD_REQUEST)
     public ExceptionResponse handleInvalidSortParameterException(InvalidSortParameterException exception) {
         log.warn("[INVALID_SORT] {}", exception.getMessage());
-        return ExceptionResponse.of(exception.getMessage());
+        return ExceptionResponse.of(tryLocalize(exception.getMessage(), exception.getArgs()));
     }
 
     @ExceptionHandler(InvalidPaginationParameterException.class)
     @ResponseStatus(BAD_REQUEST)
     public ExceptionResponse handleInvalidPaginationParameterException(InvalidPaginationParameterException exception) {
         log.warn("[INVALID_PAGINATION] {}", exception.getMessage());
-        return ExceptionResponse.of(exception.getMessage());
+        return ExceptionResponse.of(tryLocalize(exception.getMessage(), exception.getArgs()));
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ExceptionResponse handleAllExceptions(Exception exception) {
         log.error("[INTERNAL_ERROR] {}", exception.getMessage(), exception);
-        return ExceptionResponse.of("Something went wrong on our side... Try again later!");
+        return ExceptionResponse.of(getMessage("error.internal_server_error"));
+    }
+
+    private String tryLocalize(String message) {
+        return tryLocalize(message, null);
+    }
+
+    private String tryLocalize(String message, Object[] args) {
+        if (message == null) return null;
+        try {
+            return messageSource.getMessage(message, args, LocaleContextHolder.getLocale());
+        } catch (NoSuchMessageException e) {
+            return message;
+        }
+    }
+
+    private String getMessage(String code, Object... args) {
+        return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
     }
 
 }

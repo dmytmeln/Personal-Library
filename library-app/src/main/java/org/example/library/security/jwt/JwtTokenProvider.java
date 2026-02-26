@@ -21,7 +21,7 @@ public class JwtTokenProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         var jwtAuth = (JwtTokenAuthentication) authentication;
         if (!jwtService.isTokenValid(jwtAuth.getToken()))
-            throw new BadCredentialsException("Invalid JWT token");
+            throw new BadCredentialsException("error.auth.invalid_jwt_token");
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(jwtService.extractUsername(jwtAuth.getToken()));
         return new JwtTokenAuthentication(jwtAuth.getToken(), userDetails);

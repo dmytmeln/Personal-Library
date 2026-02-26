@@ -38,6 +38,8 @@
     "from": "From",
     "to": "To",
     "pagesShort": "p.",
+    "viewMode": "View Mode",
+    "selectPage": "Select page",
     "pagination": {
       "itemsPerPage": "Items per page:",
       "nextPage": "Next page",
@@ -182,7 +184,7 @@
     "deleteCollection": "Delete collection",
     "deleteConfirm": "Are you sure you want to delete the collection \"{{name}}\"? This will also delete all its subcollections and book references.",
     "bulkRemoveFromCollectionConfirm": "Are you sure you want to remove {{count}} selected books from this collection?",
-    "stats": "{{books}} books, {{subcollections}} subcollections",
+    "stats": "{books, plural, =1 {# book} other {# books}}, {subcollections, plural, =1 {# subcollection} other {# subcollections}}",
     "subcollections": "Subcollections:",
     "booksInCollection": "Books in collection:",
     "showSubcollections": "Show subcollections",
@@ -353,11 +355,7 @@
       "booksCount": "Books Count",
       "actions": "Actions"
     },
-    "booksCount": {
-      "one": "{{count}} book",
-      "few": "{{count}} books",
-      "other": "{{count}} books"
-    }
+    "booksCount": "{count, plural, =1 {# book} other {# books}}"
   },
   "categories": {
     "filters": {
@@ -377,10 +375,6 @@
       "booksCount": "Books Count",
       "actions": "Actions"
     },
-    "booksCount": {
-      "one": "{{count}} book",
-      "few": "{{count}} books",
-      "other": "{{count}} books"
-    }
+    "booksCount": "{count, plural, =1 {# book} other {# books}}"
   }
 }

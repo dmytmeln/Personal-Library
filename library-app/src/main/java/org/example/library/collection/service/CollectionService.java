@@ -9,7 +9,6 @@ import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection.repository.CollectionSpecification;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
-import org.example.library.collection_book.mapper.CollectionBookMapper;
 import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
@@ -36,7 +35,6 @@ public class CollectionService {
     private final LibraryBookRepository libraryBookRepository;
     private final UserRepository userRepository;
     private final CollectionMapper collectionMapper;
-    private final CollectionBookMapper collectionBookMapper;
 
 
     @Transactional(readOnly = true)
@@ -53,7 +51,7 @@ public class CollectionService {
     @Transactional(readOnly = true)
     public Collection getExistingById(Integer id) {
         return collectionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Collection not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +78,7 @@ public class CollectionService {
     @Transactional(readOnly = true)
     public CollectionDetailsDto getCollectionDetails(Integer collectionId, Integer userId) {
         var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
-                .orElseThrow(() -> new NotFoundException("Collection not found with id: " + collectionId));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
         var detailsDto = collectionMapper.toDetailsDto(collection);
         detailsDto.setAncestors(getAncestors(collection));
@@ -91,17 +89,17 @@ public class CollectionService {
     @Transactional
     public BasicCollectionDto createCollection(CreateCollectionRequest dto, Integer userId) {
         var user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new NotFoundException("error.user.not_found"));
 
         var newCollection = collectionMapper.toEntity(dto);
         newCollection.setUser(user);
 
         if (dto.getParentId() != null) {
             var parent = collectionRepository.findByIdAndUserId(dto.getParentId(), userId)
-                    .orElseThrow(() -> new NotFoundException("Parent collection not found with id: " + dto.getParentId()));
+                    .orElseThrow(() -> new NotFoundException("error.collection.parent_not_found"));
 
             if (getDepthFromRoot(parent) >= MAX_ALLOWED_DEPTH) {
-                throw new BadRequestException("Maximum collection depth of %d would be exceeded.".formatted(MAX_ALLOWED_DEPTH));
+                throw new BadRequestException("error.collection.max_depth_exceeded");
             }
             parent.addChildrenCollection(newCollection);
         }
@@ -113,7 +111,7 @@ public class CollectionService {
     @Transactional
     public BasicCollectionDto updateCollection(Integer collectionId, UpdateCollectionDto dto, Integer userId) {
         var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
-                .orElseThrow(() -> new NotFoundException("Collection not found with id: " + collectionId));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
         collectionMapper.updateFromDto(dto, collection);
         var savedCollection = collectionRepository.save(collection);
@@ -124,15 +122,15 @@ public class CollectionService {
     @Transactional
     public void moveCollection(Integer collectionId, Integer newParentId, Integer userId) {
         if (Objects.equals(collectionId, newParentId))
-            throw new BadRequestException("A collection cannot be its own parent.");
+            throw new BadRequestException("error.collection.cannot_be_own_parent");
 
         var collectionToMove = collectionRepository.findByIdAndUserId(collectionId, userId)
-                .orElseThrow(() -> new NotFoundException("Collection to move not found with id: " + collectionId));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
         Collection newParent = null;
         if (newParentId != null) {
             newParent = collectionRepository.findByIdAndUserId(newParentId, userId)
-                    .orElseThrow(() -> new NotFoundException("New parent collection not found with id: " + newParentId));
+                    .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
             validateMove(collectionToMove, newParent);
         }
 
@@ -158,12 +156,12 @@ public class CollectionService {
         Collection newParent = null;
         if (newParentId != null) {
             newParent = collectionRepository.findByIdAndUserId(newParentId, userId)
-                    .orElseThrow(() -> new NotFoundException("Target parent collection not found with id: " + newParentId));
+                    .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
         }
 
         var collectionsToMove = collectionRepository.findAllByIdInAndUserId(collectionIds, userId);
         if (collectionsToMove.size() != collectionIds.size())
-            throw new NotFoundException("One or more collections to move were not found.");
+            throw new NotFoundException("error.collection.not_found");
 
         for (var collection : collectionsToMove) {
             if (newParent != null) {
@@ -186,7 +184,7 @@ public class CollectionService {
     @Transactional
     public void deleteCollection(Integer collectionId, Integer userId) {
         var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
-                .orElseThrow(() -> new NotFoundException("Collection not found with id: " + collectionId));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
         collectionRepository.delete(collection);
     }
@@ -194,11 +192,11 @@ public class CollectionService {
     @Transactional
     public void addBookToCollections(Integer libraryBookId, List<Integer> collectionIds, Integer userId) {
         var book = libraryBookRepository.findByIdAndUserId(libraryBookId, userId)
-                .orElseThrow(() -> new NotFoundException("Library book not found with id: " + libraryBookId));
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
 
         var collections = collectionRepository.findAllByIdInAndUserId(collectionIds, userId);
         if (collections.size() != collectionIds.size()) {
-            throw new NotFoundException("One or more collections were not found.");
+            throw new NotFoundException("error.collection.not_found");
         }
 
         var existingMappings = collectionBookRepository.findAllByLibraryBookIdAndCollectionIdIn(libraryBookId, collectionIds)
@@ -223,18 +221,18 @@ public class CollectionService {
     @Transactional
     public void moveBook(Integer sourceCollectionId, Integer targetCollectionId, Integer libraryBookId, Integer userId) {
         libraryBookRepository.findByIdAndUserId(libraryBookId, userId)
-                .orElseThrow(() -> new NotFoundException("Library book not found with id: " + libraryBookId));
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
 
         var sourceCollection = collectionRepository.findByIdAndUserId(sourceCollectionId, userId)
-                .orElseThrow(() -> new NotFoundException("Source collection not found with id: " + sourceCollectionId));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
         var targetCollection = collectionRepository.findByIdAndUserId(targetCollectionId, userId)
-                .orElseThrow(() -> new NotFoundException("Target collection not found with id: " + targetCollectionId));
+                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
         var sourceId = new CollectionBookId(libraryBookId, sourceCollection.getId());
         var targetId = new CollectionBookId(libraryBookId, targetCollection.getId());
 
         if (!collectionBookRepository.existsById(sourceId)) {
-            throw new NotFoundException("Book is not in the source collection.");
+            throw new NotFoundException("error.collection.book_not_in_source");
         }
 
         collectionBookRepository.deleteById(sourceId);
@@ -265,14 +263,14 @@ public class CollectionService {
         checkForCircularDependency(toMove, newParent);
 
         if (getDepthFromRoot(newParent) + getSubtreeDepth(toMove) > MAX_ALLOWED_DEPTH)
-            throw new BadRequestException("Hierarchy would exceed maximum depth of " + MAX_ALLOWED_DEPTH);
+            throw new BadRequestException("error.collection.max_depth_exceeded");
     }
 
     private void checkForCircularDependency(Collection toMove, Collection newParent) {
         var current = newParent;
         while (current != null) {
             if (current.equals(toMove))
-                throw new BadRequestException("Circular dependency detected: cannot move a collection into its own sub-collection.");
+                throw new BadRequestException("error.collection.circular_dependency");
 
             current = current.getParent();
         }

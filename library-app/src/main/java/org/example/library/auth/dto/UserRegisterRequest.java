@@ -10,16 +10,16 @@ import lombok.Data;
 @Builder
 public class UserRegisterRequest {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
     private String email;
 
-    @NotBlank(message = "Full name is required")
-    @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
+    @NotBlank(message = "{validation.full_name.required}")
+    @Size(min = 2, max = 100, message = "{validation.full_name.min_length}")
     private String fullName;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
+    @NotBlank(message = "{validation.password.required}")
+    @Size(min = 6, max = 100, message = "{validation.password.min_length}")
     private String password;
 
 }

@@ -52,7 +52,7 @@ public class LibraryBookService {
 
     public LibraryBook getExistingById(Integer libraryBookId, Integer userId) {
         return repository.findByIdAndUserId(libraryBookId, userId)
-                .orElseThrow(() -> new NotFoundException("There is no such book in your library"));
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
     }
 
     @Transactional
@@ -157,19 +157,18 @@ public class LibraryBookService {
 
     private LibraryBookView getViewById(Integer libraryBookId) {
         return viewRepository.findById(libraryBookId)
-                .orElseThrow(() -> new NotFoundException("Library book view not found"));
+                .orElseThrow(() -> new NotFoundException("error.library_book.view_not_found"));
     }
 
     private void verifyRatingIsValid(Integer rating) {
         if (rating < RATING_LOWER_BOUND || rating > RATING_UPPER_BOUND) {
-            throw new BadRequestException("Rating should be between %d and %d"
-                    .formatted(RATING_LOWER_BOUND, RATING_UPPER_BOUND));
+            throw new BadRequestException("error.library_book.invalid_rating");
         }
     }
 
     private void verifyNotExists(Integer bookId, Integer userId) {
         if (repository.existsByBookIdAndUserId(bookId, userId)) {
-            throw new BadRequestException("Book already added to your library");
+            throw new BadRequestException("error.library_book.already_added");
         }
     }
 

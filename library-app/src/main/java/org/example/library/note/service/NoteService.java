@@ -24,7 +24,7 @@ public class NoteService {
     public NoteDto getByLibraryBookId(Integer libraryBookId, Integer userId) {
         return repository.findByLibraryBookIdAndLibraryBookUserId(libraryBookId, userId)
                 .map(mapper::toDto)
-                .orElseThrow(() -> new NotFoundException("Note not found for library book id " + libraryBookId));
+                .orElseThrow(() -> new NotFoundException("error.note.not_found"));
     }
 
     @Transactional

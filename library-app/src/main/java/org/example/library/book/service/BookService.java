@@ -36,20 +36,20 @@ public class BookService {
 
     public Book getExistingById(Integer bookId) {
         return repository.findById(bookId)
-                .orElseThrow(() -> new NotFoundException("Book not found"));
+                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
     }
 
     public List<Book> getExistingByIds(List<Integer> bookIds) {
         var books = repository.findAllById(bookIds);
         if (books.isEmpty())
-            throw new NotFoundException("None of the books were found");
+            throw new NotFoundException("error.book.none_found");
         
         return books;
     }
 
     public void verifyExistsById(Integer bookId) {
         if (!repository.existsById(bookId)) {
-            throw new NotFoundException("Book not found");
+            throw new NotFoundException("error.book.not_found");
         }
     }
 
