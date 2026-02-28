@@ -6,6 +6,7 @@ import { ApiService } from './api.service';
 import { UserRegisterRequest } from '../interfaces/user-register-request';
 import { UserResponse } from '../interfaces/user-response';
 import { AuthenticationRequest } from '../interfaces/authentication-request';
+import { UpdateProfileRequest } from '../interfaces/update-profile-request';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,12 @@ export class AuthService {
 
   register(request: UserRegisterRequest): Observable<UserResponse> {
     return this.apiService.post<UserResponse>('/auth/register', {
+      body: request
+    });
+  }
+
+  updateProfile(request: UpdateProfileRequest): Observable<UserResponse> {
+    return this.apiService.patch<UserResponse>('/users/me', {
       body: request
     });
   }

@@ -3,7 +3,6 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {NgStyle} from '@angular/common';
 import {CreateCollection} from '../../interfaces/create-collection';
 import {CollectionDetails} from '../../interfaces/collection-details';
 import {UpdateCollection} from '../../interfaces/update-collection';
@@ -27,7 +26,6 @@ export interface CollectionDialogData {
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
-    NgStyle,
     FormsModule,
     MatIconModule,
     TranslocoDirective,
@@ -42,8 +40,6 @@ export class CollectionDialogComponent implements OnInit {
     description: FormControl<string | null>;
   }>;
 
-  colors: string[] = ['#4285F4', '#34A853', '#EA4335', '#FBBC04', '#A142F4', '#F44292'];
-  selectedColor: string;
   isEdit: boolean;
 
   selectedParent: SelectedCollection = {id: null, name: 'Root'};
@@ -64,7 +60,6 @@ export class CollectionDialogComponent implements OnInit {
       }),
       description: new FormControl<string | null>(data.collection?.description || null),
     });
-    this.selectedColor = data.collection?.color || this.colors[0];
     this.selectedParent.name = this.translocoService.translate('collections.selector.root');
   }
 
@@ -86,10 +81,6 @@ export class CollectionDialogComponent implements OnInit {
     });
   }
 
-  selectColor(color: string): void {
-    this.selectedColor = color;
-  }
-
   save(): void {
     if (this.form.invalid) {
       return;
@@ -98,14 +89,12 @@ export class CollectionDialogComponent implements OnInit {
     if (this.isEdit) {
       const collection: UpdateCollection = {
         name: this.form.getRawValue().name,
-        color: this.selectedColor,
         description: this.form.value.description || undefined,
       };
       this.dialogRef.close(collection);
     } else {
       const collection: CreateCollection = {
         name: this.form.getRawValue().name,
-        color: this.selectedColor,
         description: this.form.value.description || undefined,
         parentId: this.selectedParent.id || undefined,
       };

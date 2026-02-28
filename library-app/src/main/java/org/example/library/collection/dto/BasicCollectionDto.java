@@ -11,6 +11,5 @@ public class BasicCollectionDto {
     private Integer id;
     private String name;
     private Integer parentId;
-    private String color;
     private LocalDateTime updatedAt;
 }

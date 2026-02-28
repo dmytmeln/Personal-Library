@@ -7,17 +7,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class LibraryApplication {
 
     // todo:
-    //  BE + FE: add possibility to update full name and email for HOST provided users
-
-    // todo:
     //  localization
     //  BE + FE: library - statistics
-    //  JPA optimizations + Hibernate bulk configuration + change strategy to sequence
-    //  BE + FE: recommendations
     //  BE + FE: share library with other users?
     //  BE: JWT refresh tokens
     //  BE: password reset
+    //  confirm email after registration
     //  indexes
+    //  BE + FE: recommendations
     //  CI/CD
     //  AWS deployment
 

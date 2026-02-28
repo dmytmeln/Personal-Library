@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CollectionBookService} from '../services/collection-book.service';
 import {CollectionService} from '../services/collection.service';
 import {CollectionDetails} from '../interfaces/collection-details';
-import {CommonModule, NgStyle} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialog} from '@angular/material/dialog';
@@ -63,7 +63,6 @@ const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   standalone: true,
   imports: [
     CommonModule,
-    NgStyle,
     MatButton,
     MatIconModule,
     LibraryBookMenuItemsComponent,

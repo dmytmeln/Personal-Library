@@ -1,10 +1,10 @@
 package org.example.library.security;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.library.security.jwt.JwtService;
+import org.example.library.security.util.CookieUtils;
 import org.example.library.user.domain.Provider;
 import org.example.library.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,13 +44,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         var token = jwtService.generateToken(user.getEmail());
 
-        Cookie cookie = new Cookie(cookieName, token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(cookieMaxAge / 1000);
-        
-        response.addCookie(cookie);
+        CookieUtils.addCookie(response, cookieName, token, cookieMaxAge);
 
         this.getRedirectStrategy().sendRedirect(request, response, frontendUrl + "/oauth2/redirect");
     }

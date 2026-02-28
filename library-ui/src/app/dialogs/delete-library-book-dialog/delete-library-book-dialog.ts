@@ -2,7 +2,6 @@ import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
 import {BasicCollection} from '../../interfaces/basic-collection';
-import {NgStyle} from '@angular/common';
 import {TranslocoDirective} from '@jsverse/transloco';
 
 @Component({
@@ -10,7 +9,6 @@ import {TranslocoDirective} from '@jsverse/transloco';
   imports: [
     MatButton,
     MatDialogModule,
-    NgStyle,
     TranslocoDirective
   ],
   templateUrl: './delete-library-book-dialog.html',

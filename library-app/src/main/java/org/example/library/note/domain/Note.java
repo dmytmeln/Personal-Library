@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "notes")
@@ -18,7 +19,8 @@ import java.time.LocalDateTime;
 public class Note {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notes_seq")
+    @SequenceGenerator(name = "notes_seq", sequenceName = "notes_seq", allocationSize = 20)
     @Column(name = "note_id")
     private Integer id;
 
@@ -36,5 +38,16 @@ public class Note {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "library_book_id", nullable = false, unique = true)
     private LibraryBook libraryBook;
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Note note)) return false;
+        return Objects.equals(id, note.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
 }

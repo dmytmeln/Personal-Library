@@ -5,7 +5,7 @@ databaseChangeLog:
       changes:
         - createSequence:
             sequenceName: authors_seq
-            startValue: 1
+            startValue: 20
             incrementBy: 20
         - createTable:
             tableName: authors

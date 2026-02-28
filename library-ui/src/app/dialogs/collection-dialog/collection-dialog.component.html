@@ -23,21 +23,6 @@
       <mat-label>{{ t('description') }}</mat-label>
       <textarea matInput formControlName="description"></textarea>
     </mat-form-field>
-
-    <div class="color-picker">
-      <label>{{ t('color') }}</label>
-      <div class="color-options">
-        @for (color of colors; track color) {
-          <button
-            type="button"
-            mat-icon-button
-            [ngStyle]="{'background-color': color}"
-            [class.selected]="color === selectedColor"
-            (click)="selectColor(color)">
-          </button>
-        }
-      </div>
-    </div>
   </div>
   <div mat-dialog-actions *transloco="let c; prefix: 'common'">
     <button type="button" mat-button (click)="close()">{{ c('cancel') }}</button>

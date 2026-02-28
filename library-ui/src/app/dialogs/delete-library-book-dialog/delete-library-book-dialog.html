@@ -10,7 +10,7 @@
         <p class="warning-title">{{ t('collectionsWarning') }}</p>
         <ul class="collections-list">
           @for (collection of data.collections; track collection.id) {
-            <li [ngStyle]="{'color': collection.color || '#333'}">
+            <li>
               {{ collection.name }}
             </li>
           }

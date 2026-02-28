@@ -21,8 +21,6 @@ public interface CollectionMapper {
     @Mapping(target = "children", ignore = true)
     CollectionNodeDto toNodeDto(Collection collection);
 
-    List<CollectionNodeDto> toNodeDto(List<Collection> collections);
-
     @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "ancestors", ignore = true)
     CollectionDetailsDto toDetailsDto(Collection collection);

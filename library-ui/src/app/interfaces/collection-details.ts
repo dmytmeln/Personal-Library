@@ -5,7 +5,6 @@ export interface CollectionDetails {
   id: number;
   name: string;
   description?: string;
-  color?: string;
   parentId?: number;
   createdAt: Date;
   ancestors: BasicCollection[];

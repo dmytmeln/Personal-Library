@@ -1,10 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatListModule} from '@angular/material/list';
 import {MatDividerModule} from '@angular/material/divider';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {AuthService} from '../services/auth.service';
 import {UserResponse} from '../interfaces/user-response';
@@ -22,6 +26,10 @@ import {MatSnackCommon} from '../common/mat-snack-common';
     MatIconModule,
     MatListModule,
     MatDividerModule,
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
     TranslocoDirective,
   ],
   templateUrl: './profile.component.html',
@@ -29,8 +37,22 @@ import {MatSnackCommon} from '../common/mat-snack-common';
 })
 export class ProfileComponent implements OnInit {
 
-  user: UserResponse | null = null;
-  loading: boolean = true;
+  user = signal<UserResponse | null>(null);
+  loading = signal<boolean>(true);
+  isEditing = signal<boolean>(false);
+  saving = signal<boolean>(false);
+
+  profileForm = new FormGroup({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email]
+    }),
+    fullName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(2)]
+    })
+  });
+
   private snackCommon: MatSnackCommon;
 
   constructor(
@@ -47,15 +69,52 @@ export class ProfileComponent implements OnInit {
   }
 
   loadUserProfile(): void {
+    this.loading.set(true);
     this.authService.getCurrentUser().subscribe({
       next: (user) => {
-        this.user = user;
-        this.loading = false;
+        this.user.set(user);
+        this.loading.set(false);
       },
       error: (error) => {
         this.snackCommon.showError(this.translocoService.translate('profile.loadError'));
-        this.loading = false;
+        this.loading.set(false);
         console.error('Error loading profile:', error);
+      }
+    });
+  }
+
+  toggleEdit(): void {
+    const user = this.user();
+    if (user && user.provider === 'HOST') {
+      this.profileForm.patchValue({
+        email: user.email,
+        fullName: user.fullName
+      });
+      this.isEditing.set(true);
+    }
+  }
+
+  cancelEdit(): void {
+    this.isEditing.set(false);
+    this.profileForm.reset();
+  }
+
+  saveProfile(): void {
+    if (this.profileForm.invalid || this.saving()) return;
+
+    this.saving.set(true);
+    const request = this.profileForm.getRawValue();
+
+    this.authService.updateProfile(request).subscribe({
+      next: (updatedUser) => {
+        this.user.set(updatedUser);
+        this.isEditing.set(false);
+        this.saving.set(false);
+        this.snackCommon.showSuccess(this.translocoService.translate('profile.updateSuccess'));
+      },
+      error: (error) => {
+        this.snackCommon.showError(error);
+        this.saving.set(false);
       }
     });
   }

@@ -5,7 +5,7 @@ databaseChangeLog:
       changes:
         - createSequence:
             sequenceName: books_seq
-            startValue: 1
+            startValue: 56
             incrementBy: 20
         - createTable:
             tableName: books

@@ -266,7 +266,15 @@
     "role": "Role",
     "provider": "Provider",
     "loadError": "Failed to load user profile",
-    "loading": "Loading profile..."
+    "loading": "Loading profile...",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "fullNameRequired": "Full Name is required",
+    "fullNameMinLength": "Full Name must be at least 2 characters",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email",
+    "updateSuccess": "Profile updated successfully"
   },
   "search": {
     "title": "Search Books",

@@ -1,4 +1,5 @@
 export const environment = {
-  apiBaseUrl: 'library-app.railway.internal',
+  production: true,
+  apiBaseUrl: 'changeit',
   cookieName: 'jwt'
 };

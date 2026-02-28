@@ -19,9 +19,10 @@ import java.util.Objects;
 public class LibraryBook {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "library_books_seq")
+    @SequenceGenerator(name = "library_books_seq", sequenceName = "library_books_seq", allocationSize = 20)
     @Column(name = "library_book_id")
-    private Integer id; // todo embedded ID
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

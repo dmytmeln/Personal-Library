@@ -15,7 +15,7 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
     List<Collection> findAllByUserId(Integer userId);
 
     @Query(value = """
-            SELECT c.collection_id, c.user_id, c.parent_id, c.name, c.description, c.color, c.created_at, c.updated_at
+            SELECT c.collection_id, c.user_id, c.parent_id, c.name, c.description, c.created_at, c.updated_at
             FROM collections c
             JOIN collection_books cb ON cb.collection_id = c.collection_id
             JOIN library_books lb ON lb.library_book_id = cb.library_book_id
@@ -35,7 +35,7 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
                 FROM collections c
                 JOIN collection_path cp ON c.collection_id = cp.parent_id
             )
-            SELECT collection_id, user_id, name, description, color, created_at, updated_at, parent_id
+            SELECT collection_id, user_id, name, description, created_at, updated_at, parent_id
             FROM collection_path
             ORDER BY depth DESC
             """, nativeQuery = true)

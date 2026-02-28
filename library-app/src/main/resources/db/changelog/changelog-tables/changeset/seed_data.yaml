@@ -7,6 +7,9 @@ databaseChangeLog:
             tableName: categories
             columns:
               - column:
+                  name: category_id
+                  value: 1
+              - column:
                   name: name
                   value: Fiction
               - column:
@@ -15,6 +18,9 @@ databaseChangeLog:
         - insert:
             tableName: categories
             columns:
+              - column:
+                  name: category_id
+                  value: 2
               - column:
                   name: name
                   value: Science Fiction
@@ -25,6 +31,9 @@ databaseChangeLog:
             tableName: categories
             columns:
               - column:
+                  name: category_id
+                  value: 3
+              - column:
                   name: name
                   value: Mystery
               - column:
@@ -33,6 +42,9 @@ databaseChangeLog:
         - insert:
             tableName: categories
             columns:
+              - column:
+                  name: category_id
+                  value: 4
               - column:
                   name: name
                   value: Romance
@@ -43,6 +55,9 @@ databaseChangeLog:
             tableName: categories
             columns:
               - column:
+                  name: category_id
+                  value: 5
+              - column:
                   name: name
                   value: Historical Fiction
               - column:
@@ -51,6 +66,9 @@ databaseChangeLog:
         - insert:
             tableName: categories
             columns:
+              - column:
+                  name: category_id
+                  value: 6
               - column:
                   name: name
                   value: Biography
@@ -61,6 +79,9 @@ databaseChangeLog:
             tableName: categories
             columns:
               - column:
+                  name: category_id
+                  value: 7
+              - column:
                   name: name
                   value: Science
               - column:
@@ -69,6 +90,9 @@ databaseChangeLog:
         - insert:
             tableName: categories
             columns:
+              - column:
+                  name: category_id
+                  value: 8
               - column:
                   name: name
                   value: Technology
@@ -79,6 +103,9 @@ databaseChangeLog:
             tableName: categories
             columns:
               - column:
+                  name: category_id
+                  value: 9
+              - column:
                   name: name
                   value: Fantasy
               - column:
@@ -87,6 +114,9 @@ databaseChangeLog:
         - insert:
             tableName: categories
             columns:
+              - column:
+                  name: category_id
+                  value: 10
               - column:
                   name: name
                   value: Thriller
@@ -101,6 +131,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 1
               - column:
                   name: full_name
                   value: Stephen King
@@ -117,6 +150,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 2
+              - column:
                   name: full_name
                   value: J.K. Rowling
               - column:
@@ -131,6 +167,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 3
               - column:
                   name: full_name
                   value: George Orwell
@@ -150,6 +189,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 4
+              - column:
                   name: full_name
                   value: Jane Austen
               - column:
@@ -167,6 +209,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 5
               - column:
                   name: full_name
                   value: Ernest Hemingway
@@ -186,6 +231,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 6
+              - column:
                   name: full_name
                   value: Agatha Christie
               - column:
@@ -203,6 +251,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 7
               - column:
                   name: full_name
                   value: Isaac Asimov
@@ -222,6 +273,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 8
+              - column:
                   name: full_name
                   value: F. Scott Fitzgerald
               - column:
@@ -239,6 +293,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 9
               - column:
                   name: full_name
                   value: Harper Lee
@@ -258,6 +315,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 10
+              - column:
                   name: full_name
                   value: J.R.R. Tolkien
               - column:
@@ -275,6 +335,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 11
               - column:
                   name: full_name
                   value: Charles Dickens
@@ -294,6 +357,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 12
+              - column:
                   name: full_name
                   value: Mark Twain
               - column:
@@ -311,6 +377,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 13
               - column:
                   name: full_name
                   value: Virginia Woolf
@@ -330,6 +399,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 14
+              - column:
                   name: full_name
                   value: Gabriel Garcia Marquez
               - column:
@@ -347,6 +419,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 15
               - column:
                   name: full_name
                   value: Leo Tolstoy
@@ -366,6 +441,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 16
+              - column:
                   name: full_name
                   value: Dan Brown
               - column:
@@ -380,6 +458,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 17
               - column:
                   name: full_name
                   value: Arthur Conan Doyle
@@ -399,6 +480,9 @@ databaseChangeLog:
             tableName: authors
             columns:
               - column:
+                  name: author_id
+                  value: 18
+              - column:
                   name: full_name
                   value: Emily Bronte
               - column:
@@ -416,6 +500,9 @@ databaseChangeLog:
         - insert:
             tableName: authors
             columns:
+              - column:
+                  name: author_id
+                  value: 19
               - column:
                   name: full_name
                   value: H.G. Wells
@@ -440,6 +527,9 @@ databaseChangeLog:
             tableName: books
             columns:
               - column:
+                  name: book_id
+                  value: 1
+              - column:
                   name: title
                   value: The Shining
               - column:
@@ -456,13 +546,16 @@ databaseChangeLog:
                   value: 447
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/shining.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: A horror novel about a haunted hotel
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 2
               - column:
                   name: title
                   value: Harry Potter and the Sorcerers Stone
@@ -479,11 +572,17 @@ databaseChangeLog:
                   name: pages
                   value: 309
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: First book in the Harry Potter series
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 3
               - column:
                   name: title
                   value: 1984
@@ -501,13 +600,16 @@ databaseChangeLog:
                   value: 328
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/1984.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Dystopian social science fiction
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 4
               - column:
                   name: title
                   value: Pride and Prejudice
@@ -524,11 +626,17 @@ databaseChangeLog:
                   name: pages
                   value: 279
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Romantic novel of manners
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 5
               - column:
                   name: title
                   value: The Old Man and the Sea
@@ -546,13 +654,16 @@ databaseChangeLog:
                   value: 127
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/old-man-sea.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Story of an aging fisherman
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 6
               - column:
                   name: title
                   value: Murder on the Orient Express
@@ -569,11 +680,17 @@ databaseChangeLog:
                   name: pages
                   value: 256
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Detective Hercule Poirot solves a murder
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 7
               - column:
                   name: title
                   value: Foundation
@@ -591,13 +708,16 @@ databaseChangeLog:
                   value: 244
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/foundation.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Science fiction novel about galactic empire
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 8
               - column:
                   name: title
                   value: The Great Gatsby
@@ -614,11 +734,17 @@ databaseChangeLog:
                   name: pages
                   value: 180
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Jazz Age novel about wealth and society
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 9
               - column:
                   name: title
                   value: To Kill a Mockingbird
@@ -636,13 +762,16 @@ databaseChangeLog:
                   value: 281
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/mockingbird.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about racial injustice
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 10
               - column:
                   name: title
                   value: The Lord of the Rings
@@ -659,11 +788,17 @@ databaseChangeLog:
                   name: pages
                   value: 1137
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Epic high fantasy novel
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 11
               - column:
                   name: title
                   value: Great Expectations
@@ -681,13 +816,16 @@ databaseChangeLog:
                   value: 544
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/great-expectations.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Coming of age novel
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 12
               - column:
                   name: title
                   value: Adventures of Huckleberry Finn
@@ -704,11 +842,17 @@ databaseChangeLog:
                   name: pages
                   value: 366
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Novel about a boy on Mississippi River
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 13
               - column:
                   name: title
                   value: Mrs Dalloway
@@ -726,13 +870,16 @@ databaseChangeLog:
                   value: 194
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/mrs-dalloway.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Modernist novel about one day in London
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 14
               - column:
                   name: title
                   value: One Hundred Years of Solitude
@@ -749,11 +896,17 @@ databaseChangeLog:
                   name: pages
                   value: 417
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Multi-generational family saga
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 15
               - column:
                   name: title
                   value: War and Peace
@@ -771,13 +924,16 @@ databaseChangeLog:
                   value: 1225
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/war-peace.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Epic novel about Napoleonic wars
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 16
               - column:
                   name: title
                   value: The Da Vinci Code
@@ -794,11 +950,17 @@ databaseChangeLog:
                   name: pages
                   value: 489
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Mystery thriller about religious conspiracy
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 17
               - column:
                   name: title
                   value: The Hound of the Baskervilles
@@ -816,13 +978,16 @@ databaseChangeLog:
                   value: 256
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/hound-baskervilles.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Sherlock Holmes mystery
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 18
               - column:
                   name: title
                   value: Wuthering Heights
@@ -839,11 +1004,17 @@ databaseChangeLog:
                   name: pages
                   value: 416
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Gothic romance novel
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 19
               - column:
                   name: title
                   value: The War of the Worlds
@@ -861,13 +1032,16 @@ databaseChangeLog:
                   value: 287
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/war-worlds.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Alien invasion science fiction
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 20
               - column:
                   name: title
                   value: Emma
@@ -884,11 +1058,17 @@ databaseChangeLog:
                   name: pages
                   value: 474
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Novel about youthful hubris and romantic misunderstandings
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 21
               - column:
                   name: title
                   value: It
@@ -905,11 +1085,17 @@ databaseChangeLog:
                   name: pages
                   value: 1138
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Horror novel about a shapeshifting entity
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 22
               - column:
                   name: title
                   value: Harry Potter and the Chamber of Secrets
@@ -927,13 +1113,16 @@ databaseChangeLog:
                   value: 341
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/chamber-secrets.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Second book in Harry Potter series
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 23
               - column:
                   name: title
                   value: Animal Farm
@@ -950,11 +1139,17 @@ databaseChangeLog:
                   name: pages
                   value: 112
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Satirical allegory about Soviet communism
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 24
               - column:
                   name: title
                   value: Sense and Sensibility
@@ -972,13 +1167,16 @@ databaseChangeLog:
                   value: 368
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/sense-sensibility.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about two sisters and their romantic lives
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 25
               - column:
                   name: title
                   value: For Whom the Bell Tolls
@@ -995,11 +1193,17 @@ databaseChangeLog:
                   name: pages
                   value: 471
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Novel about Spanish Civil War
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 26
               - column:
                   name: title
                   value: Death on the Nile
@@ -1017,13 +1221,16 @@ databaseChangeLog:
                   value: 214
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/death-nile.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Hercule Poirot investigates murder on cruise
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 27
               - column:
                   name: title
                   value: I Robot
@@ -1040,11 +1247,17 @@ databaseChangeLog:
                   name: pages
                   value: 253
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Collection of robot stories
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 28
               - column:
                   name: title
                   value: Tender Is the Night
@@ -1062,13 +1275,16 @@ databaseChangeLog:
                   value: 389
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/tender-night.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about rise and fall of a glamorous couple
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 29
               - column:
                   name: title
                   value: Go Set a Watchman
@@ -1085,11 +1301,17 @@ databaseChangeLog:
                   name: pages
                   value: 278
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Sequel to To Kill a Mockingbird
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 30
               - column:
                   name: title
                   value: The Hobbit
@@ -1107,13 +1329,16 @@ databaseChangeLog:
                   value: 310
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/hobbit.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Children fantasy novel
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 31
               - column:
                   name: title
                   value: A Tale of Two Cities
@@ -1130,11 +1355,17 @@ databaseChangeLog:
                   name: pages
                   value: 489
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Historical novel set in London and Paris
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 32
               - column:
                   name: title
                   value: The Adventures of Tom Sawyer
@@ -1152,13 +1383,16 @@ databaseChangeLog:
                   value: 274
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/tom-sawyer.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about a boy growing up along Mississippi
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 33
               - column:
                   name: title
                   value: To the Lighthouse
@@ -1175,11 +1409,17 @@ databaseChangeLog:
                   name: pages
                   value: 209
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Modernist novel about Ramsay family
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 34
               - column:
                   name: title
                   value: Love in the Time of Cholera
@@ -1197,13 +1437,16 @@ databaseChangeLog:
                   value: 348
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/love-cholera.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about love triangle lasting decades
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 35
               - column:
                   name: title
                   value: Anna Karenina
@@ -1220,11 +1463,17 @@ databaseChangeLog:
                   name: pages
                   value: 864
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Tragic novel about aristocratic adultery
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 36
               - column:
                   name: title
                   value: Angels and Demons
@@ -1242,13 +1491,16 @@ databaseChangeLog:
                   value: 616
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/angels-demons.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Thriller about secret society and Vatican
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 37
               - column:
                   name: title
                   value: The Sign of Four
@@ -1265,11 +1517,17 @@ databaseChangeLog:
                   name: pages
                   value: 129
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Second Sherlock Holmes novel
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 38
               - column:
                   name: title
                   value: Agnes Grey
@@ -1287,13 +1545,16 @@ databaseChangeLog:
                   value: 222
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/agnes-grey.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about a governess
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 39
               - column:
                   name: title
                   value: The Time Machine
@@ -1310,11 +1571,17 @@ databaseChangeLog:
                   name: pages
                   value: 118
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Time travel science fiction
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 40
               - column:
                   name: title
                   value: The Stand
@@ -1332,13 +1599,16 @@ databaseChangeLog:
                   value: 823
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/the-stand.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Post-apocalyptic horror fantasy
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 41
               - column:
                   name: title
                   value: Harry Potter and the Prisoner of Azkaban
@@ -1355,11 +1625,17 @@ databaseChangeLog:
                   name: pages
                   value: 435
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Third book in Harry Potter series
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 42
               - column:
                   name: title
                   value: Coming Up for Air
@@ -1377,13 +1653,16 @@ databaseChangeLog:
                   value: 237
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/coming-up-air.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novel about middle-aged man seeking past
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 43
               - column:
                   name: title
                   value: Mansfield Park
@@ -1400,11 +1679,17 @@ databaseChangeLog:
                   name: pages
                   value: 473
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Novel about poor relation raised by rich relatives
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 44
               - column:
                   name: title
                   value: A Moveable Feast
@@ -1422,13 +1707,16 @@ databaseChangeLog:
                   value: 211
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/moveable-feast.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Memoir about Paris in the 1920s
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 45
               - column:
                   name: title
                   value: The ABC Murders
@@ -1445,11 +1733,17 @@ databaseChangeLog:
                   name: pages
                   value: 256
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Serial killer mystery with alphabetical pattern
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 46
               - column:
                   name: title
                   value: Second Foundation
@@ -1467,13 +1761,16 @@ databaseChangeLog:
                   value: 279
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/second-foundation.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Third book in Foundation series
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 47
               - column:
                   name: title
                   value: This Side of Paradise
@@ -1490,11 +1787,17 @@ databaseChangeLog:
                   name: pages
                   value: 305
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Debut novel about Princeton student
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 48
               - column:
                   name: title
                   value: The Silmarillion
@@ -1512,13 +1815,16 @@ databaseChangeLog:
                   value: 365
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/silmarillion.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Collection of mythopoeic works
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 49
               - column:
                   name: title
                   value: Oliver Twist
@@ -1535,11 +1841,17 @@ databaseChangeLog:
                   name: pages
                   value: 554
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Novel about orphan boy in London
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 50
               - column:
                   name: title
                   value: A Connecticut Yankee in King Arthurs Court
@@ -1557,13 +1869,16 @@ databaseChangeLog:
                   value: 450
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/connecticut-yankee.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Time travel novel to Arthurian England
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 51
               - column:
                   name: title
                   value: Orlando
@@ -1580,11 +1895,17 @@ databaseChangeLog:
                   name: pages
                   value: 333
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Biographical novel spanning centuries
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 52
               - column:
                   name: title
                   value: Chronicle of a Death Foretold
@@ -1602,13 +1923,16 @@ databaseChangeLog:
                   value: 122
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/chronicle-death.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Novella about honor killing
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 53
               - column:
                   name: title
                   value: Resurrection
@@ -1625,11 +1949,17 @@ databaseChangeLog:
                   name: pages
                   value: 640
               - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
+              - column:
                   name: description
                   value: Last major novel by Tolstoy
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 54
               - column:
                   name: title
                   value: Digital Fortress
@@ -1647,13 +1977,16 @@ databaseChangeLog:
                   value: 510
               - column:
                   name: cover_image_url
-                  value: https://example.com/covers/digital-fortress.jpg
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: Techno-thriller about cryptography
         - insert:
             tableName: books
             columns:
+              - column:
+                  name: book_id
+                  value: 55
               - column:
                   name: title
                   value: A Study in Scarlet
@@ -1669,6 +2002,9 @@ databaseChangeLog:
               - column:
                   name: pages
                   value: 188
+              - column:
+                  name: cover_image_url
+                  value: https://placehold.co/150x225/png
               - column:
                   name: description
                   value: First Sherlock Holmes novel
@@ -2127,3 +2463,48 @@ databaseChangeLog:
               - column:
                   name: author_id
                   value: 12
+        - insert:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  value: 51
+              - column:
+                  name: author_id
+                  value: 13
+        - insert:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  value: 52
+              - column:
+                  name: author_id
+                  value: 14
+        - insert:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  value: 53
+              - column:
+                  name: author_id
+                  value: 15
+        - insert:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  value: 54
+              - column:
+                  name: author_id
+                  value: 16
+        - insert:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  value: 55
+              - column:
+                  name: author_id
+                  value: 17

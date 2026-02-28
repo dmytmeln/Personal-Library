@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.library.auth.dto.UserRegisterRequest;
 import org.example.library.exception.BadRequestException;
+import org.example.library.exception.NotFoundException;
 import org.example.library.user.domain.Provider;
 import org.example.library.user.domain.User;
+import org.example.library.user.dto.UpdateProfileRequest;
 import org.example.library.user.dto.UserResponse;
 import org.example.library.user.mapper.UserMapper;
 import org.example.library.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,25 @@ public class UserService {
                 .orElseGet(() -> repository.save(
                         mapper.createProvidedUser(email, fullName, providerId, provider)
                 ));
+    }
+
+    @Transactional
+    public UserResponse updateProfile(Integer userId, UpdateProfileRequest request) {
+        var user = repository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("error.user.not_found"));
+
+        if (user.getProvider() != Provider.HOST)
+            throw new BadRequestException("error.user.profile_read_only");
+
+        if (!user.getEmail().equalsIgnoreCase(request.getEmail()) && repository.existsByEmail(request.getEmail()))
+            throw new BadRequestException("error.auth.email_already_registered");
+
+        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName());
+
+        var savedUser = repository.save(user);
+        log.info("[PROFILE_UPDATE_SUCCESS] User ID: {}", userId);
+        return mapper.toResponse(savedUser);
     }
 
 }

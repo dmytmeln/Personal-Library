@@ -46,11 +46,6 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: color
-                  type: varchar(50)
-                  constraints:
-                    nullable: true
-              - column:
                   name: created_at
                   type: timestamp
                   constraints:

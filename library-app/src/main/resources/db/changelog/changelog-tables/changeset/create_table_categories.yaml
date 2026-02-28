@@ -5,7 +5,7 @@ databaseChangeLog:
       changes:
         - createSequence:
             sequenceName: categories_seq
-            startValue: 1
+            startValue: 11
             incrementBy: 20
         - createTable:
             tableName: categories

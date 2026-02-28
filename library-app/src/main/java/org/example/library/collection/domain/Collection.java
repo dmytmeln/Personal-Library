@@ -24,7 +24,8 @@ import java.util.Objects;
 public class Collection {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "collections_seq")
+    @SequenceGenerator(name = "collections_seq", sequenceName = "collections_seq", allocationSize = 20)
     @Column(name = "collection_id")
     private Integer id;
 
@@ -33,9 +34,6 @@ public class Collection {
 
     @Column(name = "description")
     private String description;
-
-    @Column(name = "color")
-    private String color;
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp

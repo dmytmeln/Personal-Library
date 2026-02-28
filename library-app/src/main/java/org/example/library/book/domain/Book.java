@@ -18,7 +18,8 @@ import java.util.Objects;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "books_seq")
+    @SequenceGenerator(name = "books_seq", sequenceName = "books_seq", allocationSize = 20)
     @Column(name = "book_id")
     private Integer id;
 
@@ -41,7 +42,7 @@ public class Book {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "cover_image_url")
+    @Column(name = "cover_image_url", nullable = false)
     private String coverImageUrl;
 
     @ManyToMany
