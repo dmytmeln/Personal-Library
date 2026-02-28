@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../services/auth.service';
 import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackCommon} from '../common/mat-snack-common';
 
 @Component({
   selector: 'app-login',
@@ -30,19 +32,21 @@ import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/tran
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  errorMessage: string = '';
   hidePassword: boolean = true;
+  private snackCommon: MatSnackCommon;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private matSnackBar: MatSnackBar,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   onSubmit(): void {
@@ -52,7 +56,7 @@ export class LoginComponent {
           this.router.navigate(['/']);
         },
         error: (error) => {
-          this.errorMessage = this.translocoService.translate('auth.login.error');
+          this.snackCommon.showError(this.translocoService.translate('auth.login.error'));
           console.error('Login error:', error);
         }
       });

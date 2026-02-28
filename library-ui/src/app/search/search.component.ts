@@ -25,7 +25,6 @@ import {LanguageWithCount} from '../interfaces/language-with-count';
 import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {MatMenu, MatMenuContent, MatMenuItem} from '@angular/material/menu';
-import {SortOption} from '../interfaces/sort-config';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {BaseBookFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
@@ -33,7 +32,9 @@ import {AutocompleteSearchStore} from '../services/autocomplete-search.store';
 import {
   FilterShellComponent,
   FooterFiltersDirective,
-  SecondaryFiltersDirective
+  MainFiltersDirective,
+  SecondaryFiltersDirective,
+  TopRowFiltersDirective
 } from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {AutocompleteFilterComponent} from '../common/filters/autocomplete-filter/autocomplete-filter.component';
@@ -90,14 +91,16 @@ const EMPTY_BOOK_FILTERS: BaseBookFilters = {
     MatMenuItem,
     SortBarComponent,
     FilterShellComponent,
+    TopRowFiltersDirective,
+    MainFiltersDirective,
+    SecondaryFiltersDirective,
+    FooterFiltersDirective,
     TextFilterComponent,
     AutocompleteFilterComponent,
     RangeFilterComponent,
     LanguageFilterComponent,
     AuthorListComponent,
     CategoryListComponent,
-    SecondaryFiltersDirective,
-    FooterFiltersDirective,
     BulkActionBarComponent,
     MatButtonToggleModule,
     TranslocoDirective,
@@ -140,6 +143,18 @@ export class SearchComponent implements OnInit {
   readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<BaseBookFilters>(EMPTY_BOOK_FILTERS);
   readonly viewMode = signal<'grid' | 'list'>('grid');
+
+  readonly isFiltersExpanded = signal(false);
+  readonly activeFiltersCount = computed(() => {
+    const f = this.filters.state();
+    let count = 0;
+    if (f.author) count++;
+    if (f.category) count++;
+    if (f.publishYear.min || f.publishYear.max) count++;
+    if (f.pages.min || f.pages.max) count++;
+    if (f.languages.length > 0) count++;
+    return count;
+  });
 
   readonly authorSearch = new AutocompleteSearchStore<Author>(
     (q, p, s) => this.authorService.search({name: q, page: p, size: s}),
@@ -188,6 +203,7 @@ export class SearchComponent implements OnInit {
     this.loadBooks();
   }
 
+  // todo duplicate code
   addBookToLibrary(book: Book): void {
     this.libraryBookService.addBook(book.id).subscribe({
       next: () => {
@@ -203,6 +219,7 @@ export class SearchComponent implements OnInit {
     });
   }
 
+  // todo duplicate code
   bulkAddBooks(): void {
     const ids = this.selection.selectedIds();
     this.libraryBookService.bulkAdd(ids).subscribe({

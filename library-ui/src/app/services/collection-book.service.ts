@@ -46,8 +46,4 @@ export class CollectionBookService {
     });
   }
 
-  moveBookToOtherCollection(fromCollectionId: number, libraryBookId: number, toCollectionId: number): Observable<CollectionBook> {
-    return this.apiService.post(`/collections/${fromCollectionId}/books/${libraryBookId}/move/${toCollectionId}`, {});
-  }
-
 }

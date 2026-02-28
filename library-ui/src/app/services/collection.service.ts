@@ -43,4 +43,8 @@ export class CollectionService {
     return this.apiService.patch(`/collections/${collectionId}/move`, {body: {newParentId}});
   }
 
+  moveBook(sourceCollectionId: number, bookId: number, targetCollectionId: number): Observable<void> {
+    return this.apiService.patch(`/collections/${sourceCollectionId}/books/${bookId}/move`, {body: {newParentId: targetCollectionId}});
+  }
+
 }

@@ -34,11 +34,11 @@ public class CollectionBookController {
 
     @PostMapping("/{libraryBookId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public CollectionBookDto addBookToCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public void addBookToCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @PathVariable int collectionId,
                                                   @PathVariable int libraryBookId
     ) {
-        return service.addBookToCollection(userDetails.getId(), collectionId, libraryBookId);
+        service.addBookToCollection(userDetails.getId(), collectionId, libraryBookId);
     }
 
     @PostMapping("/bulk")
@@ -66,15 +66,6 @@ public class CollectionBookController {
                                               @Valid @RequestBody BulkLibraryBookRequest request
     ) {
         service.bulkRemoveBooksFromCollection(userDetails.getId(), collectionId, request.getIds());
-    }
-
-    @PostMapping("/{libraryBookId}/move/{toCollectionId}")
-    @ResponseStatus(HttpStatus.OK)
-    public CollectionBookDto moveBook(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                      @PathVariable int collectionId,
-                                      @PathVariable int libraryBookId,
-                                      @PathVariable int toCollectionId) {
-        return service.moveBook(userDetails.getId(), libraryBookId, collectionId, toCollectionId);
     }
 
 }

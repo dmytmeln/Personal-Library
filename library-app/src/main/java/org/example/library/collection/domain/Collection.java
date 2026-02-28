@@ -5,6 +5,8 @@ import lombok.*;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -35,14 +37,6 @@ public class Collection {
     @Column(name = "color")
     private String color;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<CollectionBook> collectionBooks = new ArrayList<>();
-
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -53,9 +47,18 @@ public class Collection {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @Builder.Default
+    private List<CollectionBook> collectionBooks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "parent")
     @Builder.Default
     private List<Collection> children = new ArrayList<>();
 

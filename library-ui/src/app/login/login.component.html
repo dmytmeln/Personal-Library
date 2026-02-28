@@ -42,12 +42,6 @@
           </mat-form-field>
         </ng-container>
 
-        @if (errorMessage) {
-          <div class="error-message">
-            {{ errorMessage }}
-          </div>
-        }
-
         <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loginForm.invalid">
           {{ t('submit') }}
         </button>

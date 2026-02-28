@@ -32,6 +32,7 @@
     "error": "Error",
     "logout": "Logout",
     "books": "Books",
+    "filters": "Filters",
     "sortBy": "Sort by",
     "showMore": "Show more",
     "showLess": "Show less",
@@ -140,6 +141,7 @@
       "myNotes": "My Notes",
       "editDetails": "Edit Details",
       "addToCollection": "Add to Collection",
+      "addToLibrary": "Add to Library",
       "changeStatus": "Change Status",
       "rate": "Rate",
       "removeFromAllCollections": "Remove from all collections",
@@ -177,6 +179,7 @@
     "createCollection": "Create collection",
     "goToCollection": "Go to collection",
     "addBook": "Add book",
+    "addToCollection": "Add to collection",
     "updateCollection": "Update collection",
     "createSubcollection": "Create subcollection",
     "addExistingCollection": "Add collection",
@@ -304,7 +307,8 @@
       "submit": "Sign In",
       "google": "Login with Google",
       "noAccount": "Don't have an account?",
-      "error": "Invalid email or password"
+      "error": "Invalid email or password",
+      "required": "You must login to access this page."
     },
     "register": {
       "title": "Register",

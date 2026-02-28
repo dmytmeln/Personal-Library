@@ -36,14 +36,15 @@ import {Author} from '../interfaces/author';
 import {Category} from '../interfaces/category';
 import {LanguageWithCount} from '../interfaces/language-with-count';
 import {PageEvent} from '@angular/material/paginator';
-import {AuthorService} from '../services/author.service';
-import {CategoryService} from '../services/category.service';
-import {SortOption} from '../interfaces/sort-config';
+import {LibraryAuthorService} from '../services/library-author.service';
+import {LibraryCategoryService} from '../services/library-category.service';
 import {CommonModule} from '@angular/common';
 import {
   FilterShellComponent,
   FooterFiltersDirective,
-  SecondaryFiltersDirective
+  MainFiltersDirective,
+  SecondaryFiltersDirective,
+  TopRowFiltersDirective
 } from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {AutocompleteFilterComponent} from '../common/filters/autocomplete-filter/autocomplete-filter.component';
@@ -55,11 +56,10 @@ import {MatSelectModule} from '@angular/material/select';
 import {FormsModule} from '@angular/forms';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
+import {SelectFilterComponent} from '../common/filters/select-filter/select-filter.component';
 import {AuthorListComponent} from '../author-list/author-list.component';
 import {CategoryListComponent} from '../category-list/category-list.component';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
-
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {SelectionStore} from '../services/selection.store';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
@@ -90,6 +90,10 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     LibraryBookMenuItemsComponent,
     MatMenuModule,
     FilterShellComponent,
+    TopRowFiltersDirective,
+    MainFiltersDirective,
+    SecondaryFiltersDirective,
+    FooterFiltersDirective,
     TextFilterComponent,
     AutocompleteFilterComponent,
     RangeFilterComponent,
@@ -102,8 +106,6 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     SelectFilterComponent,
     AuthorListComponent,
     CategoryListComponent,
-    SecondaryFiltersDirective,
-    FooterFiltersDirective,
     BulkActionBarComponent,
     MatButtonToggleModule,
     TranslocoDirective,
@@ -151,13 +153,27 @@ export class LibraryComponent implements OnInit {
   readonly filters = new EntityFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
   readonly viewMode = signal<'grid' | 'list'>('grid');
 
+  readonly isFiltersExpanded = signal(false);
+  readonly activeFiltersCount = computed(() => {
+    const f = this.filters.state();
+    let count = 0;
+    if (f.status) count++;
+    if (f.author) count++;
+    if (f.category) count++;
+    if (f.publishYear.min || f.publishYear.max) count++;
+    if (f.pages.min || f.pages.max) count++;
+    if (f.languages.length > 0) count++;
+    if (f.rating.min || f.rating.max) count++;
+    return count;
+  });
+
   readonly authorSearch = new AutocompleteSearchStore<Author>(
-    (q, p, s) => this.authorService.searchMe({name: q, page: p, size: s}),
+    (q, p, s) => this.libraryAuthorService.getAll({name: q, page: p, size: s}),
     450,
     10
   );
   readonly categorySearch = new AutocompleteSearchStore<Category>(
-    (q, p, s) => this.categoryService.searchMe({name: q, page: p, size: s}),
+    (q, p, s) => this.libraryCategoryService.getAll({name: q, page: p, size: s}),
     450,
     10
   );
@@ -175,8 +191,8 @@ export class LibraryComponent implements OnInit {
     private libraryBookService: LibraryBookService,
     private dialog: MatDialog,
     private bookService: BookService,
-    private authorService: AuthorService,
-    private categoryService: CategoryService,
+    private libraryAuthorService: LibraryAuthorService,
+    private libraryCategoryService: LibraryCategoryService,
     private collectionService: CollectionService,
     private collectionBookService: CollectionBookService,
     matSnackBar: MatSnackBar,
@@ -466,8 +482,7 @@ export class LibraryComponent implements OnInit {
   }
 
   private loadLanguages(): void {
-    // todo change
-    this.bookService.getLanguages().subscribe(langs => this.languages.set(langs));
+    this.libraryBookService.getLanguages().subscribe(langs => this.languages.set(langs));
   }
 
   private setupSubscriptions(): void {

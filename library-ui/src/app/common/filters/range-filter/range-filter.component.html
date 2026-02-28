@@ -2,16 +2,16 @@
   <span class="range-label">{{ label() }}</span>
   <div class="range-inputs">
     <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
-      <mat-label>{{ minPlaceholder() }}</mat-label>
+      <mat-label>{{ t('from') }}</mat-label>
       <input
         matInput
         type="number"
         [ngModel]="range().min"
         (ngModelChange)="onMinChange($event)">
     </mat-form-field>
-    
+
     <mat-form-field appearance="outline" class="range-input" subscriptSizing="dynamic">
-      <mat-label>{{ maxPlaceholder() }}</mat-label>
+      <mat-label>{{ t('to') }}</mat-label>
       <input
         matInput
         type="number"

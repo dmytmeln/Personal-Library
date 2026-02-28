@@ -2,6 +2,7 @@ package org.example.library.library_book.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.dto.BulkLibraryBookRequest;
 import org.example.library.library_book.dto.LibraryBookDto;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users/me/library-books")
@@ -31,10 +34,16 @@ public class LibraryBookController {
         return service.getAllByUserId(userDetails.getId(), criteria, paginationParams);
     }
 
+    @GetMapping("/languages")
+    @ResponseStatus(HttpStatus.OK)
+    public List<LanguageWithCount> getLanguages(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return service.getLanguagesByUserId(userDetails.getId());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public LibraryBookDto create(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Integer bookId) {
-        return service.create(bookId, userDetails.user());
+    public void create(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Integer bookId) {
+        service.create(bookId, userDetails.user());
     }
 
     @PostMapping("/bulk")
@@ -63,7 +72,7 @@ public class LibraryBookController {
 
     @PutMapping("/{libraryBookId}/details")
     @ResponseStatus(HttpStatus.OK)
-public LibraryBookDto updateDetails(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public LibraryBookDto updateDetails(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @PathVariable Integer libraryBookId,
                                          @Valid @RequestBody UpdateLibraryBookDetailsDto dto
     ) {

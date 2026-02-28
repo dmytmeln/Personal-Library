@@ -30,7 +30,8 @@ public class CollectionController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<BasicCollectionDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam(required = false) Integer libraryBookId) {
+    public List<BasicCollectionDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                           @RequestParam Integer libraryBookId) {
         return service.getAllCollections(userDetails.getId(), libraryBookId);
     }
 
@@ -45,7 +46,7 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.CREATED)
     public BasicCollectionDto create(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                      @Valid @RequestBody CreateCollectionRequest dto) {
-        return service.createCollection(dto, userDetails.getId());
+        return service.createCollection(dto, userDetails.user());
     }
 
     @PutMapping("/{collectionId}")
@@ -64,25 +65,11 @@ public class CollectionController {
         service.moveCollection(collectionId, request.getNewParentId(), userDetails.getId());
     }
 
-    @PatchMapping("/bulk-move")
-    @ResponseStatus(HttpStatus.OK)
-    public void bulkMoveCollections(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                    @Valid @RequestBody BulkMoveRequest request) {
-        service.bulkMoveCollections(request.getCollectionIdsToMove(), request.getNewParentId(), userDetails.getId());
-    }
-
     @DeleteMapping("/{collectionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                  @PathVariable Integer collectionId) {
         service.deleteCollection(collectionId, userDetails.getId());
-    }
-
-    @PostMapping("/books")
-    @ResponseStatus(HttpStatus.OK)
-    public void addBookToCollections(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                     @Valid @RequestBody AddBookToCollectionsRequest request) {
-        service.addBookToCollections(request.getLibraryBookId(), request.getCollectionIds(), userDetails.getId());
     }
 
     @PatchMapping("/{sourceCollectionId}/books/{bookId}/move")

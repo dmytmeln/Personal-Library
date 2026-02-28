@@ -3,13 +3,10 @@ package org.example.library.library_book.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.library.book.domain.Book;
-import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.user.domain.User;
-import org.example.library.note.domain.Note;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -64,23 +61,11 @@ public class LibraryBook {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "libraryBook", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Note note;
-
     public static LibraryBook of(Book book, User user) {
         return LibraryBook.builder()
                 .book(book)
                 .user(user)
                 .build();
-    }
-
-    public void resetOverriddenFields() {
-        this.title = null;
-        this.publishYear = null;
-        this.pages = null;
-        this.language = null;
-        this.description = null;
-        this.coverImageUrl = null;
     }
 
     @Override

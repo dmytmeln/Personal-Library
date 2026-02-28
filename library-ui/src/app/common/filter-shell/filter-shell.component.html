@@ -1,25 +1,52 @@
-<div class="filters-container">
-  <div class="filter-row main-row">
-    <ng-content select="[mainFilters]"></ng-content>
+<div class="filters-container" *transloco="let c; prefix: 'common'">
+  <div class="title-row">
+    <h3>{{ c('filters') }}</h3>
   </div>
 
-  @if (hasActiveFilters() || secondaryContent()) {
-    <div class="filter-row secondary-row">
-      <ng-content select="[secondaryFilters]"></ng-content>
+  <div class="header-row">
+    <div class="top-row-filters">
+      <ng-content select="[topRowFilters]"></ng-content>
+    </div>
+
+    <div class="header-actions">
+      @if (mainContent() || secondaryContent() || footerContent()) {
+        <button mat-button (click)="isExpanded.set(!isExpanded())" class="toggle-filters-btn">
+          <mat-icon>{{ isExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+          <span>{{ isExpanded() ? c('showLess') : c('showMore') }}</span>
+          @if (activeFiltersCount() > 0) {
+            <span class="filters-badge">{{ activeFiltersCount() }}</span>
+          }
+        </button>
+      }
 
       @if (hasActiveFilters()) {
-        <button mat-stroked-button (click)="resetAll.emit()" class="clear-filters-btn"
-                matTooltip="Скинути всі фільтри">
+        <button mat-icon-button (click)="resetAll.emit()" class="reset-all-btn"
+                [matTooltip]="c('clear')">
           <mat-icon>filter_alt_off</mat-icon>
-          Скинути всі
         </button>
       }
     </div>
-  }
+  </div>
 
-  @if (footerContent()) {
-    <div class="filter-row footer-row">
-      <ng-content select="[footerFilters]"></ng-content>
+  <div class="collapsible-content" [class.expanded]="isExpanded()">
+    <div class="content-wrapper">
+      @if (mainContent()) {
+        <div class="filter-row main-row">
+          <ng-content select="[mainFilters]"></ng-content>
+        </div>
+      }
+
+      @if (secondaryContent()) {
+        <div class="filter-row secondary-row">
+          <ng-content select="[secondaryFilters]"></ng-content>
+        </div>
+      }
+
+      @if (footerContent()) {
+        <div class="filter-row footer-row">
+          <ng-content select="[footerFilters]"></ng-content>
+        </div>
+      }
     </div>
-  }
+  </div>
 </div>

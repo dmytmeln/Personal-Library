@@ -8,7 +8,9 @@ import {BookService} from '../services/book.service';
 import {MatAnchor, MatButton} from '@angular/material/button';
 import {LibraryBookService} from '../services/library-book.service';
 import {BasicCollection} from '../interfaces/basic-collection';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackCommon} from '../common/mat-snack-common';
 
 @Component({
   selector: 'app-book-details',
@@ -24,6 +26,8 @@ import {TranslocoDirective} from '@jsverse/transloco';
 })
 export class BookDetailsComponent implements OnInit {
 
+  private snackCommon: MatSnackCommon;
+
   book: Book;
   authors: Array<[number, string]> = [];
   bookDetails!: BookDetails;
@@ -32,8 +36,11 @@ export class BookDetailsComponent implements OnInit {
     private router: Router,
     private bookService: BookService,
     private libraryBookService: LibraryBookService,
+    matSnackBar: MatSnackBar,
+    private translocoService: TranslocoService,
   ) {
     this.book = this.router.getCurrentNavigation()?.extras?.state as Book;
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
@@ -44,9 +51,13 @@ export class BookDetailsComponent implements OnInit {
   }
 
   addBookToLibrary(): void {
-    this.libraryBookService.addBook(this.book.id).subscribe(libraryBook => {
-      this.book = libraryBook.book;
-      this.bookDetails.isInLibrary = true;
+    this.libraryBookService.addBook(this.book.id).subscribe({
+      next: (libraryBook) => {
+        this.book = libraryBook.book;
+        this.bookDetails.isInLibrary = true;
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 
@@ -60,8 +71,12 @@ export class BookDetailsComponent implements OnInit {
   }
 
   changeRating(rating: number): void {
-    this.libraryBookService.changeRating(this.book.id, rating).subscribe(libraryBook => {
-      this.bookDetails.myRating = libraryBook.rating || 0;
+    this.libraryBookService.changeRating(this.book.id, rating).subscribe({
+      next: (libraryBook) => {
+        this.bookDetails.myRating = libraryBook.rating || 0;
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.ratingChanged'));
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 

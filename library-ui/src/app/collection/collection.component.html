@@ -1,4 +1,4 @@
-<div class="container" *transloco="let t; prefix: 'collections'">
+<div *transloco="let t; prefix: 'collections'">
   <div class="breadcrumbs">
     <a routerLink="/collections" class="breadcrumb-item">
       <mat-icon>home</mat-icon>
@@ -75,8 +75,11 @@
       </mat-slide-toggle>
     </div>
 
-    <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-      <div mainFilters>
+    <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
+                      [(isExpanded)]="isFiltersExpanded"
+                      [activeFiltersCount]="activeFiltersCount()"
+                      (resetAll)="clearAllFilters()">
+      <div topRowFilters>
         <app-text-filter
           [label]="t('bookTitle')"
           [value]="filters.state().title || ''"
@@ -153,7 +156,7 @@
       </button>
       <button mat-menu-item (click)="addToCollection(libraryBook)">
         <mat-icon>playlist_add</mat-icon>
-        <span>{{ t('addBook') }}</span>
+        <span>{{ t('addToCollection') }}</span>
       </button>
       <button mat-menu-item (click)="moveBookToOtherCollection(libraryBook)">
         <mat-icon>drive_file_move</mat-icon>

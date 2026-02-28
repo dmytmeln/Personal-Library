@@ -5,13 +5,20 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
+        generate_statistics: true
         show_sql: true
+        format_sql: true
         default_batch_fetch_size: ${application.pagination.max-page-size}
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   liquibase:
     enabled: true
   security:

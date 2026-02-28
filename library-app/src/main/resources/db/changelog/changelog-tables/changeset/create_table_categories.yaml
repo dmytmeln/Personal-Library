@@ -3,12 +3,16 @@ databaseChangeLog:
       id: create_table_categories
       author: Dmytro Melnyk
       changes:
+        - createSequence:
+            sequenceName: categories_seq
+            startValue: 1
+            incrementBy: 20
         - createTable:
             tableName: categories
             columns:
               - column:
                   name: category_id
-                  type: serial
+                  type: integer
                   constraints:
                     primaryKey: true
                     primaryKeyName: categories_pk

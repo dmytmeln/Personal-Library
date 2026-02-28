@@ -4,39 +4,24 @@ import {Observable} from 'rxjs';
 import {Author} from '../interfaces/author';
 import {Page} from '../interfaces/page';
 import {CountryWithCount} from '../interfaces/country-with-count';
-
-export interface AuthorSearchOptions {
-  name?: string;
-  page?: number;
-  size?: number;
-  sort?: string[];
-  country?: string;
-  birthYearMin?: number;
-  birthYearMax?: number;
-  booksCountMin?: number;
-  booksCountMax?: number;
-}
+import {AuthorSearchOptions} from './author.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthorService {
+export class LibraryAuthorService {
 
   constructor(
     private apiService: ApiService,
   ) {
   }
 
-  search(options: AuthorSearchOptions = {}): Observable<Page<Author>> {
-    return this.apiService.get('/authors', {params: this.buildParams(options)});
+  getAll(options: AuthorSearchOptions = {}): Observable<Page<Author>> {
+    return this.apiService.get('/users/me/library-authors', {params: this.buildParams(options)});
   }
 
   getCountries(): Observable<CountryWithCount[]> {
-    return this.apiService.get('/authors/countries', {});
-  }
-
-  getById(authorId: number): Observable<Author> {
-    return this.apiService.get(`/authors/${authorId}`, {});
+    return this.apiService.get('/users/me/library-authors/countries', {});
   }
 
   private buildParams(options: AuthorSearchOptions): AuthorSearchOptions {

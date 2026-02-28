@@ -1,4 +1,3 @@
-
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {Author} from '../interfaces/author';
 import {Router} from '@angular/router';
@@ -13,7 +12,6 @@ import {MatSnackCommon} from '../common/mat-snack-common';
 import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {PageEvent} from '@angular/material/paginator';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
-import {SortOption} from '../interfaces/sort-config';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
@@ -73,10 +71,10 @@ export class AuthorDetailsComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private matSnackBar: MatSnackBar,
     private bookService: BookService,
     private authorService: AuthorService,
     private libraryBookService: LibraryBookService,
+    matSnackBar: MatSnackBar,
   ) {
     this.authorId = this.router.getCurrentNavigation()?.extras?.state?.['id'] as number;
     this.snackCommon = new MatSnackCommon(matSnackBar);

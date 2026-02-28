@@ -1,4 +1,4 @@
-<div class="search-container" *transloco="let t; prefix: 'search'">
+<div *transloco="let t; prefix: 'search'">
   <div class="header-row">
     <h1 class="page-title">{{ t('title') }}</h1>
     <div class="header-actions">
@@ -17,13 +17,18 @@
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
     <mat-tab [label]="t('tabs.allBooks')">
       <div class="tab-content" *transloco="let c; prefix: 'common'">
-        <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-          <div mainFilters *transloco="let f; prefix: 'search.filters'">
+        <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
+                          [(isExpanded)]="isFiltersExpanded"
+                          [activeFiltersCount]="activeFiltersCount()"
+                          (resetAll)="clearAllFilters()">
+          <div topRowFilters *transloco="let f; prefix: 'search.filters'">
             <app-text-filter
               [label]="f('bookTitle')"
               [value]="filters.state().title || ''"
               (valueChange)="filters.update('title', $event)"/>
+          </div>
 
+          <div mainFilters *transloco="let f; prefix: 'search.filters'">
             <app-autocomplete-filter
               [label]="f('author')"
               [searchInput]="authorSearch.query()"
@@ -49,15 +54,11 @@
             <app-range-filter
               [label]="f('publishYear')"
               [range]="filters.state().publishYear"
-              [minPlaceholder]="c('from')"
-              [maxPlaceholder]="c('to')"
               (rangeChange)="filters.update('publishYear', $event)"/>
 
             <app-range-filter
               [label]="f('pages')"
               [range]="filters.state().pages"
-              [minPlaceholder]="c('from')"
-              [maxPlaceholder]="c('to')"
               (rangeChange)="filters.update('pages', $event)"/>
           </div>
 

@@ -13,7 +13,7 @@ import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
 import org.example.library.library_book.repository.LibraryBookRepository;
-import org.example.library.user.repository.UserRepository;
+import org.example.library.user.domain.User;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,6 @@ public class CollectionService {
     private final CollectionRepository collectionRepository;
     private final CollectionBookRepository collectionBookRepository;
     private final LibraryBookRepository libraryBookRepository;
-    private final UserRepository userRepository;
     private final CollectionMapper collectionMapper;
 
 
@@ -46,12 +45,6 @@ public class CollectionService {
     @Transactional(readOnly = true)
     public List<BasicCollectionDto> getAllByUserIdAndBookId(Integer userId, Integer bookId) {
         return collectionMapper.toBasicDto(collectionRepository.findAllByUserIdAndBookId(userId, bookId));
-    }
-
-    @Transactional(readOnly = true)
-    public Collection getExistingById(Integer id) {
-        return collectionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
     }
 
     @Transactional(readOnly = true)
@@ -77,31 +70,31 @@ public class CollectionService {
 
     @Transactional(readOnly = true)
     public CollectionDetailsDto getCollectionDetails(Integer collectionId, Integer userId) {
-        var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
+        var collection = collectionRepository.findByIdAndUserIdWithChildren(collectionId, userId)
                 .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
         var detailsDto = collectionMapper.toDetailsDto(collection);
-        detailsDto.setAncestors(getAncestors(collection));
+        detailsDto.setAncestors(collectionRepository.findAncestors(collectionId).stream()
+                .map(collectionMapper::toBasicDto)
+                .toList());
 
         return detailsDto;
     }
 
     @Transactional
-    public BasicCollectionDto createCollection(CreateCollectionRequest dto, Integer userId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("error.user.not_found"));
-
+    public BasicCollectionDto createCollection(CreateCollectionRequest dto, User user) {
         var newCollection = collectionMapper.toEntity(dto);
         newCollection.setUser(user);
 
         if (dto.getParentId() != null) {
-            var parent = collectionRepository.findByIdAndUserId(dto.getParentId(), userId)
-                    .orElseThrow(() -> new NotFoundException("error.collection.parent_not_found"));
+            if (!collectionRepository.existsByIdAndUserId(dto.getParentId(), user.getId()))
+                throw new NotFoundException("error.collection.parent_not_found");
 
-            if (getDepthFromRoot(parent) >= MAX_ALLOWED_DEPTH) {
+            int parentDepth = collectionRepository.getDepth(dto.getParentId());
+            if (parentDepth >= MAX_ALLOWED_DEPTH)
                 throw new BadRequestException("error.collection.max_depth_exceeded");
-            }
-            parent.addChildrenCollection(newCollection);
+
+            newCollection.setParent(collectionRepository.getReferenceById(dto.getParentId()));
         }
 
         var savedCollection = collectionRepository.save(newCollection);
@@ -115,31 +108,22 @@ public class CollectionService {
 
         collectionMapper.updateFromDto(dto, collection);
         var savedCollection = collectionRepository.save(collection);
-
         return collectionMapper.toBasicDto(savedCollection);
     }
 
     @Transactional
     public void moveCollection(Integer collectionId, Integer newParentId, Integer userId) {
+        // todo divide into move and makeRoot operations
         if (Objects.equals(collectionId, newParentId))
             throw new BadRequestException("error.collection.cannot_be_own_parent");
 
         var collectionToMove = collectionRepository.findByIdAndUserId(collectionId, userId)
                 .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
 
-        Collection newParent = null;
         if (newParentId != null) {
-            newParent = collectionRepository.findByIdAndUserId(newParentId, userId)
+            var newParent = collectionRepository.findByIdAndUserIdWithChildren(newParentId, userId)
                     .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
             validateMove(collectionToMove, newParent);
-        }
-
-        var oldParent = collectionToMove.getParent();
-        if (oldParent != null) {
-            oldParent.removeChildrenCollection(collectionToMove);
-        }
-
-        if (newParent != null) {
             newParent.addChildrenCollection(collectionToMove);
         } else {
             collectionToMove.setParent(null);
@@ -149,149 +133,54 @@ public class CollectionService {
     }
 
     @Transactional
-    public void bulkMoveCollections(List<Integer> collectionIds, Integer newParentId, Integer userId) {
-        if (collectionIds == null || collectionIds.isEmpty())
-            return;
-
-        Collection newParent = null;
-        if (newParentId != null) {
-            newParent = collectionRepository.findByIdAndUserId(newParentId, userId)
-                    .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
-        }
-
-        var collectionsToMove = collectionRepository.findAllByIdInAndUserId(collectionIds, userId);
-        if (collectionsToMove.size() != collectionIds.size())
-            throw new NotFoundException("error.collection.not_found");
-
-        for (var collection : collectionsToMove) {
-            if (newParent != null) {
-                validateMove(collection, newParent);
-            }
-            var oldParent = collection.getParent();
-            if (oldParent != null) {
-                oldParent.removeChildrenCollection(collection);
-            }
-            if (newParent != null) {
-                newParent.addChildrenCollection(collection);
-            } else {
-                collection.setParent(null);
-            }
-        }
-
-        collectionRepository.saveAll(collectionsToMove);
-    }
-
-    @Transactional
     public void deleteCollection(Integer collectionId, Integer userId) {
-        var collection = collectionRepository.findByIdAndUserId(collectionId, userId)
-                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
-
-        collectionRepository.delete(collection);
-    }
-
-    @Transactional
-    public void addBookToCollections(Integer libraryBookId, List<Integer> collectionIds, Integer userId) {
-        var book = libraryBookRepository.findByIdAndUserId(libraryBookId, userId)
-                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
-
-        var collections = collectionRepository.findAllByIdInAndUserId(collectionIds, userId);
-        if (collections.size() != collectionIds.size()) {
+        int deletedCount = collectionRepository.deleteById(collectionId, userId);
+        if (deletedCount == 0)
             throw new NotFoundException("error.collection.not_found");
-        }
-
-        var existingMappings = collectionBookRepository.findAllByLibraryBookIdAndCollectionIdIn(libraryBookId, collectionIds)
-                .stream()
-                .map(cb -> cb.getCollection().getId())
-                .collect(Collectors.toSet());
-
-        var newMappings = collections.stream()
-                .filter(collection -> !existingMappings.contains(collection.getId()))
-                .map(collection -> CollectionBook.builder()
-                        .id(new CollectionBookId(collection.getId(), libraryBookId))
-                        .libraryBook(book)
-                        .collection(collection)
-                        .build())
-                .toList();
-
-        if (!newMappings.isEmpty()) {
-            collectionBookRepository.saveAll(newMappings);
-        }
     }
 
     @Transactional
     public void moveBook(Integer sourceCollectionId, Integer targetCollectionId, Integer libraryBookId, Integer userId) {
-        libraryBookRepository.findByIdAndUserId(libraryBookId, userId)
-                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+        if (sourceCollectionId.equals(targetCollectionId))
+            return;
 
-        var sourceCollection = collectionRepository.findByIdAndUserId(sourceCollectionId, userId)
-                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
-        var targetCollection = collectionRepository.findByIdAndUserId(targetCollectionId, userId)
-                .orElseThrow(() -> new NotFoundException("error.collection.not_found"));
+        if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId))
+            throw new NotFoundException("error.library_book.not_found");
 
-        var sourceId = new CollectionBookId(libraryBookId, sourceCollection.getId());
-        var targetId = new CollectionBookId(libraryBookId, targetCollection.getId());
+        if (collectionRepository.countByUserIdAndIds(userId, sourceCollectionId, targetCollectionId) != 2)
+            throw new NotFoundException("error.collection.not_found");
 
-        if (!collectionBookRepository.existsById(sourceId)) {
+        int deletedCount = collectionBookRepository.deleteByLibraryBookIdAndCollectionId(libraryBookId, sourceCollectionId);
+        if (deletedCount == 0)
             throw new NotFoundException("error.collection.book_not_in_source");
-        }
 
-        collectionBookRepository.deleteById(sourceId);
+        var targetId = new CollectionBookId(targetCollectionId, libraryBookId);
+        if (collectionBookRepository.existsById(targetId))
+            throw new BadRequestException("error.collection.book_already_in_target");
 
-        if (!collectionBookRepository.existsById(targetId)) {
-            var bookRef = libraryBookRepository.getReferenceById(libraryBookId);
-            var collectionRef = collectionRepository.getReferenceById(targetCollectionId);
-            var newMapping = CollectionBook.builder()
-                    .id(targetId)
-                    .libraryBook(bookRef)
-                    .collection(collectionRef)
-                    .build();
-            collectionBookRepository.save(newMapping);
-        }
-    }
-
-    private List<BasicCollectionDto> getAncestors(Collection collection) {
-        List<BasicCollectionDto> ancestors = new ArrayList<>(MAX_ALLOWED_DEPTH - 1);
-        Collection current = collection.getParent();
-        while (current != null) {
-            ancestors.add(0, collectionMapper.toBasicDto(current));
-            current = current.getParent();
-        }
-        return ancestors;
+        var libraryBookRef = libraryBookRepository.getReferenceById(libraryBookId);
+        var collectionRef = collectionRepository.getReferenceById(targetCollectionId);
+        var newMapping = CollectionBook.builder()
+                .id(targetId)
+                .libraryBook(libraryBookRef)
+                .collection(collectionRef)
+                .build();
+        collectionBookRepository.save(newMapping);
     }
 
     private void validateMove(Collection toMove, Collection newParent) {
-        checkForCircularDependency(toMove, newParent);
+        if (newParent == null)
+            return;
 
-        if (getDepthFromRoot(newParent) + getSubtreeDepth(toMove) > MAX_ALLOWED_DEPTH)
+        var validation = collectionRepository.getValidationData(
+                toMove.getId(),
+                newParent.getId());
+
+        if (validation.getIsCircular())
+            throw new BadRequestException("error.collection.circular_dependency");
+
+        if (validation.getParentRootDepth() + validation.getSubtreeDepth() > MAX_ALLOWED_DEPTH)
             throw new BadRequestException("error.collection.max_depth_exceeded");
-    }
-
-    private void checkForCircularDependency(Collection toMove, Collection newParent) {
-        var current = newParent;
-        while (current != null) {
-            if (current.equals(toMove))
-                throw new BadRequestException("error.collection.circular_dependency");
-
-            current = current.getParent();
-        }
-    }
-
-    private int getDepthFromRoot(Collection node) {
-        int depth = 1;
-        for (var current = node.getParent(); current != null; current = current.getParent()) {
-            depth++;
-        }
-        return depth;
-    }
-
-    private int getSubtreeDepth(Collection node) {
-        if (node.getChildren() == null || node.getChildren().isEmpty())
-            return 1;
-
-        return 1 + node.getChildren().stream()
-                .mapToInt(this::getSubtreeDepth)
-                .max()
-                .orElse(0);
     }
 
 }

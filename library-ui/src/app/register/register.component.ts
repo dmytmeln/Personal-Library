@@ -10,6 +10,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {AuthService} from '../services/auth.service';
 
 import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackCommon} from '../common/mat-snack-common';
 
 @Component({
   selector: 'app-register',
@@ -32,20 +34,22 @@ import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/tran
 export class RegisterComponent {
 
   registerForm: FormGroup;
-  errorMessage: string = '';
   hidePassword: boolean = true;
+  private snackCommon: MatSnackCommon;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private matSnackBar: MatSnackBar,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       fullName: ['', [Validators.required, Validators.minLength(2)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   onSubmit(): void {
@@ -58,14 +62,14 @@ export class RegisterComponent {
               this.router.navigate(['/']);
             },
             error: (error) => {
-              this.errorMessage = this.translocoService.translate('auth.register.loginFailed');
+              this.snackCommon.showError(this.translocoService.translate('auth.register.loginFailed'));
               console.error('Auto-login error:', error);
               this.router.navigate(['/login']);
             }
           });
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || this.translocoService.translate('auth.register.error');
+          this.snackCommon.showError(error.error?.message || this.translocoService.translate('auth.register.error'));
           console.error('Registration error:', error);
         }
       });

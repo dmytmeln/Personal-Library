@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CollectionBookService} from '../services/collection-book.service';
 import {CollectionService} from '../services/collection.service';
 import {CollectionDetails} from '../interfaces/collection-details';
@@ -43,7 +43,7 @@ import {FormsModule} from '@angular/forms';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {BooksDisplayComponent} from '../books-display/books-display.component';
 import {EntityFilterStore} from '../services/entity-filter.store';
-import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
+import {FilterShellComponent, TopRowFiltersDirective} from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
@@ -79,6 +79,7 @@ const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
     SortBarComponent,
     BooksDisplayComponent,
     FilterShellComponent,
+    TopRowFiltersDirective,
     TextFilterComponent,
     BulkActionBarComponent,
     MatTooltipModule,
@@ -106,6 +107,9 @@ export class CollectionComponent implements OnInit {
   readonly selection = new SelectionStore();
   readonly filters = new EntityFilterStore<CollectionBookSearchParams>(EMPTY_SEARCH_PARAMS);
   readonly viewMode = signal<'grid' | 'list'>('grid');
+
+  readonly isFiltersExpanded = signal(false);
+  readonly activeFiltersCount = computed(() => 0);
 
   readonly bookSortOptions = toSignal(
     this.translocoService.selectTranslateObject('library.sort').pipe(
@@ -420,7 +424,7 @@ export class CollectionComponent implements OnInit {
 
     dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
       if (selection.id) {
-        this.collectionBookService.moveBookToOtherCollection(this.collection.id, libraryBook.id, selection.id).subscribe({
+        this.collectionService.moveBook(this.collection.id, libraryBook.id, selection.id).subscribe({
           next: () => {
             this.loadBooks();
             this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookMoved'));

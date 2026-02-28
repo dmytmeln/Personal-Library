@@ -2,13 +2,17 @@ import {Component, computed, inject, input, OnInit, output, signal} from '@angul
 import {toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {AuthorService} from '../services/author.service';
+import {LibraryAuthorService} from '../services/library-author.service';
 import {Author} from '../interfaces/author';
 import {CountryWithCount} from '../interfaces/country-with-count';
 import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButtonModule} from '@angular/material/button';
 import {Router} from '@angular/router';
-import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
+import {
+  FilterShellComponent, MainFiltersDirective,
+  SecondaryFiltersDirective, TopRowFiltersDirective
+} from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
@@ -34,6 +38,9 @@ const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
     MatProgressSpinnerModule,
     MatButtonModule,
     FilterShellComponent,
+    TopRowFiltersDirective,
+    MainFiltersDirective,
+    SecondaryFiltersDirective,
     TextFilterComponent,
     SelectFilterComponent,
     RangeFilterComponent,
@@ -61,6 +68,16 @@ export class AuthorListComponent implements OnInit {
 
   readonly filters = new EntityFilterStore<AuthorFilters>(EMPTY_AUTHOR_FILTERS);
 
+  readonly isFiltersExpanded = signal(false);
+  readonly activeFiltersCount = computed(() => {
+    const f = this.filters.state();
+    let count = 0;
+    if (f.country) count++;
+    if (f.birthYear.min || f.birthYear.max) count++;
+    if (f.booksCount.min || f.booksCount.max) count++;
+    return count;
+  });
+
   private translocoService = inject(TranslocoService);
 
   readonly authorSortOptions = toSignal(
@@ -84,6 +101,7 @@ export class AuthorListComponent implements OnInit {
 
   constructor(
     private authorService: AuthorService,
+    private libraryAuthorService: LibraryAuthorService,
     private router: Router
   ) {
   }
@@ -132,7 +150,7 @@ export class AuthorListComponent implements OnInit {
     };
 
     const request = this.mode() === 'library'
-      ? this.authorService.searchMe(options)
+      ? this.libraryAuthorService.getAll(options)
       : this.authorService.search(options);
 
     request.subscribe({
@@ -147,7 +165,7 @@ export class AuthorListComponent implements OnInit {
 
   private loadCountries(): void {
     const request = this.mode() === 'library'
-      ? this.authorService.getCountriesMe()
+      ? this.libraryAuthorService.getCountries()
       : this.authorService.getCountries();
 
     request.subscribe(countries => this.countries.set(countries));

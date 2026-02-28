@@ -3,12 +3,16 @@ databaseChangeLog:
       id: create_table_collections
       author: Dmytro Melnyk
       changes:
+        - createSequence:
+            sequenceName: collections_seq
+            startValue: 1
+            incrementBy: 20
         - createTable:
             tableName: collections
             columns:
               - column:
                   name: collection_id
-                  type: serial
+                  type: integer
                   constraints:
                     primaryKey: true
                     primaryKeyName: collections_pk
@@ -20,6 +24,15 @@ databaseChangeLog:
                     foreignKeyName: collections_users_fk
                     referencedTableName: users
                     referencedColumnNames: user_id
+              - column:
+                  name: parent_id
+                  type: integer
+                  constraints:
+                    nullable: true
+                    foreignKeyName: collections_parent_fk
+                    referencedTableName: collections
+                    referencedColumnNames: collection_id
+                    onDelete: CASCADE
               - column:
                   name: name
                   type: varchar(100)
@@ -47,3 +60,9 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
+        - createIndex:
+            indexName: collections_parent_idx
+            tableName: collections
+            columns:
+              - column:
+                  name: parent_id

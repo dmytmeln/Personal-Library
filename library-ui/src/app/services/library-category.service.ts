@@ -3,26 +3,18 @@ import {ApiService} from './api.service';
 import {Observable} from 'rxjs';
 import {Page} from '../interfaces/page';
 import {Category} from '../interfaces/category';
-
-export interface CategoryQueryOptions {
-  name?: string;
-  page?: number;
-  size?: number;
-  sort?: string[];
-  booksCountMin?: number;
-  booksCountMax?: number;
-}
+import {CategoryQueryOptions} from './category.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CategoryService {
+export class LibraryCategoryService {
 
   constructor(private apiService: ApiService) {
   }
 
-  search(options: CategoryQueryOptions = {}): Observable<Page<Category>> {
-    return this.apiService.get('/categories', {params: this.buildParams(options)});
+  getAll(options: CategoryQueryOptions = {}): Observable<Page<Category>> {
+    return this.apiService.get('/users/me/library-categories', {params: this.buildParams(options)});
   }
 
   private buildParams(options: CategoryQueryOptions): CategoryQueryOptions {

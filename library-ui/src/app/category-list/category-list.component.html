@@ -1,6 +1,9 @@
 <div class="tab-content" *transloco="let t; prefix: 'categories'">
-  <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-    <div mainFilters>
+  <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
+                    [(isExpanded)]="isFiltersExpanded"
+                    [activeFiltersCount]="activeFiltersCount()"
+                    (resetAll)="clearAllFilters()">
+    <div topRowFilters>
       <app-text-filter
         [label]="t('filters.name')"
         [value]="filters.state().name"

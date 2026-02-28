@@ -36,7 +36,6 @@ public interface LibraryBookMapper {
     @Mapping(target = "rating", ignore = true)
     @Mapping(target = "book", ignore = true)
     @Mapping(target = "user", ignore = true)
-    @Mapping(target = "note", ignore = true)
     void update(@MappingTarget LibraryBook libraryBook, UpdateLibraryBookDetailsDto dto);
 
     @Named("authorsToMap")

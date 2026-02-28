@@ -11,12 +11,9 @@ public class LibraryApplication {
 
     // todo:
     //  localization
-    //  FE: enhance searching and filtering in search page
-    //  FE: grouping layout for library (group by author, genre, etc.)
     //  BE + FE: library - statistics
-    //  FE: use MatSnackBar to show messages to user
-    //  JPA optimizations + Hibernate bulk configuration
-    //  BE+ FE: recommendations
+    //  JPA optimizations + Hibernate bulk configuration + change strategy to sequence
+    //  BE + FE: recommendations
     //  BE + FE: share library with other users?
     //  BE: JWT refresh tokens
     //  BE: password reset

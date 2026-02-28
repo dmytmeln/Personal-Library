@@ -3,12 +3,16 @@ databaseChangeLog:
       id: create_table_books
       author: Dmytro Melnyk
       changes:
+        - createSequence:
+            sequenceName: books_seq
+            startValue: 1
+            incrementBy: 20
         - createTable:
             tableName: books
             columns:
               - column:
                   name: book_id
-                  type: serial
+                  type: integer
                   constraints:
                     primaryKey: true
                     primaryKeyName: books_pk
@@ -44,7 +48,7 @@ databaseChangeLog:
                   name: cover_image_url
                   type: varchar(255)
                   constraints:
-                    nullable: true
+                    nullable: false
               - column:
                   name: description
                   type: text

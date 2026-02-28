@@ -32,6 +32,7 @@
     "error": "Помилка",
     "logout": "Вихід",
     "books": "Книги",
+    "filters": "Фільтри",
     "sortBy": "Сортувати за",
     "showMore": "Показати більше",
     "showLess": "Показати менше",
@@ -140,6 +141,7 @@
       "myNotes": "Мої нотатки",
       "editDetails": "Редагувати деталі",
       "addToCollection": "Додати до колекції",
+      "addToLibrary": "Додати до бібліотеки",
       "changeStatus": "Змінити статус",
       "rate": "Оцінити",
       "removeFromAllCollections": "Видалити з усіх колекцій",
@@ -177,6 +179,7 @@
     "createCollection": "Створити колекцію",
     "goToCollection": "Перейти до колекції",
     "addBook": "Додати книгу",
+    "addToCollection": "Додати до колекції",
     "updateCollection": "Оновити колекцію",
     "createSubcollection": "Створити підколекцію",
     "addExistingCollection": "Додати колекцію",
@@ -354,7 +357,8 @@
       "submit": "Увійти",
       "google": "Увійти через Google",
       "noAccount": "Ще не маєте акаунту?",
-      "error": "Невірний email або пароль"
+      "error": "Невірний email або пароль",
+      "required": "Ви повинні увійти, щоб отримати доступ до цієї сторінки."
     },
     "register": {
       "title": "Реєстрація",

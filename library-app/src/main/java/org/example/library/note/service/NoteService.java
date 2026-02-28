@@ -2,7 +2,7 @@ package org.example.library.note.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.library.exception.NotFoundException;
-import org.example.library.library_book.service.LibraryBookService;
+import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.note.domain.Note;
 import org.example.library.note.dto.NoteDto;
 import org.example.library.note.dto.NoteRequest;
@@ -17,7 +17,7 @@ public class NoteService {
 
     private final NoteRepository repository;
     private final NoteMapper mapper;
-    private final LibraryBookService libraryBookService;
+    private final LibraryBookRepository libraryBookRepository;
 
 
     @Transactional(readOnly = true)
@@ -40,8 +40,9 @@ public class NoteService {
     }
 
     private NoteDto createNew(NoteRequest request, Integer userId) {
-        var libraryBook = libraryBookService.getExistingById(request.libraryBookId(), userId);
-        Note note = mapper.toEntity(request);
+        var libraryBook = libraryBookRepository.findByIdAndUserId(request.libraryBookId(), userId)
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+        var note = mapper.toEntity(request);
         note.setLibraryBook(libraryBook);
         return mapper.toDto(repository.saveAndFlush(note));
     }
@@ -50,5 +51,5 @@ public class NoteService {
         mapper.update(existingNote, request);
         return mapper.toDto(repository.saveAndFlush(existingNote));
     }
-    
+
 }

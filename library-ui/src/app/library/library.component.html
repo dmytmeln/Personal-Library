@@ -1,4 +1,4 @@
-<div class="library-container" *transloco="let t; prefix: 'library'">
+<div *transloco="let t; prefix: 'library'">
   <div class="header-row">
     <h1 class="page-title">{{ t('title') }}</h1>
     <div class="header-actions">
@@ -12,7 +12,7 @@
       </mat-button-toggle-group>
       <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
         <mat-icon>add</mat-icon>
-        {{ t('menu.addToCollection') }}
+        {{ t('menu.addToLibrary') }}
       </button>
     </div>
   </div>
@@ -23,13 +23,18 @@
     <mat-tab [label]="t('tabs.allBooks')">
       <div class="tab-content">
 
-        <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-          <div mainFilters *transloco="let f; prefix: 'library.filters'">
+        <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
+                          [(isExpanded)]="isFiltersExpanded"
+                          [activeFiltersCount]="activeFiltersCount()"
+                          (resetAll)="clearAllFilters()">
+          <div topRowFilters *transloco="let f; prefix: 'library.filters'">
             <app-text-filter
               [label]="f('bookTitle')"
               [value]="filters.state().title"
               (valueChange)="filters.update('title', $event)"/>
+          </div>
 
+          <div mainFilters *transloco="let f; prefix: 'library.filters'">
             <app-select-filter
               [label]="f('status')"
               [value]="filters.state().status"
@@ -64,22 +69,16 @@
               <app-range-filter
                 [label]="f('publishYear')"
                 [range]="filters.state().publishYear"
-                [minPlaceholder]="c('from')"
-                [maxPlaceholder]="c('to')"
                 (rangeChange)="filters.update('publishYear', $event)"/>
 
               <app-range-filter
                 [label]="f('pages')"
                 [range]="filters.state().pages"
-                [minPlaceholder]="c('from')"
-                [maxPlaceholder]="c('to')"
                 (rangeChange)="filters.update('pages', $event)"/>
 
               <app-range-filter
                 [label]="f('rating')"
                 [range]="filters.state().rating"
-                [minPlaceholder]="c('from')"
-                [maxPlaceholder]="c('to')"
                 (rangeChange)="filters.update('rating', $event)"/>
             </ng-container>
           </div>

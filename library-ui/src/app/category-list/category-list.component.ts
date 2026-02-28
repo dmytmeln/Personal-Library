@@ -1,19 +1,24 @@
-import {Component, inject, input, OnInit, output} from '@angular/core';
+import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {CategoryService} from '../services/category.service';
+import {LibraryCategoryService} from '../services/library-category.service';
 import {Category} from '../interfaces/category';
 import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {FilterShellComponent} from '../common/filter-shell/filter-shell.component';
+import {
+  FilterShellComponent,
+  SecondaryFiltersDirective,
+  TopRowFiltersDirective
+} from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {CategoryFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
-import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {map} from 'rxjs';
 
 const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
@@ -31,11 +36,12 @@ const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
     MatButtonModule,
     MatTooltipModule,
     FilterShellComponent,
+    TopRowFiltersDirective,
+    SecondaryFiltersDirective,
     TextFilterComponent,
     RangeFilterComponent,
     SortBarComponent,
     TranslocoDirective,
-
   ],
   templateUrl: './category-list.component.html',
   styleUrl: './category-list.component.scss'
@@ -56,6 +62,14 @@ export class CategoryListComponent implements OnInit {
 
   readonly filters = new EntityFilterStore<CategoryFilters>(EMPTY_CATEGORY_FILTERS);
 
+  readonly isFiltersExpanded = signal(false);
+  readonly activeFiltersCount = computed(() => {
+    const f = this.filters.state();
+    let count = 0;
+    if (f.booksCount.min || f.booksCount.max) count++;
+    return count;
+  });
+
   private translocoService = inject(TranslocoService);
 
   readonly categorySortOptions = toSignal(
@@ -69,7 +83,8 @@ export class CategoryListComponent implements OnInit {
   );
 
   constructor(
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private libraryCategoryService: LibraryCategoryService
   ) {
   }
 
@@ -113,7 +128,7 @@ export class CategoryListComponent implements OnInit {
     };
 
     const request = this.mode() === 'library'
-      ? this.categoryService.searchMe(options)
+      ? this.libraryCategoryService.getAll(options)
       : this.categoryService.search(options);
 
     request.subscribe({

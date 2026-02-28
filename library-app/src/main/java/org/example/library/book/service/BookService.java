@@ -34,19 +34,6 @@ public class BookService {
                 .map(mapper::toBookDto);
     }
 
-    public Book getExistingById(Integer bookId) {
-        return repository.findById(bookId)
-                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
-    }
-
-    public List<Book> getExistingByIds(List<Integer> bookIds) {
-        var books = repository.findAllById(bookIds);
-        if (books.isEmpty())
-            throw new NotFoundException("error.book.none_found");
-        
-        return books;
-    }
-
     public void verifyExistsById(Integer bookId) {
         if (!repository.existsById(bookId)) {
             throw new NotFoundException("error.book.not_found");

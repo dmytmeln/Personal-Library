@@ -1,7 +1,8 @@
 package org.example.library.library_book.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.book.service.BookService;
+import org.example.library.book.dto.LanguageWithCount;
+import org.example.library.book.repository.BookRepository;
 import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
@@ -35,9 +36,9 @@ public class LibraryBookService {
 
     private final LibraryBookRepository repository;
     private final LibraryBookViewRepository viewRepository;
-    private final LibraryBookMapper mapper;
     private final CollectionBookRepository collectionBookRepository;
-    private final BookService bookService;
+    private final BookRepository bookRepository;
+    private final LibraryBookMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
 
@@ -50,19 +51,20 @@ public class LibraryBookService {
                 .map(mapper::toDto);
     }
 
-    public LibraryBook getExistingById(Integer libraryBookId, Integer userId) {
-        return repository.findByIdAndUserId(libraryBookId, userId)
-                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+    @Transactional(readOnly = true)
+    public List<LanguageWithCount> getLanguagesByUserId(Integer userId) {
+        return repository.findLanguagesWithCountByUserId(userId);
     }
 
     @Transactional
-    public LibraryBookDto create(Integer bookId, User user) {
-        verifyNotExists(bookId, user.getId());
-        var book = bookService.getExistingById(bookId);
-        var saved = repository.saveAndFlush(LibraryBook.of(book, user));
+    public void create(Integer bookId, User user) {
+        if (repository.existsByBookIdAndUserId(bookId, user.getId()))
+            throw new BadRequestException("error.library_book.already_added");
 
-        var view = getViewById(saved.getId());
-        return mapper.toDto(view);
+        if (!bookRepository.existsById(bookId))
+            throw new NotFoundException("error.book.not_found");
+
+        repository.save(LibraryBook.of(bookRepository.getReferenceById(bookId), user));
     }
 
     @Transactional
@@ -75,7 +77,10 @@ public class LibraryBookService {
 
         if (newBookIds.isEmpty()) return;
 
-        var books = bookService.getExistingByIds(newBookIds);
+        var books = bookRepository.findAllById(bookIds);
+        if (books.isEmpty())
+            throw new NotFoundException("error.book.none_found");
+
         var libraryBooks = books.stream()
                 .map(book -> LibraryBook.of(book, user))
                 .toList();
@@ -87,21 +92,25 @@ public class LibraryBookService {
 
     @Transactional
     public LibraryBookDto rate(Integer libraryBookId, Integer userId, Integer rating) {
-        verifyRatingIsValid(rating);
-        var libraryBook = getExistingById(libraryBookId, userId);
-        libraryBook.setRating(rating.byteValue());
-        repository.saveAndFlush(libraryBook);
+        if (rating < RATING_LOWER_BOUND || rating > RATING_UPPER_BOUND)
+            throw new BadRequestException("error.library_book.invalid_rating");
 
+        int updatedCount = repository.updateRating(libraryBookId, userId, rating.byteValue());
+        if (updatedCount == 0)
+            throw new NotFoundException("error.library_book.not_found");
+
+        repository.flush();
         var view = getViewById(libraryBookId);
         return mapper.toDto(view);
     }
 
     @Transactional
     public LibraryBookDto updateStatus(Integer libraryBookId, Integer userId, LibraryBookStatus status) {
-        var libraryBook = getExistingById(libraryBookId, userId);
-        libraryBook.setStatus(status);
-        repository.saveAndFlush(libraryBook);
+        int updatedCount = repository.updateStatus(libraryBookId, userId, status);
+        if (updatedCount == 0)
+            throw new NotFoundException("error.library_book.not_found");
 
+        repository.flush();
         var view = getViewById(libraryBookId);
         return mapper.toDto(view);
     }
@@ -117,9 +126,11 @@ public class LibraryBookService {
 
     @Transactional
     public LibraryBookDto resetDetails(Integer libraryBookId, Integer userId) {
-        var libraryBook = getExistingById(libraryBookId, userId);
-        libraryBook.resetOverriddenFields();
-        repository.saveAndFlush(libraryBook);
+        int updatedCount = repository.resetOverriddenFields(libraryBookId, userId);
+        if (updatedCount == 0)
+            throw new NotFoundException("error.library_book.not_found");
+
+        repository.flush();
         var updatedView = getViewById(libraryBookId);
         return mapper.toDto(updatedView);
     }
@@ -155,21 +166,14 @@ public class LibraryBookService {
         return repository.findUserRatingOfBook(bookId, userId); // todo refactor
     }
 
+    private LibraryBook getExistingById(Integer libraryBookId, Integer userId) {
+        return repository.findByIdAndUserId(libraryBookId, userId)
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+    }
+
     private LibraryBookView getViewById(Integer libraryBookId) {
         return viewRepository.findById(libraryBookId)
                 .orElseThrow(() -> new NotFoundException("error.library_book.view_not_found"));
-    }
-
-    private void verifyRatingIsValid(Integer rating) {
-        if (rating < RATING_LOWER_BOUND || rating > RATING_UPPER_BOUND) {
-            throw new BadRequestException("error.library_book.invalid_rating");
-        }
-    }
-
-    private void verifyNotExists(Integer bookId, Integer userId) {
-        if (repository.existsByBookIdAndUserId(bookId, userId)) {
-            throw new BadRequestException("error.library_book.already_added");
-        }
     }
 
 }

@@ -27,11 +27,11 @@ import {TranslocoDirective} from '@jsverse/transloco';
   styleUrl: './range-filter.component.scss'
 })
 export class RangeFilterComponent {
+
   label = input.required<string>();
   range = input.required<Range<number>>();
-  minPlaceholder = input<string>('Any');
   maxPlaceholder = input<string>('Any');
-  
+
   rangeChange = output<Range<number>>();
 
   onMinChange(min: number | null): void {
@@ -49,4 +49,5 @@ export class RangeFilterComponent {
   hasValue(): boolean {
     return this.range().min !== null || this.range().max !== null;
   }
+
 }

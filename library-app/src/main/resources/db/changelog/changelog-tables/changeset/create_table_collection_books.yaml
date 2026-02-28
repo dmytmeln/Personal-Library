@@ -14,6 +14,7 @@ databaseChangeLog:
                     foreignKeyName: collection_books_collections_fk
                     referencedTableName: collections
                     referencedColumnNames: collection_id
+                    onDelete: CASCADE
               - column:
                   name: library_book_id
                   type: integer

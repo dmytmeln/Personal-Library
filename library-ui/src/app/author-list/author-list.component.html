@@ -1,11 +1,16 @@
 <div class="tab-content" *transloco="let t; prefix: 'authors'">
-  <app-filter-shell [hasActiveFilters]="hasActiveFilters()" (resetAll)="clearAllFilters()">
-    <div mainFilters>
+  <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
+                    [(isExpanded)]="isFiltersExpanded"
+                    [activeFiltersCount]="activeFiltersCount()"
+                    (resetAll)="clearAllFilters()">
+    <div topRowFilters>
       <app-text-filter
         [label]="t('filters.name')"
         [value]="filters.state().name"
         (valueChange)="filters.update('name', $event)"/>
+    </div>
 
+    <div mainFilters>
       <app-select-filter
         [label]="t('filters.country')"
         [value]="filters.state().country"
@@ -56,13 +61,7 @@
               <td>{{ author.birthYear }}</td>
               <td>{{ author.deathYear || '-' }}</td>
               <td>
-                @if (author.booksCount === 1) {
-                  {{ t('booksCount.one', { count: 1 }) }}
-                } @else if (author.booksCount && author.booksCount >= 2 && author.booksCount <= 4) {
-                  {{ t('booksCount.few', { count: author.booksCount }) }}
-                } @else {
-                  {{ t('booksCount.other', { count: author.booksCount || 0 }) }}
-                }
+                {{ t('booksCount', { count: author.booksCount || 0 }) }}
               </td>
               <td *transloco="let c; prefix: 'common'">
                 <div class="action-buttons">

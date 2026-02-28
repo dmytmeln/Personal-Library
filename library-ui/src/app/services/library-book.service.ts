@@ -5,6 +5,7 @@ import {LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {Page} from '../interfaces/page';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
 import {BulkLibraryBookRequest} from '../interfaces/bulk-library-book-request';
+import {LanguageWithCount} from '../interfaces/language-with-count';
 
 export interface LibraryBookQueryOptions {
   page?: number;
@@ -35,6 +36,10 @@ export class LibraryBookService {
 
   getAll(options: LibraryBookQueryOptions = {}): Observable<Page<LibraryBook>> {
     return this.apiService.get('/users/me/library-books', {params: this.buildParams(options)});
+  }
+
+  getLanguages(): Observable<LanguageWithCount[]> {
+    return this.apiService.get('/users/me/library-books/languages', {});
   }
 
   addBook(bookId: number): Observable<LibraryBook> {

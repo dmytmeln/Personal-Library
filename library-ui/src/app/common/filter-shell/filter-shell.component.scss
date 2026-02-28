@@ -1,11 +1,93 @@
 .filters-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   padding: 16px;
   background-color: var(--mat-sys-surface-container-low);
   border-radius: 12px;
   margin-bottom: 24px;
+}
+
+.title-row {
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.top-row-filters {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  border-radius: 20px;
+  color: var(--mat-sys-primary);
+
+  mat-icon {
+    margin: 0;
+  }
+}
+
+.filters-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.reset-all-btn {
+  color: var(--mat-sys-error);
+}
+
+.collapsible-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-out;
+  overflow: hidden;
+
+  &.expanded {
+    grid-template-rows: 1fr;
+    padding-top: 16px;
+  }
+}
+
+.content-wrapper {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .filter-row {
@@ -20,20 +102,9 @@
   align-items: flex-start;
 }
 
-.secondary-row {
-  justify-content: flex-start;
-}
-
-.clear-filters-btn {
-  height: 40px;
-  border-radius: 20px;
-  margin-left: auto;
-
-  mat-icon {
-    margin-right: 4px;
-  }
-}
-
-::ng-deep [mainFilters], ::ng-deep [secondaryFilters] {
+::ng-deep [topRowFilters],
+::ng-deep [mainFilters],
+::ng-deep [secondaryFilters],
+::ng-deep [footerFilters] {
   display: contents;
 }

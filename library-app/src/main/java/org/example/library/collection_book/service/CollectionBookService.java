@@ -1,13 +1,10 @@
 package org.example.library.collection_book.service;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.example.library.collection.service.CollectionService;
+import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
-import org.example.library.collection_book.dto.CollectionBookDto;
 import org.example.library.collection_book.dto.CollectionBookSearchParams;
-import org.example.library.collection_book.mapper.CollectionBookMapper;
 import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
@@ -15,7 +12,6 @@ import org.example.library.library_book.dto.LibraryBookDto;
 import org.example.library.library_book.mapper.LibraryBookMapper;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.library_book.repository.LibraryBookViewRepository;
-import org.example.library.library_book.service.LibraryBookService;
 import org.example.library.pagination.PageRequestBuilder;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
@@ -30,20 +26,16 @@ import java.util.List;
 public class CollectionBookService {
 
     private final CollectionBookRepository repository;
-    private final CollectionBookMapper mapper;
-    private final CollectionService collectionService;
-    private final LibraryBookService libraryBookService;
+    private final CollectionRepository collectionRepository;
     private final LibraryBookRepository libraryBookRepository;
-    private final EntityManager entityManager;
     private final LibraryBookViewRepository viewRepository;
-    private final PageRequestBuilder pageRequestBuilder;
     private final LibraryBookMapper libraryBookMapper;
+    private final PageRequestBuilder pageRequestBuilder;
 
 
     @Transactional(readOnly = true)
     public Page<LibraryBookDto> getCollectionBooksPaginated(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, PaginationParams paginationParams) {
-        var collection = collectionService.getExistingById(collectionId);
-        if (!collection.getUser().getId().equals(userId))
+        if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
             throw new BadRequestException("error.collection.not_belong_to_user");
 
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.LIBRARY_BOOK_FIELDS);
@@ -53,29 +45,29 @@ public class CollectionBookService {
     }
 
     @Transactional
-    public CollectionBookDto addBookToCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
-        var collection = collectionService.getExistingById(collectionId);
-        if (!collection.getUser().getId().equals(userId))
+    public void addBookToCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
+        if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
             throw new BadRequestException("error.collection.not_belong_to_user");
 
-        var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
-        var id = new CollectionBookId(collection.getId(), libraryBook.getId());
+        if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId))
+            throw new NotFoundException("error.library_book.not_found");
+
+        var id = new CollectionBookId(collectionId, libraryBookId);
         if (repository.existsById(id))
             throw new BadRequestException("error.collection.book_already_added");
 
-        var managedEntity = repository.saveAndFlush(CollectionBook.builder()
+        var collectionBook = CollectionBook.builder()
                 .id(id)
-                .libraryBook(libraryBook)
-                .collection(collection)
-                .build());
-        entityManager.refresh(managedEntity);
-        return mapper.toDto(managedEntity);
+                .libraryBook(libraryBookRepository.getReferenceById(libraryBookId))
+                .collection(collectionRepository.getReferenceById(collectionId))
+                .build();
+
+        repository.save(collectionBook);
     }
 
     @Transactional
     public void bulkAddBooksToCollection(Integer userId, Integer collectionId, List<Integer> libraryBookIds) {
-        var collection = collectionService.getExistingById(collectionId);
-        if (!collection.getUser().getId().equals(userId))
+        if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
             throw new BadRequestException("error.collection.not_belong_to_user");
 
         var libraryBooks = libraryBookRepository.findAllByIdInAndUserId(libraryBookIds, userId);
@@ -89,7 +81,7 @@ public class CollectionBookService {
                 .map(lb -> CollectionBook.builder()
                         .id(new CollectionBookId(collectionId, lb.getId()))
                         .libraryBook(lb)
-                        .collection(collection)
+                        .collection(collectionRepository.getReferenceById(collectionId))
                         .build())
                 .toList();
 
@@ -98,29 +90,37 @@ public class CollectionBookService {
         }
     }
 
+    @Transactional
     public void removeBookFromCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
-        var collection = collectionService.getExistingById(collectionId);
-        if (!collection.getUser().getId().equals(userId))
-            throw new BadRequestException("error.collection.not_belong_to_user");
+        int deletedCount = repository.deleteByIdAndUserId(collectionId, libraryBookId, userId);
+        if (deletedCount == 0) {
+            if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+                throw new BadRequestException("error.collection.not_belong_to_user");
 
-        var libraryBook = libraryBookService.getExistingById(libraryBookId, userId);
-        repository.deleteById(new CollectionBookId(collection.getId(), libraryBook.getId()));
+            throw new NotFoundException("error.library_book.not_found");
+        }
     }
 
     @Transactional
     public void bulkRemoveBooksFromCollection(Integer userId, Integer collectionId, List<Integer> libraryBookIds) {
-        repository.deleteAllByCollectionIdAndLibraryBookIdInAndUserId(collectionId, libraryBookIds, userId);
+        int deletedCount = repository.deleteAllByCollectionIdAndLibraryBookIdInAndUserId(collectionId, libraryBookIds, userId);
+        if (deletedCount == 0) {
+            if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+                throw new BadRequestException("error.collection.not_belong_to_user");
+
+            throw new NotFoundException("error.collection.books_not_found_in_collection");
+        }
     }
 
     @Transactional
     public void removeBookFromAllCollections(Integer userId, Integer libraryBookId) {
-        repository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
-    }
+        int deletedCount = repository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
+        if (deletedCount == 0) {
+            if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId))
+                throw new NotFoundException("error.library_book.not_found");
 
-    @Transactional
-    public CollectionBookDto moveBook(Integer userId, Integer libraryBookId, Integer fromCollectionId, Integer toCollectionId) {
-        removeBookFromCollection(userId, fromCollectionId, libraryBookId);
-        return addBookToCollection(userId, toCollectionId, libraryBookId);
+            throw new NotFoundException("error.collection.books_not_found_in_collection");
+        }
     }
 
 }

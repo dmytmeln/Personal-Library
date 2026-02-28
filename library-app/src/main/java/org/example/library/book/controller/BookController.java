@@ -34,7 +34,7 @@ public class BookController {
 
     @GetMapping("/{bookId}/details")
     public BookDetails getById(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Integer bookId) {
-        return bookDetailsService.getDetails(bookId, userDetails.getId());
+        return bookDetailsService.getDetails(bookId, userDetails.getId());//todo optimize
     }
 
     @GetMapping("/languages")

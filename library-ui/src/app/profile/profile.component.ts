@@ -9,6 +9,8 @@ import {Router} from '@angular/router';
 import {AuthService} from '../services/auth.service';
 import {UserResponse} from '../interfaces/user-response';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackCommon} from '../common/mat-snack-common';
 
 @Component({
   selector: 'app-profile',
@@ -29,13 +31,15 @@ export class ProfileComponent implements OnInit {
 
   user: UserResponse | null = null;
   loading: boolean = true;
-  errorMessage: string = '';
+  private snackCommon: MatSnackCommon;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private matSnackBar: MatSnackBar,
   ) {
+    this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
@@ -49,7 +53,7 @@ export class ProfileComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.errorMessage = this.translocoService.translate('profile.loadError');
+        this.snackCommon.showError(this.translocoService.translate('profile.loadError'));
         this.loading = false;
         console.error('Error loading profile:', error);
       }

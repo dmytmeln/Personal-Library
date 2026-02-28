@@ -6,6 +6,9 @@ import org.example.library.collection.domain.Collection;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookView;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,7 +20,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CollectionBook {
+public class CollectionBook implements Persistable<CollectionBookId> {
 
     @EmbeddedId
     private CollectionBookId id;
@@ -38,7 +41,12 @@ public class CollectionBook {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("collectionId")
     @JoinColumn(name = "collection_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection collection;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
 
     @Override
     public boolean equals(Object o) {
@@ -49,6 +57,17 @@ public class CollectionBook {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
     }
 
 }

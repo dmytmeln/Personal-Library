@@ -3,12 +3,16 @@ databaseChangeLog:
       id: create_table_users
       author: Dmytro Melnyk
       changes:
+        - createSequence:
+            sequenceName: users_seq
+            startValue: 1
+            incrementBy: 20
         - createTable:
             tableName: users
             columns:
               - column:
                   name: user_id
-                  type: serial
+                  type: integer
                   constraints:
                     primaryKey: true
                     primaryKeyName: users_pk
