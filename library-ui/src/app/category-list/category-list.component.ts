@@ -8,6 +8,7 @@ import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {Router} from '@angular/router';
 import {
   FilterShellComponent,
   SecondaryFiltersDirective,
@@ -19,7 +20,7 @@ import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {CategoryFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {map, skip} from 'rxjs';
+import {map} from 'rxjs';
 import {LibraryStore} from '../services/library.store';
 
 const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
@@ -87,12 +88,13 @@ export class CategoryListComponent implements OnInit {
     private categoryService: CategoryService,
     private libraryCategoryService: LibraryCategoryService,
     private libraryStore: LibraryStore,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private router: Router
   ) {
     effect(() => {
-      this.libraryStore.refreshVersion();
+      const version = this.libraryStore.refreshVersion();
       untracked(() => {
-        if (this.mode() === 'library') {
+        if (version !== 0 && this.mode() === 'library') {
           this.loadCategories();
         }
       });
@@ -152,7 +154,7 @@ export class CategoryListComponent implements OnInit {
   }
 
   private setupSubscriptions(): void {
-    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       const hadFilters = this.hasActiveFilters();
       this.clearAllFilters();
       if (!hadFilters) {
@@ -164,6 +166,10 @@ export class CategoryListComponent implements OnInit {
       this.categoriesState.currentPage = 0;
       this.loadCategories();
     });
+  }
+
+  goToCategoryDetails(category: Category): void {
+    this.router.navigate(['/category-details'], {state: {id: category.id}});
   }
 
   onShowBooks(category: Category): void {

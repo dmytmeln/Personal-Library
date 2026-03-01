@@ -1,11 +1,11 @@
 import {BasicCollection} from './basic-collection';
-import {LibraryBookStatus} from './library-book';
+import {LibraryBook} from './library-book';
+import {Book} from './book';
 
 export interface BookDetails {
+  book?: Book;
+  libraryBook?: LibraryBook;
   averageRating: number;
   ratingsNumber: number;
-  myRating: number;
   collections: BasicCollection[];
-  status?: LibraryBookStatus;
-  isInLibrary: boolean;
 }

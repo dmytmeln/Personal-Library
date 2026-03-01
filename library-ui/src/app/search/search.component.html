@@ -111,10 +111,6 @@
   <mat-menu #searchBookMenu="matMenu">
     <ng-template matMenuContent let-book>
       <ng-container *transloco="let m; prefix: 'search.menu'">
-        <button mat-menu-item (click)="goToBookDetails(book)">
-          <mat-icon>info</mat-icon>
-          <span>{{ m('bookDetails') }}</span>
-        </button>
         <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
           <mat-icon>add_circle</mat-icon>
           <span>{{ isBookInLibrary(book) ? m('alreadyInLibrary') : m('addToLibrary') }}</span>

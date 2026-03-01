@@ -1,15 +1,17 @@
 <div class="list-item" [class.selected]="isSelected()" (click)="toggleSelection.emit()">
-  <div class="cover">
+  <div class="cover" (click)="$event.stopPropagation(); goToBookDetails()">
     @if (book().coverImageUrl) {
       <img ngSrc="{{book().coverImageUrl}}" priority width="40" height="60" alt="Book cover"/>
     } @else {
       <div class="no-cover"><mat-icon>book</mat-icon></div>
     }
   </div>
-  
+
   <div class="info">
     <div class="main-info">
-      <span class="title" [matTooltip]="book().title">{{ book().title }}</span>
+      <span class="title"
+            (click)="$event.stopPropagation(); goToBookDetails()"
+            [matTooltip]="book().title">{{ book().title }}</span>
       <span class="authors">
         @for (author of book().authors | keyvalue; track author.key; let last = $last) {
           <a class="link"
@@ -17,9 +19,11 @@
         }
       </span>
     </div>
-    
+
     <div class="secondary-info" *transloco="let c; prefix: 'common'">
-      <span class="category">{{ book().categoryName }}</span>
+      <span class="category">
+        <a class="link" (click)="$event.stopPropagation(); goToCategoryDetails()">{{ book().categoryName }}</a>
+      </span>
       <span class="metadata">{{ book().publishYear }} • {{ book().pages }}{{ c('pagesShort') }} • {{ book().language }}</span>
     </div>
   </div>

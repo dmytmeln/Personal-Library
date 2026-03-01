@@ -1,6 +1,7 @@
 {
   "appTitle": "Особиста бібліотека",
   "menu": {
+    "dashboard": "Дашборд",
     "library": "Бібліотека",
     "collections": "Колекції",
     "recommendations": "Рекомендації",
@@ -252,8 +253,10 @@
     "ratingsCount": "Кількість відгуків: {{count}}",
     "info": "Інформація про книгу",
     "publishYear": "Рік видання",
-    "notInLibrary": "Не в бібліотеці",
+    "notInLibraryStatus": "Книга не в бібліотеці",
     "inCollections": "У колекціях:",
+    "noCollections": "Книга не додана до жодної колекції",
+    "inLibraryTooltip": "Ця книга у вашій бібліотеці",
     "genre": "Жанр",
     "description": "Опис",
     "addToLibrary": "Додати до бібліотеки",
@@ -356,7 +359,8 @@
       "booksCount": "Кількість книг",
       "actions": "Дії"
     },
-    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}"
+    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}",
+    "categoryBooks": "Книги жанру"
   },
   "auth": {
     "or": "АБО",
@@ -387,6 +391,56 @@
       "passwordMinLength": "Пароль має бути не менше {{min}} символів",
       "fullNameRequired": "Повне ім'я обов'язкове",
       "fullNameMinLength": "Повне ім'я має бути не менше {{min}} символів"
+    }
+  },
+  "dashboard": {
+    "title": "Панель читання",
+    "setGoal": "Встановити цілі",
+    "booksGoal": "Ціль по книгах",
+    "pagesGoal": "Ціль по сторінках",
+    "totalBooks": "Всього книг",
+    "addedThisYear": "Додано цього року",
+    "currentlyReading": "Читаю зараз",
+    "averageRating": "Середня оцінка",
+    "totalRatedBooks": "Всього оцінено книг",
+    "categoryDist": "Розподіл за жанрами",
+    "languageDist": "Розподіл за мовами",
+    "topAuthors": "Топ авторів",
+    "countryDist": "Країни авторів",
+    "statusDist": "Розподіл за статусами",
+    "readingActivity": "Активність читання за місяцями",
+    "yearlySection": "Прогрес за рік",
+    "totalSection": "Огляд бібліотеки",
+    "booksRead": "Прочитано книг",
+    "pagesRead": "Прочитано сторінок",
+    "deleteConfirm": "Ви впевнені, що хочете видалити ціль читання на {{year}} рік?",
+    "months": {
+      "1": "Січ",
+      "2": "Лют",
+      "3": "Бер",
+      "4": "Кві",
+      "5": "Тра",
+      "6": "Чер",
+      "7": "Лип",
+      "8": "Сер",
+      "9": "Вер",
+      "10": "Жов",
+      "11": "Лис",
+      "12": "Гру"
+    },
+    "success": {
+      "goalSaved": "Ціль читання успішно збережена",
+      "goalDeleted": "Ціль читання успішно видалена"
+    },
+    "setGoalDialog": {
+      "titleAdd": "Встановити ціль",
+      "titleEdit": "Редагувати ціль",
+      "targetBooks": "Цільова кількість книг",
+      "targetPages": "Цільова кількість сторінок",
+      "targetPagesHint": "Опціонально",
+      "save": "Зберегти",
+      "cancel": "Скасувати",
+      "delete": "Видалити"
     }
   }
 }

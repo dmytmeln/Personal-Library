@@ -47,6 +47,14 @@ export class BookCardComponent {
     this.router.navigate(['/author-details'], {state: {id: Number(authorId)}});
   }
 
+  goToCategoryDetails(): void {
+    this.router.navigate(['/category-details'], {state: {id: this.book().categoryId}});
+  }
+
+  goToBookDetails(): void {
+    this.router.navigate(['/book-details'], {state: {id: this.book().id}});
+  }
+
   truncateTitle(title: string): string {
     if (title.length <= this.TITLE_MAX_LENGTH) {
       return title;

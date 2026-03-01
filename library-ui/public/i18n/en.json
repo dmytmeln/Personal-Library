@@ -1,6 +1,7 @@
 {
   "appTitle": "Personal Library",
   "menu": {
+    "dashboard": "Dashboard",
     "library": "Library",
     "collections": "Collections",
     "recommendations": "Recommendations",
@@ -252,8 +253,10 @@
     "ratingsCount": "Ratings count: {{count}}",
     "info": "Book information",
     "publishYear": "Publish year",
-    "notInLibrary": "Not in library",
+    "notInLibraryStatus": "Book is not in library",
     "inCollections": "In collections:",
+    "noCollections": "Book is not in any collection",
+    "inLibraryTooltip": "This book is in your library",
     "genre": "Genre",
     "description": "Description",
     "addToLibrary": "Add to Library",
@@ -387,6 +390,57 @@
       "booksCount": "Books Count",
       "actions": "Actions"
     },
-    "booksCount": "{count, plural, =1 {# book} other {# books}}"
+    "booksCount": "{count, plural, =1 {# book} other {# books}}",
+    "categoryBooks": "Category's Books"
+  },
+  "dashboard": {
+    "title": "Reading Dashboard",
+    "setGoal": "Set Goals",
+    "booksGoal": "Books Goal",
+    "pagesGoal": "Pages Goal",
+    "totalBooks": "Total Books",
+    "addedThisYear": "Added This Year",
+    "currentlyReading": "Currently Reading",
+    "averageRating": "Average Rating",
+    "totalRatedBooks": "Total Rated Books",
+    "categoryDist": "Category Distribution",
+    "languageDist": "Language Distribution",
+    "topAuthors": "Top Authors",
+    "countryDist": "Author Countries",
+    "statusDist": "Status Distribution",
+    "readingActivity": "Monthly Reading Activity",
+    "yearlySection": "Yearly Progress",
+    "totalSection": "Library Overview",
+    "booksRead": "Books Read",
+    "pagesRead": "Pages Read",
+    "deleteConfirm": "Are you sure you want to delete your reading goal for {{year}}?",
+    "months": {
+      "1": "Jan",
+      "2": "Feb",
+      "3": "Mar",
+      "4": "Apr",
+      "5": "May",
+      "6": "Jun",
+      "7": "Jul",
+      "8": "Aug",
+      "9": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    },
+    "success": {
+      "goalSaved": "Reading goal saved successfully",
+      "goalDeleted": "Reading goal deleted successfully"
+    },
+    "setGoalDialog": {
+      "titleAdd": "Set Reading Goal",
+      "titleEdit": "Edit Reading Goal",
+      "targetBooks": "Target Books",
+      "targetPages": "Target Pages",
+      "targetPagesHint": "Optional",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    }
   }
 }

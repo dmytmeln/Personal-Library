@@ -1,66 +1,79 @@
 <div class="container" *transloco="let t; prefix: 'bookDetails'">
-  <div class="book-header">
-    @if (book.coverImageUrl) {
-      <div class="card-image">
-        <img ngSrc="{{book.coverImageUrl}}" priority width="200" height="300" alt="Book cover"/>
-      </div>
-    }
-
-    <div class="book-info">
-      <h3 class="book-title">{{ book.title }}</h3>
-      <div class="book-authors">
-        @for (entry of authors; track entry[0]) {
-          <a class="link" (click)="goToAuthorDetails(entry[0])">{{ entry[1] }}</a>
-        }
-      </div>
-      @if (!bookDetails.isInLibrary) {
-        <button mat-flat-button (click)="addBookToLibrary()">{{ t('addToLibrary') }}</button>
+  @if (bookDetails && displayBook) {
+    <div class="book-header">
+      @if (displayBook.coverImageUrl) {
+        <div class="card-image">
+          <img ngSrc="{{displayBook.coverImageUrl}}" priority width="200" height="300" alt="Book cover"/>
+        </div>
       }
-      <div>{{ t('myRating') }}:
-        <app-book-rating [rating]="bookDetails.myRating" (ratingChange)="changeRating($event)"/>
-      </div>
-      <div>
-        {{ t('averageRating') }}
-        <div class="average-rating">
-          <app-book-rating [rating]="bookDetails.averageRating" [disabled]="true"/>
-          <span>{{ t('ratingsCount', { count: bookDetails.ratingsNumber }) }}</span>
+
+      <div class="book-info">
+        <h3 class="book-title">
+          {{ displayBook.title }}
+          @if (bookDetails.libraryBook) {
+            <mat-icon class="in-library-icon" [matTooltip]="t('inLibraryTooltip')">check_circle</mat-icon>
+          }
+        </h3>
+        <div class="book-authors">
+          @for (entry of authors; track entry[0]) {
+            <a class="link" (click)="goToAuthorDetails(entry[0])">{{ entry[1] }}</a>
+          }
+        </div>
+        @if (!bookDetails.libraryBook) {
+          <button mat-flat-button (click)="addBookToLibrary()">{{ t('addToLibrary') }}</button>
+        }
+        <div>{{ t('myRating') }}:
+          <app-book-rating [rating]="myRating" (ratingChange)="changeRating($event)"/>
+        </div>
+        <div>
+          {{ t('averageRating') }}
+          <div class="average-rating">
+            <app-book-rating [rating]="bookDetails.averageRating" [disabled]="true"/>
+            <span>{{ t('ratingsCount', { count: bookDetails.ratingsNumber }) }}</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="book-details">
-    <h4>{{ t('info') }}</h4>
-    <div class="book-details-info">
-      <div class="book-details-group">
-        <div><span class="book-attribute-label">{{ t('genre') }}:</span> {{ book.categoryName }}</div>
-        <div><span class="book-attribute-label">{{ t('pages') }}:</span> {{ book.pages }}</div>
-        <div><span class="book-attribute-label">{{ t('language') }}:</span> {{ book.language }}</div>
-        <div><span class="book-attribute-label">{{ t('publishYear') }}:</span> {{ book.publishYear }}</div>
-        <div *transloco="let s; prefix: 'library.statuses'">
-          <span class="book-attribute-label">{{ t('status') }}: </span>
-          @if (bookDetails && bookDetails.status) {
-            {{ s(bookDetails.status) }}
+    <div class="book-details">
+      <h4>{{ t('info') }}</h4>
+      <div class="book-details-info">
+        <div class="book-details-group">
+          <div><span class="book-attribute-label">{{ t('genre') }}:</span> {{ displayBook.categoryName }}</div>
+          <div><span class="book-attribute-label">{{ t('pages') }}:</span> {{ displayBook.pages }}</div>
+          <div><span class="book-attribute-label">{{ t('language') }}:</span> {{ displayBook.language }}</div>
+          <div><span class="book-attribute-label">{{ t('publishYear') }}:</span> {{ displayBook.publishYear }}</div>
+          <div *transloco="let s; prefix: 'library.statuses'">
+            <span class="book-attribute-label">{{ t('status') }}: </span>
+            @if (bookDetails.libraryBook && bookDetails.libraryBook.status) {
+              {{ s(bookDetails.libraryBook.status) }}
+            } @else {
+              {{ t('notInLibraryStatus') }}
+            }
+          </div>
+        </div>
+        <div class="book-collections">
+          <span class="book-attribute-label">{{ t('inCollections') }}</span>
+          @if (bookDetails.collections.length > 0) {
+            @for (collection of bookDetails.collections; track collection.id) {
+              <div class="collections">
+                <a mat-button (click)="goToCollection(collection)">{{ collection.name }}</a>
+              </div>
+            }
+          } @else if (bookDetails.libraryBook) {
+            <div class="no-collections-msg">{{ t('noCollections') }}</div>
           } @else {
-            {{ t('notInLibrary') }}
+            <div class="no-collections-msg">{{ t('notInLibraryStatus') }}</div>
           }
         </div>
       </div>
-      <div class="book-collections">
-        <span class="book-attribute-label">{{ t('inCollections') }}</span>
-        @for (collection of bookDetails.collections; track collection.id) {
-          <div class="collections">
-            <a mat-button (click)="goToCollection(collection)">{{ collection.name }}</a>
-          </div>
-        }
-      </div>
     </div>
-  </div>
 
-  @if (book.description) {
-    <div class="book-description">
-      <span class="book-attribute-label">{{ t('description') }}:</span>
-      <p class="book-description-text">{{ book.description }}</p>
-    </div>
+    @if (displayBook.description) {
+      <div class="book-description">
+        <span class="book-attribute-label">{{ t('description') }}:</span>
+        <p class="book-description-text">{{ displayBook.description }}</p>
+      </div>
+    }
   }
 </div>

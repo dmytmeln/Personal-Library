@@ -12,6 +12,19 @@
   align-items: center;
 }
 
+.book-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.in-library-icon {
+  color: var(--mat-sys-primary);
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
 .book-info {
   * {
     margin: 5px 0;
@@ -69,6 +82,13 @@
 
 .collections {
   display: flex;
+}
+
+.no-collections-msg {
+  color: var(--mat-sys-outline);
+  font-style: italic;
+  font-size: 0.9em;
+  margin-left: 5px;
 }
 
 .book-authors {

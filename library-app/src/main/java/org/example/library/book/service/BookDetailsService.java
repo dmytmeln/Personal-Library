@@ -2,38 +2,50 @@ package org.example.library.book.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.library.book.dto.BookDetails;
+import org.example.library.book.mapper.BookMapper;
+import org.example.library.book.repository.BookDisplayViewRepository;
 import org.example.library.collection.service.CollectionService;
-import org.example.library.library_book.service.LibraryBookService;
+import org.example.library.exception.NotFoundException;
+import org.example.library.library_book.mapper.LibraryBookMapper;
+import org.example.library.library_book.repository.LibraryBookRepository;
+import org.example.library.library_book.repository.LibraryBookViewRepository;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class BookDetailsService {
 
     private final CollectionService collectionService;
-    private final BookService bookService;
-    private final LibraryBookService libraryBookService;
+    private final LibraryBookRepository libraryBookRepository;
+    private final LibraryBookViewRepository libraryBookViewRepository;
+    private final BookDisplayViewRepository bookDisplayViewRepository;
+    private final BookMapper bookMapper;
+    private final LibraryBookMapper libraryBookMapper;
 
+    @Transactional(readOnly = true)
     public BookDetails getDetails(Integer bookId, Integer userId) {
-        bookService.verifyExistsById(bookId);
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+
+        var libraryBookViewOpt = libraryBookViewRepository.findByBookIdAndUserIdAndLanguageCode(bookId, userId, lang);
         var collections = collectionService.getAllByUserIdAndBookId(userId, bookId);
-        var bookAverageRatingAndCount = libraryBookService.getBookAverageRatingAndCount(bookId);
-        var bookStatusOpt = libraryBookService.getBookStatus(bookId, userId);
-        var userRating = libraryBookService.getUserRatingOfBook(bookId, userId)
-                .orElse(0);
-        var builder = BookDetails.builder();
-        if (bookStatusOpt.isPresent()) {
-            builder.status(bookStatusOpt.get());
-            builder.isInLibrary(true);
-        } else {
-            builder.isInLibrary(false);
-        }
-        return builder
+        var ratingSummary = libraryBookRepository.findAverageRatingAndCountByBookId(bookId);
+
+        var builder = BookDetails.builder()
                 .collections(collections)
-                .averageRating(bookAverageRatingAndCount.getKey())
-                .ratingsNumber(bookAverageRatingAndCount.getValue())
-                .myRating(userRating)
-                .build();
+                .averageRating(ratingSummary.getAverageRating() != null ? ratingSummary.getAverageRating() : 0.0)
+                .ratingsNumber(ratingSummary.getRatingsCount() != null ? ratingSummary.getRatingsCount() : 0L);
+
+        if (libraryBookViewOpt.isPresent()) {
+            builder.libraryBook(libraryBookMapper.toDto(libraryBookViewOpt.get()));
+        } else {
+            var bookView = bookDisplayViewRepository.findByIdAndLanguageCode(bookId, lang)
+                    .orElseThrow(() -> new NotFoundException("error.book.not_found"));
+            builder.book(bookMapper.toBookDto(bookView));
+        }
+
+        return builder.build();
     }
 
 }

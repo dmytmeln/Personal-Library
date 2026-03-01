@@ -37,7 +37,7 @@ export class LibraryBookMenuItemsComponent {
   }
 
   goToBookDetails(book: Book): void {
-    this.router.navigate(['/book-details'], {state: book});
+    this.router.navigate(['/book-details'], {state: {id: book.id}});
   }
 
 }

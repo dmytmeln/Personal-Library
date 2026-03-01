@@ -47,6 +47,12 @@ mat-card {
 .title {
   font-weight: 600;
   line-height: 1.3;
+
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    color: var(--mat-sys-primary);
+  }
 }
 
 .category {

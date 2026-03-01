@@ -20,7 +20,7 @@
   width: 40px;
   height: 60px;
   flex-shrink: 0;
-  
+
   img {
     border-radius: 4px;
     object-fit: cover;
@@ -50,13 +50,18 @@
   display: flex;
   align-items: baseline;
   gap: 12px;
-  
+
   .title {
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 400px;
+
+    &:hover {
+      text-decoration: underline;
+      color: var(--mat-sys-primary);
+    }
   }
 
   .authors {
@@ -73,7 +78,7 @@
   gap: 16px;
   font-size: 13px;
   color: var(--mat-sys-on-surface-variant);
-  
+
   .category {
     font-weight: 500;
   }

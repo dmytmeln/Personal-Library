@@ -1,0 +1,247 @@
+.dashboard-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+
+    .title-selector {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      h1 {
+        margin: 0;
+        font-weight: 300;
+        font-size: 2.5rem;
+      }
+
+      .year-selector {
+        width: 100px;
+        margin-top: 8px;
+
+        ::ng-deep .mat-mdc-text-field-wrapper {
+          padding-bottom: 0;
+        }
+
+        ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .dashboard-section {
+    margin-bottom: 48px;
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--mat-sys-on-surface);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--mat-sys-primary-container);
+    }
+  }
+
+  .section-divider {
+    margin: 48px 0;
+  }
+
+  .goals-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+
+    .goal-card {
+      .goal-stats {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 16px;
+
+        .current {
+          font-size: 3rem;
+          font-weight: 500;
+          color: var(--mat-sys-primary);
+        }
+
+        .separator {
+          font-size: 1.5rem;
+          color: var(--mat-sys-outline);
+        }
+
+        .target {
+          font-size: 1.5rem;
+          color: var(--mat-sys-on-surface-variant);
+        }
+      }
+
+      .percent {
+        text-align: right;
+        margin-top: 8px;
+        font-weight: 500;
+        color: var(--mat-sys-secondary);
+      }
+    }
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+
+    .summary-card {
+      text-align: center;
+
+      &.yearly {
+        border-top: 4px solid var(--mat-sys-primary);
+      }
+
+      &.total {
+        border-top: 4px solid var(--mat-sys-secondary);
+      }
+
+      .value {
+        font-size: 2rem;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .label {
+        font-size: 0.875rem;
+        color: var(--mat-sys-on-surface-variant);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    }
+  }
+
+  .activity-card {
+    .activity-grid {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 250px;
+      padding: 24px 16px 8px;
+      gap: 8px;
+
+      .activity-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        height: 100%;
+        justify-content: flex-end;
+
+        .activity-bar {
+          width: 100%;
+          max-width: 40px;
+          background: var(--mat-sys-primary);
+          border-radius: 4px 4px 0 0;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          transition: height 0.3s ease;
+          min-height: 2px;
+          position: relative;
+
+          .activity-count {
+            position: absolute;
+            top: -24px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--mat-sys-on-surface);
+          }
+        }
+
+        .month-label {
+          font-size: 0.75rem;
+          color: var(--mat-sys-on-surface-variant);
+          text-transform: uppercase;
+        }
+      }
+    }
+  }
+
+  .distributions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+
+    .dist-card {
+      .dist-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 16px;
+
+        .dist-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .name {
+            font-weight: 400;
+
+            &.link {
+              color: var(--mat-sys-primary);
+              cursor: pointer;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+          }
+
+          .count {
+            font-weight: 500;
+            background: var(--mat-sys-secondary-container);
+            color: var(--mat-sys-on-secondary-container);
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-container {
+    padding: 16px;
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .activity-card {
+      .activity-grid {
+        height: 200px;
+        gap: 2px;
+        padding: 24px 4px 8px;
+
+        .month-label {
+          font-size: 0.6rem;
+        }
+      }
+    }
+  }
+}

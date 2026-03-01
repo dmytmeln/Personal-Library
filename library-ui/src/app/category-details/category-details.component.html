@@ -1,1 +1,68 @@
-<p>category-details works!</p>
+<ng-container *transloco="let t; prefix: 'categories'">
+  @if (category) {
+    <div class="container">
+      <div class="header-row">
+        <h1 class="page-title">{{ category.name }}</h1>
+        <div class="header-actions">
+          <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
+            <mat-button-toggle value="grid">
+              <mat-icon>grid_view</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle value="list">
+              <mat-icon>view_list</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </div>
+
+      <div class="category-info">
+        <p>
+          <strong>{{ t('table.booksCount') }}:</strong>
+          {{ t('booksCount', { count: totalElements }) }}
+        </p>
+        @if (category.description) {
+          <div class="description-container">
+            <h4 class="category-attribute-label">{{ t('table.description') }}</h4>
+            <div class="category-description-text">
+              {{ category.description }}
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="category-books">
+        <h4 class="category-attribute-label">{{ t('categoryBooks') }}</h4>
+        <app-sort-bar [options]="bookSortOptions()" (sortChange)="onSortChange($event)"/>
+
+        <app-books-display
+          [books]="books"
+          [totalElements]="totalElements"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [loading]="loading"
+          [actionsMenu]="bookMenu"
+          [viewMode]="viewMode()"
+          [selectionStore]="selection"
+          (pageChange)="onPageChange($event)"/>
+      </div>
+    </div>
+  }
+
+  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button (click)="bulkAddBooks()">
+      <mat-icon>add_circle</mat-icon>
+      <span *transloco="let search; prefix: 'search.bulkActions'">{{ search('addToLibrary') }}</span>
+    </button>
+  </app-bulk-action-bar>
+
+  <mat-menu #bookMenu="matMenu">
+    <ng-template matMenuContent let-book>
+      <ng-container *transloco="let menu; prefix: 'search.menu'">
+        <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+          <mat-icon>add_circle</mat-icon>
+          <span>{{ isBookInLibrary(book) ? menu('alreadyInLibrary') : menu('addToLibrary') }}</span>
+        </button>
+      </ng-container>
+    </ng-template>
+  </mat-menu>
+</ng-container>

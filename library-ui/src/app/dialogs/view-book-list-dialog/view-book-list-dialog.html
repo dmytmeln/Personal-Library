@@ -34,7 +34,7 @@
           <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).publishYear }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="language">
+        <ng-container matColumnDef="bookLanguage">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ col('language') }}</th>
           <td mat-cell *matCellDef="let item"> {{ getBookFromItem(item).language }}</td>
         </ng-container>

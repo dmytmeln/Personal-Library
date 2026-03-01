@@ -5,14 +5,19 @@
     }
   </div>
   <div class="content">
-    <p class="title" [matTooltip]="book().title" [matTooltipDisabled]="!shouldShowTooltip(book().title)">{{ truncateTitle(book().title) }}</p>
+    <p class="title"
+       (click)="$event.stopPropagation(); goToBookDetails()"
+       [matTooltip]="book().title"
+       [matTooltipDisabled]="!shouldShowTooltip(book().title)">{{ truncateTitle(book().title) }}</p>
     <p class="authors">
       @for (author of book().authors | keyvalue; track author.key; let last = $last) {
         <a class="link"
            (click)="$event.stopPropagation(); goToAuthorDetails(author.key)">{{ author.value }}</a>{{ last ? '' : ', ' }}
       }
     </p>
-    <p class="category">{{ book().categoryName }}</p>
+    <p class="category">
+      <a class="link" (click)="$event.stopPropagation(); goToCategoryDetails()">{{ book().categoryName }}</a>
+    </p>
     <div class="metadata" *transloco="let c; prefix: 'common'">
       <span class="chip">{{ book().publishYear }}</span>
       <span class="chip">{{ book().pages }} {{ c('pagesShort') }}</span>

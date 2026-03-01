@@ -22,7 +22,7 @@ import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {AuthorFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {map, skip} from 'rxjs';
+import {map} from 'rxjs';
 import {LibraryStore} from '../services/library.store';
 
 const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
@@ -54,6 +54,7 @@ const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
   styleUrl: './author-list.component.scss'
 })
 export class AuthorListComponent implements OnInit {
+
   mode = input.required<'library' | 'search'>();
 
   authorBooks = output<Author>();
@@ -110,9 +111,9 @@ export class AuthorListComponent implements OnInit {
     private router: Router
   ) {
     effect(() => {
-      this.libraryStore.refreshVersion();
+      const version = this.libraryStore.refreshVersion();
       untracked(() => {
-        if (this.mode() === 'library') {
+        if (version !== 0 && this.mode() === 'library') {
           this.loadAuthors();
           this.loadCountries();
         }
@@ -184,7 +185,7 @@ export class AuthorListComponent implements OnInit {
   }
 
   private setupSubscriptions(): void {
-    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       const hadFilters = this.hasActiveFilters();
       this.clearAllFilters();
       if (!hadFilters) {
@@ -206,4 +207,5 @@ export class AuthorListComponent implements OnInit {
   onShowBooks(author: Author): void {
     this.authorBooks.emit(author);
   }
+
 }

@@ -12,6 +12,8 @@ import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSnackCommon} from '../common/mat-snack-common';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {MatIcon} from '@angular/material/icon';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-book-details',
@@ -21,6 +23,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     MatButton,
     MatAnchor,
     TranslocoDirective,
+    MatIcon,
+    MatTooltip,
   ],
   templateUrl: './book-details.component.html',
   styleUrl: './book-details.component.scss'
@@ -30,9 +34,8 @@ export class BookDetailsComponent implements OnInit {
   private snackCommon: MatSnackCommon;
   private destroyRef = inject(DestroyRef);
 
-  book: Book;
-  authors: Array<[number, string]> = [];
-  bookDetails!: BookDetails;
+  bookId: number;
+  bookDetails?: BookDetails;
 
   constructor(
     private router: Router,
@@ -41,24 +44,41 @@ export class BookDetailsComponent implements OnInit {
     matSnackBar: MatSnackBar,
     private translocoService: TranslocoService,
   ) {
-    this.book = this.router.getCurrentNavigation()?.extras?.state as Book;
+    const state = this.router.getCurrentNavigation()?.extras?.state as { id: number };
+    this.bookId = state?.id;
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
-    this.authors = Object.entries(this.book.authors) as {} as Array<[number, string]>;
+    if (!this.bookId) {
+      this.router.navigate(['/']);
+      return;
+    }
+
     this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.bookService.getBookDetails(this.book.id).subscribe(bookDetails => {
-        this.bookDetails = bookDetails;
-      });
+      this.loadBookDetails();
     });
   }
 
+  get displayBook(): Book | undefined {
+    return this.bookDetails?.libraryBook?.book ?? this.bookDetails?.book;
+  }
+
+  get authors(): Array<[number, string]> {
+    return Object.entries(this.displayBook?.authors ?? {}) as {} as Array<[number, string]>;
+  }
+
+  get myRating(): number {
+    return this.bookDetails?.libraryBook?.rating ?? 0;
+  }
+
   addBookToLibrary(): void {
-    this.libraryBookService.addBook(this.book.id).subscribe({
+    this.libraryBookService.addBook(this.bookId).subscribe({
       next: (libraryBook) => {
-        this.book = libraryBook.book;
-        this.bookDetails.isInLibrary = true;
+        if (this.bookDetails) {
+          this.bookDetails.libraryBook = libraryBook;
+          this.bookDetails.book = undefined;
+        }
         this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
       },
       error: (err) => this.snackCommon.showError(err)
@@ -70,17 +90,27 @@ export class BookDetailsComponent implements OnInit {
   }
 
   goToAuthorDetails(id: number): void {
-    this.router.navigate(['/author-details'], {state: {id}}).then(() => {
-    });
+    this.router.navigate(['/author-details'], {state: {id}});
   }
 
   changeRating(rating: number): void {
-    this.libraryBookService.changeRating(this.book.id, rating).subscribe({
+    const libraryBookId = this.bookDetails?.libraryBook?.id;
+    if (!libraryBookId) return;
+
+    this.libraryBookService.changeRating(libraryBookId, rating).subscribe({
       next: (libraryBook) => {
-        this.bookDetails.myRating = libraryBook.rating || 0;
+        if (this.bookDetails) {
+          this.bookDetails.libraryBook = libraryBook;
+        }
         this.snackCommon.showSuccess(this.translocoService.translate('library.success.ratingChanged'));
       },
       error: (err) => this.snackCommon.showError(err)
+    });
+  }
+
+  private loadBookDetails(): void {
+    this.bookService.getBookDetails(this.bookId).subscribe(bookDetails => {
+      this.bookDetails = bookDetails;
     });
   }
 

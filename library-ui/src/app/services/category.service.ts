@@ -25,6 +25,10 @@ export class CategoryService {
     return this.apiService.get('/categories', {params: this.buildParams(options)});
   }
 
+  getById(id: number): Observable<Category> {
+    return this.apiService.get(`/categories/${id}`, {});
+  }
+
   private buildParams(options: CategoryQueryOptions): CategoryQueryOptions {
     const {page = 0, size = 12, name, sort, booksCountMin, booksCountMax} = options;
     const params: CategoryQueryOptions = {page, size};

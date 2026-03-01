@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_reading_goals
+      author: Dmytro Melnyk
+      changes:
+        - createSequence:
+            sequenceName: reading_goals_seq
+            startValue: 1
+            incrementBy: 20
+        - createTable:
+            tableName: reading_goals
+            columns:
+              - column:
+                  name: goal_id
+                  type: integer
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: reading_goals_pk
+              - column:
+                  name: user_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: reading_goals_users_fk
+                    referencedTableName: users
+                    referencedColumnNames: user_id
+                    deleteCascade: true
+              - column:
+                  name: year
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_books
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_pages
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: reading_goals
+            columnNames: user_id, year
+            constraintName: reading_goals_user_id_year_uq

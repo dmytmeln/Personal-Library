@@ -6,6 +6,7 @@ import org.example.library.book.domain.Book;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -32,6 +33,9 @@ public class LibraryBook {
     @Column(name = "added_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime addedAt;
+
+    @Column(name = "finished_at")
+    private LocalDate finishedAt;
 
     @Column(name = "rating")
     private Byte rating;

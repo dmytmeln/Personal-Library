@@ -43,6 +43,9 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: finished_at
+                  type: date
+              - column:
                   name: rating
                   type: tinyint
                   constraints:

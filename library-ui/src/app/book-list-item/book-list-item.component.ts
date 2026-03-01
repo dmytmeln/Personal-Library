@@ -38,4 +38,12 @@ export class BookListItemComponent {
   goToAuthorDetails(authorId: string | number): void {
     this.router.navigate(['/author-details'], {state: {id: Number(authorId)}});
   }
+
+  goToCategoryDetails(): void {
+    this.router.navigate(['/category-details'], {state: {id: this.book().categoryId}});
+  }
+
+  goToBookDetails(): void {
+    this.router.navigate(['/book-details'], {state: {id: this.book().id}});
+  }
 }

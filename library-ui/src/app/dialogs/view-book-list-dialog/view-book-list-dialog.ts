@@ -52,7 +52,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
   sort = viewChild.required<MatSort>(MatSort);
   paginator = viewChild.required<MatPaginator>(MatPaginator);
 
-  displayedColumns: string[] = ['title', 'publishYear', 'language', 'pages', 'actions'];
+  displayedColumns: string[] = ['title', 'publishYear', 'bookLanguage', 'pages', 'actions'];
   dataSource = new MatTableDataSource<LibraryBook | Book>();
 
   private searchSubject = new Subject<string>();
@@ -141,7 +141,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
   }
 
   goToBookDetails(book: Book) {
-    this.router.navigate(['book-details'], {state: book}).then(() => {
+    this.router.navigate(['book-details'], {state: {id: book.id}}).then(() => {
     });
   }
 

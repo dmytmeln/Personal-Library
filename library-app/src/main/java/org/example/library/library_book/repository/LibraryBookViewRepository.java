@@ -18,4 +18,7 @@ public interface LibraryBookViewRepository extends JpaRepository<LibraryBookView
     @EntityGraph(attributePaths = {"authors"})
     Optional<LibraryBookView> findByIdAndLanguageCode(Integer id, String languageCode);
 
+    @EntityGraph(attributePaths = {"authors"})
+    Optional<LibraryBookView> findByBookIdAndUserIdAndLanguageCode(Integer bookId, Integer userId, String languageCode);
+
 }

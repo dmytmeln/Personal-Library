@@ -1,0 +1,28 @@
+<ng-container *transloco="let t; prefix: 'dashboard.setGoalDialog'">
+  <h2 mat-dialog-title>{{ data.goal ? t('titleEdit') : t('titleAdd') }} ({{ data.year }})</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="goal-form">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ t('targetBooks') }}</mat-label>
+        <input matInput type="number" formControlName="targetBooks">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ t('targetPages') }}</mat-label>
+        <input matInput type="number" formControlName="targetPages">
+        <mat-hint>{{ t('targetPagesHint') }}</mat-hint>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    @if (data.goal) {
+      <button mat-button color="warn" (click)="delete()">{{ t('delete') }}</button>
+    }
+    <button mat-button mat-dialog-close>{{ t('cancel') }}</button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid">
+      {{ t('save') }}
+    </button>
+  </mat-dialog-actions>
+</ng-container>

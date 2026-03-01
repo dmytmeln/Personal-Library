@@ -39,17 +39,24 @@
         <tbody>
           @for (category of categoriesState.items; track category.id) {
             <tr>
-              <td>{{ category.name }}</td>
+              <td>
+                <a class="category-link" (click)="goToCategoryDetails(category)">{{ category.name }}</a>
+              </td>
               <td [matTooltip]="category.description || '-'"
                   matTooltipPosition="above">{{ (category.description || '-') | slice:0:50 }}{{ category.description && category.description.length > 50 ? '...' : '' }}
               </td>
               <td>
                 {{ t('booksCount', { count: category.booksCount || 0 }) }}
               </td>
-              <td>
-                <button mat-stroked-button (click)="onShowBooks(category)" class="action-btn" *transloco="let c; prefix: 'common'">
-                  {{ c('books') }}
-                </button>
+              <td *transloco="let c; prefix: 'common'">
+                <div class="action-buttons">
+                  <button mat-stroked-button (click)="goToCategoryDetails(category)" class="action-btn">
+                    {{ c('details') }}
+                  </button>
+                  <button mat-stroked-button (click)="onShowBooks(category)" class="action-btn">
+                    {{ c('books') }}
+                  </button>
+                </div>
               </td>
             </tr>
           }

@@ -4,20 +4,24 @@ import { CollectionsComponent } from './collections/collections.component';
 import { CollectionComponent } from './collection/collection.component';
 import { BookDetailsComponent } from './book-details/book-details.component';
 import { AuthorDetailsComponent } from './author-details/author-details.component';
+import { CategoryDetailsComponent } from './category-details/category-details.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ProfileComponent } from './profile/profile.component';
 import { OAuth2RedirectComponent } from './oauth2-redirect/oauth2-redirect.component';
 import { SearchComponent } from './search/search.component';
 import { AuthGuard } from './guards/auth.guard';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/library', pathMatch: 'full' },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'library', component: LibraryComponent, canActivate: [AuthGuard] },
   { path: 'collections', component: CollectionsComponent, canActivate: [AuthGuard] },
   { path: 'collections/:id', component: CollectionComponent, canActivate: [AuthGuard] },
   { path: 'book-details', component: BookDetailsComponent },
   { path: 'author-details', component: AuthorDetailsComponent },
+  { path: 'category-details', component: CategoryDetailsComponent },
   { path: 'search', component: SearchComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },

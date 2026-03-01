@@ -142,10 +142,6 @@
 
   <mat-menu #collectionBookMenu="matMenu">
     <ng-template matMenuContent let-libraryBook="libraryBook">
-      <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
-        <mat-icon>info</mat-icon>
-        <span>{{ t('bookDetails') }}</span>
-      </button>
       <button mat-menu-item (click)="openNoteDialog(libraryBook)">
         <mat-icon>note_alt</mat-icon>
         <span>{{ t('myNotes') }}</span>

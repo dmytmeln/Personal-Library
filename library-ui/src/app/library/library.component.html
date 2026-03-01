@@ -140,10 +140,6 @@
 <mat-menu #libraryBookMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">
     <ng-container *transloco="let m; prefix: 'library.menu'">
-      <button mat-menu-item (click)="sharedMenu.goToBookDetails(libraryBook.book)">
-        <mat-icon>info</mat-icon>
-        <span>{{ m('bookDetails') }}</span>
-      </button>
       <button mat-menu-item (click)="openNoteDialog(libraryBook)">
         <mat-icon>note_alt</mat-icon>
         <span>{{ m('myNotes') }}</span>

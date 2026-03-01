@@ -1,0 +1,215 @@
+<ng-container *transloco="let t">
+  <div class="dashboard-container">
+    <div class="header">
+      <div class="title-selector">
+        <h1>{{ t('dashboard.title') }}</h1>
+        <mat-form-field appearance="outline" class="year-selector">
+          <mat-select [value]="selectedYear()" (selectionChange)="onYearChange($event.value)">
+            @for (year of availableYears; track year) {
+              <mat-option [value]="year">{{ year }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button mat-flat-button (click)="openSetGoalDialog()">
+        <mat-icon>edit</mat-icon>
+        {{ t('dashboard.setGoal') }}
+      </button>
+    </div>
+
+    <section class="dashboard-section">
+      <h2 class="section-title">{{ t('dashboard.yearlySection') }}</h2>
+
+      <div class="summary-grid">
+        <mat-card class="summary-card yearly">
+          <mat-card-content>
+            <div class="value">{{ stats()?.summary?.booksReadCount || 0 }}</div>
+            <div class="label">{{ t('dashboard.booksRead') }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card yearly">
+          <mat-card-content>
+            <div class="value">{{ stats()?.summary?.pagesReadCount || 0 }}</div>
+            <div class="label">{{ t('dashboard.pagesRead') }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card yearly">
+          <mat-card-content>
+            <div class="value">{{ stats()?.summary?.booksAddedThisYear || 0 }}</div>
+            <div class="label">{{ t('dashboard.addedThisYear') }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card yearly">
+          <mat-card-content>
+            <div class="value">{{ (stats()?.summary?.averageRating || 0) | number:'1.1-2' }}</div>
+            <div class="label">{{ t('dashboard.averageRating') }}</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      @if (goal()) {
+        <div class="goals-row">
+          <mat-card class="goal-card">
+            <mat-card-header>
+              <mat-card-title>{{ t('dashboard.booksGoal') }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="goal-stats">
+                <span class="current">{{ stats()?.summary?.booksReadCount || 0 }}</span>
+                <span class="separator">/</span>
+                <span class="target">{{ goal()?.targetBooks }}</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="getPercent(stats()?.summary?.booksReadCount || 0, goal()?.targetBooks || 0)"></mat-progress-bar>
+              <div class="percent">{{ getPercent(stats()?.summary?.booksReadCount || 0, goal()?.targetBooks || 0) }}%</div>
+            </mat-card-content>
+          </mat-card>
+
+          @if (goal()?.targetPages) {
+            <mat-card class="goal-card">
+              <mat-card-header>
+                <mat-card-title>{{ t('dashboard.pagesGoal') }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="goal-stats">
+                  <span class="current">{{ stats()?.summary?.pagesReadCount || 0 }}</span>
+                  <span class="separator">/</span>
+                  <span class="target">{{ goal()?.targetPages }}</span>
+                </div>
+                <mat-progress-bar mode="determinate" [value]="getPercent(stats()?.summary?.pagesReadCount || 0, goal()?.targetPages || 0)"></mat-progress-bar>
+                <div class="percent">{{ getPercent(stats()?.summary?.pagesReadCount || 0, goal()?.targetPages || 0) }}%</div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+
+      <mat-card class="activity-card">
+        <mat-card-header>
+          <mat-card-title>{{ t('dashboard.readingActivity') }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="activity-grid">
+            @for (activity of stats()?.monthlyReadingActivity; track activity.month) {
+              <div class="activity-item">
+                <div class="activity-bar"
+                     [style.height.%]="getMonthlyActivityPercent(activity)">
+                  <span class="activity-count">{{ activity.count }}</span>
+                </div>
+                <div class="month-label">{{ t('dashboard.months.' + activity.month) }}</div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <mat-divider class="section-divider"></mat-divider>
+
+    <section class="dashboard-section">
+      <h2 class="section-title">{{ t('dashboard.totalSection') }}</h2>
+
+      <div class="summary-grid">
+        <mat-card class="summary-card total">
+          <mat-card-content>
+            <div class="value">{{ stats()?.summary?.totalLibraryBooks || 0 }}</div>
+            <div class="label">{{ t('dashboard.totalBooks') }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card total">
+          <mat-card-content>
+            <div class="value">{{ stats()?.summary?.totalRatedBooks || 0 }}</div>
+            <div class="label">{{ t('dashboard.totalRatedBooks') }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card total">
+          <mat-card-content>
+            <div class="value">{{ stats()?.summary?.currentlyReadingCount || 0 }}</div>
+            <div class="label">{{ t('dashboard.currentlyReading') }}</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="distributions-grid">
+        <mat-card class="dist-card">
+          <mat-card-header>
+            <mat-card-title>{{ t('dashboard.categoryDist') }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="dist-list">
+              @for (item of stats()?.categoryDistribution; track item.categoryId) {
+                <div class="dist-item">
+                  <span class="name link" (click)="goToCategoryDetails(item.categoryId)">{{ item.categoryName }}</span>
+                  <span class="count">{{ item.count }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dist-card">
+          <mat-card-header>
+            <mat-card-title>{{ t('dashboard.statusDist') }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="dist-list">
+              @for (item of stats()?.statusDistribution; track item.status) {
+                <div class="dist-item">
+                  <span class="name">{{ t('library.statuses.' + item.status) }}</span>
+                  <span class="count">{{ item.count }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dist-card">
+          <mat-card-header>
+            <mat-card-title>{{ t('dashboard.languageDist') }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="dist-list">
+              @for (item of stats()?.languageDistribution; track item.language) {
+                <div class="dist-item">
+                  <span class="name">{{ item.language }}</span>
+                  <span class="count">{{ item.count }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dist-card">
+          <mat-card-header>
+            <mat-card-title>{{ t('dashboard.topAuthors') }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="dist-list">
+              @for (author of stats()?.topAuthors; track author.authorId) {
+                <div class="dist-item">
+                  <span class="name link" (click)="goToAuthorDetails(author.authorId)">{{ author.authorName }}</span>
+                  <span class="count">{{ author.count }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dist-card">
+          <mat-card-header>
+            <mat-card-title>{{ t('dashboard.countryDist') }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="dist-list">
+              @for (item of stats()?.authorCountryDistribution; track item.country) {
+                <div class="dist-item">
+                  <span class="name">{{ item.country }}</span>
+                  <span class="count">{{ item.count }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
+  </div>
+</ng-container>

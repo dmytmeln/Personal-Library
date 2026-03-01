@@ -3,6 +3,7 @@ package org.example.library.library_book.repository;
 import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
+import org.example.library.library_book.dto.BookRatingSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,6 +29,15 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
     @Modifying
     @Query("DELETE FROM LibraryBook lb WHERE lb.id IN :ids AND lb.user.id = :userId")
     void deleteAllByIdInAndUserId(List<Integer> ids, Integer userId);
+
+    @Query("""
+            SELECT 
+                AVG(lb.rating) AS averageRating, 
+                COUNT(lb) AS ratingsCount
+            FROM LibraryBook lb
+            WHERE lb.book.id = :bookId AND lb.rating IS NOT NULL
+            """)
+    BookRatingSummary findAverageRatingAndCountByBookId(Integer bookId);
 
     @Query(value = """
             SELECT rating

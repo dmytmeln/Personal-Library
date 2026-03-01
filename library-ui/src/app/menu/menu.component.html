@@ -3,6 +3,7 @@
     <a mat-button routerLink="/" routerLinkActive="active">{{ t('appTitle') }}</a>
 
     <ng-container *transloco="let m; prefix: 'menu'">
+      <a mat-button routerLink="/dashboard" routerLinkActive="active">{{ m('dashboard') }}</a>
       <a mat-button routerLink="/library" routerLinkActive="active">{{ m('library') }}</a>
       <a mat-button routerLink="/collections" routerLinkActive="active">{{ m('collections') }}</a>
       <a mat-button routerLink="/recommendations" routerLinkActive="active">{{ m('recommendations') }}</a>

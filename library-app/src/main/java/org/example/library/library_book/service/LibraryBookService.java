@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -109,11 +110,18 @@ public class LibraryBookService {
 
     @Transactional
     public LibraryBookDto updateStatus(Integer libraryBookId, Integer userId, LibraryBookStatus status) {
-        int updatedCount = repository.updateStatus(libraryBookId, userId, status);
-        if (updatedCount == 0)
-            throw new NotFoundException("error.library_book.not_found");
+        var libraryBook = getExistingById(libraryBookId, userId);
+        var oldStatus = libraryBook.getStatus();
 
-        repository.flush();
+        if (status == LibraryBookStatus.READ && oldStatus != LibraryBookStatus.READ) {
+            libraryBook.setFinishedAt(LocalDate.now());
+        } else if (status != LibraryBookStatus.READ && oldStatus == LibraryBookStatus.READ) {
+            libraryBook.setFinishedAt(null);
+        }
+
+        libraryBook.setStatus(status);
+        repository.saveAndFlush(libraryBook);
+
         var view = getViewById(libraryBookId);
         return mapper.toDto(view);
     }
