@@ -15,6 +15,7 @@ export enum LibraryBookStatus {
   READING = 'READING',
   STOP = 'STOP',
   NO_TAG = 'NO_TAG',
+  WISHLIST = 'WISHLIST',
 }
 
 export const LIBRARY_BOOK_STATUSES = [
@@ -24,4 +25,5 @@ export const LIBRARY_BOOK_STATUSES = [
   LibraryBookStatus.READING,
   LibraryBookStatus.STOP,
   LibraryBookStatus.NO_TAG,
+  LibraryBookStatus.WISHLIST,
 ];

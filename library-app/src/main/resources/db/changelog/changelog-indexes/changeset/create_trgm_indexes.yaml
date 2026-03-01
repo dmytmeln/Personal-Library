@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: enable_pg_trgm_extension
+      author: Dmytro Melnyk
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+  - changeSet:
+      id: create_index_book_translations_title_trgm
+      author: Dmytro Melnyk
+      changes:
+        - sql:
+            sql: CREATE INDEX idx_book_translations_title_trgm ON book_translations USING gin (title gin_trgm_ops);
+
+  - changeSet:
+      id: create_index_author_translations_name_trgm
+      author: Dmytro Melnyk
+      changes:
+        - sql:
+            sql: CREATE INDEX idx_author_translations_name_trgm ON author_translations USING gin (full_name gin_trgm_ops);
+
+  - changeSet:
+      id: create_index_category_translations_name_trgm
+      author: Dmytro Melnyk
+      changes:
+        - sql:
+            sql: CREATE INDEX idx_category_translations_name_trgm ON category_translations USING gin (name gin_trgm_ops);

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_index_collection_books_book_id
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_collection_books_book_id
+            tableName: collection_books
+            columns:
+              - column:
+                  name: library_book_id

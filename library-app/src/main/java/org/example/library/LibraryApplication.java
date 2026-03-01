@@ -7,10 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class LibraryApplication {
 
     // todo:
-    //  BE + FE: recommendations
-    //  wishlist
+    //  BE + FE: recommendations, popular books, new arrivals
     //  batch update status of books in library
-    //  indexes
     //  admin panel
     //  download cover for books
     //  CI/CD

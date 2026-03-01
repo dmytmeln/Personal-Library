@@ -170,7 +170,8 @@
       "READ": "Read",
       "NO_TAG": "No tag",
       "STOP": "Stopped reading",
-      "FAVORITE": "Favorites"
+      "FAVORITE": "Favorites",
+      "WISHLIST": "Wishlist"
     }
   },
   "collections": {

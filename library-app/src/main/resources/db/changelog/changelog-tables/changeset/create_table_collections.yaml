@@ -55,9 +55,3 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
-        - createIndex:
-            indexName: collections_parent_idx
-            tableName: collections
-            columns:
-              - column:
-                  name: parent_id

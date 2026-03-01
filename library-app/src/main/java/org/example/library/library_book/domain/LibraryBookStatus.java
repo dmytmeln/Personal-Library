@@ -6,5 +6,6 @@ public enum LibraryBookStatus {
     READ,
     READING,
     STOP,
-    NO_TAG
+    NO_TAG,
+    WISHLIST
 }

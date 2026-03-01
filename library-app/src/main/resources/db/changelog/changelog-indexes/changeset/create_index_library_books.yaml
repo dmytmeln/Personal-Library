@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_index_library_books_user_id
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_library_books_user_id
+            tableName: library_books
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: create_index_library_books_book_id
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_library_books_book_id
+            tableName: library_books
+            columns:
+              - column:
+                  name: book_id
+
+  - changeSet:
+      id: create_index_library_books_user_added_at
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_library_books_user_added_at
+            tableName: library_books
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: added_at
+                  descending: true
+
+  - changeSet:
+      id: create_index_library_books_status
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_library_books_status
+            tableName: library_books
+            columns:
+              - column:
+                  name: status

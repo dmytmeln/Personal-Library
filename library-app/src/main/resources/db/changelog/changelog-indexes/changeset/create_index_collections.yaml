@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_index_collections_user_id
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_collections_user_id
+            tableName: collections
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: create_index_collections_parent_id
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_collections_parent_id
+            tableName: collections
+            columns:
+              - column:
+                  name: parent_id
