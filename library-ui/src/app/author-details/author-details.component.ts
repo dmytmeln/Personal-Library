@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Author} from '../interfaces/author';
 import {Router} from '@angular/router';
 import {BookService} from '../services/book.service';
@@ -18,7 +18,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 
 @Component({
@@ -41,6 +41,7 @@ import {map} from 'rxjs';
 export class AuthorDetailsComponent implements OnInit {
 
   private translocoService = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly bookSortOptions = toSignal(
     this.translocoService.selectTranslateObject('search.sort').pipe(
@@ -81,8 +82,10 @@ export class AuthorDetailsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initAuthor();
-    this.loadBooks();
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.initAuthor();
+      this.loadBooks();
+    });
   }
 
   onPageChange(event: PageEvent): void {

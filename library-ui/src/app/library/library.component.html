@@ -110,11 +110,15 @@
     </mat-tab>
 
     <mat-tab [label]="t('tabs.authors')">
-      <app-author-list mode="library" (authorBooks)="goToAuthorBooks($event)"/>
+      @if (uiState.authorsOpened) {
+        <app-author-list mode="library" (authorBooks)="goToAuthorBooks($event)"/>
+      }
     </mat-tab>
 
     <mat-tab [label]="t('tabs.categories')">
-      <app-category-list mode="library" (categoryBooks)="goToCategoryBooks($event)"/>
+      @if (uiState.categoriesOpened) {
+        <app-category-list mode="library" (categoryBooks)="goToCategoryBooks($event)"/>
+      }
     </mat-tab>
 
   </mat-tab-group>

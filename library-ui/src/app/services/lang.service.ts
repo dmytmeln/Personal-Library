@@ -9,8 +9,8 @@ export class LangService {
   constructor(private transloco: TranslocoService) {}
 
   setLang(lang: string) {
-    this.transloco.setActiveLang(lang);
     localStorage.setItem('lang', lang);
+    this.transloco.setActiveLang(lang);
   }
 
   loadSaved() {

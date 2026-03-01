@@ -1,5 +1,5 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {LibraryBookService} from '../services/library-book.service';
 import {LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
@@ -64,6 +64,7 @@ import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.
 import {SelectionStore} from '../services/selection.store';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {LibraryStore} from '../services/library.store';
 
 const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
   title: '',
@@ -109,13 +110,14 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     BulkActionBarComponent,
     MatButtonToggleModule,
     TranslocoDirective,
+
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })
 export class LibraryComponent implements OnInit {
 
-  private translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly bookSortOptions = toSignal(
     this.translocoService.selectTranslateObject('library.sort').pipe(
@@ -183,6 +185,8 @@ export class LibraryComponent implements OnInit {
 
   uiState = {
     activeTabIndex: 0,
+    authorsOpened: false,
+    categoriesOpened: false,
   };
 
   private snackCommon: MatSnackCommon;
@@ -195,19 +199,21 @@ export class LibraryComponent implements OnInit {
     private libraryCategoryService: LibraryCategoryService,
     private collectionService: CollectionService,
     private collectionBookService: CollectionBookService,
+    private libraryStore: LibraryStore,
+    private destroyRef: DestroyRef,
     matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
-    this.loadBooks();
-    this.loadLanguages();
     this.setupSubscriptions();
   }
 
   onTabChange(index: number): void {
     this.uiState.activeTabIndex = index;
+    if (index === 1) this.uiState.authorsOpened = true;
+    if (index === 2) this.uiState.categoriesOpened = true;
   }
 
   //region Books Methods
@@ -293,6 +299,7 @@ export class LibraryComponent implements OnInit {
     this.libraryBookService.removeBook(libraryBook.id).subscribe({
       next: () => {
         this.loadBooks();
+        this.libraryStore.triggerRefresh();
         this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookRemoved'));
       },
       error: (err) => this.snackCommon.showError(err)
@@ -333,6 +340,7 @@ export class LibraryComponent implements OnInit {
       this.libraryBookService.bulkRemove(ids).subscribe({
         next: () => {
           this.loadBooks();
+          this.libraryStore.triggerRefresh();
           this.selection.clear();
           this.snackCommon.showSuccess(this.translocoService.translate('library.success.booksRemoved'));
         },
@@ -473,6 +481,7 @@ export class LibraryComponent implements OnInit {
         this.libraryBookService.addBook(bookId).subscribe({
           next: () => {
             this.loadBooks();
+            this.libraryStore.triggerRefresh();
             this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
           },
           error: (err) => this.snackCommon.showError(err)
@@ -486,6 +495,15 @@ export class LibraryComponent implements OnInit {
   }
 
   private setupSubscriptions(): void {
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const hadFilters = this.hasActiveFilters();
+      this.clearAllFilters();
+      if (!hadFilters) {
+        this.loadBooks();
+      }
+      this.loadLanguages();
+    });
+
     this.filters.filtersChanged$.subscribe(() => {
       this.booksState.currentPage = 0;
       this.loadBooks();

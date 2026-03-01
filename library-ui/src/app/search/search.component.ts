@@ -1,5 +1,5 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
@@ -172,6 +172,8 @@ export class SearchComponent implements OnInit {
 
   uiState = {
     activeTabIndex: 0,
+    authorsOpened: false,
+    categoriesOpened: false,
   };
 
   constructor(
@@ -180,14 +182,13 @@ export class SearchComponent implements OnInit {
     private authorService: AuthorService,
     private categoryService: CategoryService,
     private libraryBookService: LibraryBookService,
+    private destroyRef: DestroyRef,
     matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
-    this.loadBooks();
-    this.loadLanguages();
     this.setupSearchSubscriptions();
   }
 
@@ -278,6 +279,8 @@ export class SearchComponent implements OnInit {
 
   onTabChange(index: number): void {
     this.uiState.activeTabIndex = index;
+    if (index === 1) this.uiState.authorsOpened = true;
+    if (index === 2) this.uiState.categoriesOpened = true;
   }
 
   showAuthorBooks(author: Author): void {
@@ -291,6 +294,15 @@ export class SearchComponent implements OnInit {
   }
 
   private setupSearchSubscriptions(): void {
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const hadFilters = this.hasActiveFilters();
+      this.clearAllFilters();
+      if (!hadFilters) {
+        this.loadBooks();
+      }
+      this.loadLanguages();
+    });
+
     this.filters.filtersChanged$.subscribe(() => {
       this.booksState.pagination.currentPage = 0;
       this.loadBooks();

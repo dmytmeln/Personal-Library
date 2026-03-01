@@ -7,10 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class LibraryApplication {
 
     // todo:
-    //  add refresh request on ui when language changes
-    //  BE + FE: library - statistics
+    //  BE + FE: library - statistics + goals
+    //  wishlist
+    //  fix book details
     //  indexes
     //  BE + FE: recommendations
+    //  admin panel
     //  download cover for books
     //  CI/CD
     //  AWS deployment

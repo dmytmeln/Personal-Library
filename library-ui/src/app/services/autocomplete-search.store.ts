@@ -1,5 +1,5 @@
 import {signal} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 
 export class AutocompleteSearchStore<T> {

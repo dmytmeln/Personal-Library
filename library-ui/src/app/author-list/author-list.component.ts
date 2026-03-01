@@ -1,5 +1,5 @@
-import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {Component, computed, DestroyRef, effect, inject, input, OnInit, output, signal, untracked} from '@angular/core';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {AuthorService} from '../services/author.service';
 import {LibraryAuthorService} from '../services/library-author.service';
@@ -10,8 +10,10 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButtonModule} from '@angular/material/button';
 import {Router} from '@angular/router';
 import {
-  FilterShellComponent, MainFiltersDirective,
-  SecondaryFiltersDirective, TopRowFiltersDirective
+  FilterShellComponent,
+  MainFiltersDirective,
+  SecondaryFiltersDirective,
+  TopRowFiltersDirective
 } from '../common/filter-shell/filter-shell.component';
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
@@ -20,7 +22,8 @@ import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {AuthorFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {map} from 'rxjs';
+import {map, skip} from 'rxjs';
+import {LibraryStore} from '../services/library.store';
 
 const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
   name: '',
@@ -78,7 +81,7 @@ export class AuthorListComponent implements OnInit {
     return count;
   });
 
-  private translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly authorSortOptions = toSignal(
     this.translocoService.selectTranslateObject('authors.sort').pipe(
@@ -102,13 +105,22 @@ export class AuthorListComponent implements OnInit {
   constructor(
     private authorService: AuthorService,
     private libraryAuthorService: LibraryAuthorService,
+    private libraryStore: LibraryStore,
+    private destroyRef: DestroyRef,
     private router: Router
   ) {
+    effect(() => {
+      this.libraryStore.refreshVersion();
+      untracked(() => {
+        if (this.mode() === 'library') {
+          this.loadAuthors();
+          this.loadCountries();
+        }
+      });
+    });
   }
 
   ngOnInit(): void {
-    this.loadAuthors();
-    this.loadCountries();
     this.setupSubscriptions();
   }
 
@@ -134,7 +146,7 @@ export class AuthorListComponent implements OnInit {
     this.filters.reset(EMPTY_AUTHOR_FILTERS);
   }
 
-  loadAuthors(): void {
+  private loadAuthors(): void {
     this.authorsState.loading = true;
     const f = this.filters.state();
     const options = {
@@ -172,6 +184,15 @@ export class AuthorListComponent implements OnInit {
   }
 
   private setupSubscriptions(): void {
+    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const hadFilters = this.hasActiveFilters();
+      this.clearAllFilters();
+      if (!hadFilters) {
+        this.loadAuthors();
+      }
+      this.loadCountries();
+    });
+
     this.filters.filtersChanged$.subscribe(() => {
       this.authorsState.currentPage = 0;
       this.loadAuthors();

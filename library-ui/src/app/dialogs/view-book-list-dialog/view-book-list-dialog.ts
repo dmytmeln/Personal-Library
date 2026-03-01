@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Inject, OnDestroy, OnInit, viewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, inject, Inject, OnDestroy, OnInit, viewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule,} from '@angular/material/dialog';
 import {LibraryBook} from '../../interfaces/library-book';
 import {Book} from '../../interfaces/book';
@@ -13,7 +13,8 @@ import {Router} from '@angular/router';
 import {Page} from '../../interfaces/page';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-view-book-list-dialog',
@@ -45,6 +46,9 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
   private sortParams?: string[];
   loading: boolean = false;
 
+  private translocoService = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
+
   sort = viewChild.required<MatSort>(MatSort);
   paginator = viewChild.required<MatPaginator>(MatPaginator);
 
@@ -62,6 +66,10 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.getBooks();
+    });
+
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged()

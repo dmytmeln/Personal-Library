@@ -15,7 +15,8 @@
         [label]="t('filters.country')"
         [value]="filters.state().country"
         [options]="countryOptions()"
-        (valueChange)="filters.update('country', $event)"/>
+        (valueChange)="filters.update('country', $event)"
+        (clear)="filters.update('country', null)"/>
     </div>
 
     <div secondaryFilters>

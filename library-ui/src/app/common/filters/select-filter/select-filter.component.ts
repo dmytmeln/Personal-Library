@@ -48,8 +48,6 @@ export class SelectFilterComponent {
   }
 
   onClear(): void {
-    /*this.value = input(null);
-    this.valueChange.emit(null);*/
     this.clear.emit();
   }
 

@@ -1,5 +1,5 @@
-import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {Component, computed, DestroyRef, effect, inject, input, OnInit, output, signal, untracked} from '@angular/core';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {CategoryService} from '../services/category.service';
 import {LibraryCategoryService} from '../services/library-category.service';
@@ -19,7 +19,8 @@ import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
 import {CategoryFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {map} from 'rxjs';
+import {map, skip} from 'rxjs';
+import {LibraryStore} from '../services/library.store';
 
 const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
   name: '',
@@ -70,7 +71,7 @@ export class CategoryListComponent implements OnInit {
     return count;
   });
 
-  private translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly categorySortOptions = toSignal(
     this.translocoService.selectTranslateObject('categories.sort').pipe(
@@ -84,12 +85,21 @@ export class CategoryListComponent implements OnInit {
 
   constructor(
     private categoryService: CategoryService,
-    private libraryCategoryService: LibraryCategoryService
+    private libraryCategoryService: LibraryCategoryService,
+    private libraryStore: LibraryStore,
+    private destroyRef: DestroyRef
   ) {
+    effect(() => {
+      this.libraryStore.refreshVersion();
+      untracked(() => {
+        if (this.mode() === 'library') {
+          this.loadCategories();
+        }
+      });
+    });
   }
 
   ngOnInit(): void {
-    this.loadCategories();
     this.setupSubscriptions();
   }
 
@@ -115,7 +125,7 @@ export class CategoryListComponent implements OnInit {
     this.filters.reset(EMPTY_CATEGORY_FILTERS);
   }
 
-  loadCategories(): void {
+  private loadCategories(): void {
     this.categoriesState.loading = true;
     const f = this.filters.state();
     const options = {
@@ -142,6 +152,14 @@ export class CategoryListComponent implements OnInit {
   }
 
   private setupSubscriptions(): void {
+    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const hadFilters = this.hasActiveFilters();
+      this.clearAllFilters();
+      if (!hadFilters) {
+        this.loadCategories();
+      }
+    });
+
     this.filters.filtersChanged$.subscribe(() => {
       this.categoriesState.currentPage = 0;
       this.loadCategories();
@@ -152,4 +170,3 @@ export class CategoryListComponent implements OnInit {
     this.categoryBooks.emit(category);
   }
 }
-

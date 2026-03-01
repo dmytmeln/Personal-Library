@@ -16,7 +16,7 @@
   <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
     <mat-tab [label]="t('tabs.allBooks')">
-      <div class="tab-content" *transloco="let c; prefix: 'common'">
+      <div class="tab-content">
         <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
                           [(isExpanded)]="isFiltersExpanded"
                           [activeFiltersCount]="activeFiltersCount()"
@@ -89,11 +89,15 @@
     </mat-tab>
 
     <mat-tab [label]="t('tabs.authors')">
-      <app-author-list mode="search" (authorBooks)="showAuthorBooks($event)"/>
+      @if (uiState.authorsOpened) {
+        <app-author-list mode="search" (authorBooks)="showAuthorBooks($event)"/>
+      }
     </mat-tab>
 
     <mat-tab [label]="t('tabs.categories')">
-      <app-category-list mode="search" (categoryBooks)="goToCategoryBooks($event)"/>
+      @if (uiState.categoriesOpened) {
+        <app-category-list mode="search" (categoryBooks)="goToCategoryBooks($event)"/>
+      }
     </mat-tab>
   </mat-tab-group>
 

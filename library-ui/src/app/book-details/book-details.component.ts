@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {Book} from '../interfaces/book';
 import {NgOptimizedImage} from '@angular/common';
@@ -11,6 +11,7 @@ import {BasicCollection} from '../interfaces/basic-collection';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSnackCommon} from '../common/mat-snack-common';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-book-details',
@@ -27,6 +28,7 @@ import {MatSnackCommon} from '../common/mat-snack-common';
 export class BookDetailsComponent implements OnInit {
 
   private snackCommon: MatSnackCommon;
+  private destroyRef = inject(DestroyRef);
 
   book: Book;
   authors: Array<[number, string]> = [];
@@ -45,8 +47,10 @@ export class BookDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.authors = Object.entries(this.book.authors) as {} as Array<[number, string]>;
-    this.bookService.getBookDetails(this.book.id).subscribe(bookDetails => {
-      this.bookDetails = bookDetails;
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.bookService.getBookDetails(this.book.id).subscribe(bookDetails => {
+        this.bookDetails = bookDetails;
+      });
     });
   }
 

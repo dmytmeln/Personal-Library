@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {CollectionBookService} from '../services/collection-book.service';
 import {CollectionService} from '../services/collection.service';
 import {CollectionDetails} from '../interfaces/collection-details';
@@ -51,7 +51,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 
 const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   title: '',
@@ -91,6 +91,7 @@ const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
 export class CollectionComponent implements OnInit {
 
   private translocoService = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
 
   collection!: CollectionDetails;
 
@@ -143,6 +144,14 @@ export class CollectionComponent implements OnInit {
       this.loadCollection(collectionId);
     });
 
+    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const hadFilters = this.hasActiveFilters();
+      this.clearAllFilters();
+      if (!hadFilters) {
+        this.loadBooks();
+      }
+    });
+
     this.filters.filtersChanged$.subscribe(() => {
       this.booksState.currentPage = 0;
       this.loadBooks();
@@ -156,7 +165,7 @@ export class CollectionComponent implements OnInit {
     });
   }
 
-  loadBooks(): void {
+  private loadBooks(): void {
     if (!this.collection) return;
     this.booksState.loading = true;
     this.collectionBookService.getCollectionBooks(this.collection.id, {
