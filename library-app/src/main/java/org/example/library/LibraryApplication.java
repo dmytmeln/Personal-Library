@@ -7,16 +7,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class LibraryApplication {
 
     // todo:
-    //  localization
+    //  add refresh request on ui when language changes
     //  BE + FE: library - statistics
+    //  indexes
+    //  BE + FE: recommendations
+    //  download cover for books
+    //  CI/CD
+    //  AWS deployment
     //  BE + FE: share library with other users?
     //  BE: JWT refresh tokens
     //  BE: password reset
     //  confirm email after registration
-    //  indexes
-    //  BE + FE: recommendations
-    //  CI/CD
-    //  AWS deployment
 
     public static void main(String[] args) {
         SpringApplication.run(LibraryApplication.class, args);

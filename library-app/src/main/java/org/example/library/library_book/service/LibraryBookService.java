@@ -20,6 +20,7 @@ import org.example.library.pagination.PageRequestBuilder;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
 import org.example.library.user.domain.User;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,8 @@ public class LibraryBookService {
 
     @Transactional(readOnly = true)
     public Page<LibraryBookDto> getAllByUserId(Integer userId, LibraryBookSearchCriteria criteria, PaginationParams paginationParams) {
-        var spec = LibraryBookViewSpecification.fromSearchCriteria(userId, criteria);
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        var spec = LibraryBookViewSpecification.fromSearchCriteria(userId, lang, criteria);
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.LIBRARY_BOOK_FIELDS);
 
         return viewRepository.findAll(spec, pageable)
@@ -53,7 +55,8 @@ public class LibraryBookService {
 
     @Transactional(readOnly = true)
     public List<LanguageWithCount> getLanguagesByUserId(Integer userId) {
-        return repository.findLanguagesWithCountByUserId(userId);
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        return repository.findLanguagesWithCountByUserId(userId, lang);
     }
 
     @Transactional
@@ -172,7 +175,8 @@ public class LibraryBookService {
     }
 
     private LibraryBookView getViewById(Integer libraryBookId) {
-        return viewRepository.findById(libraryBookId)
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        return viewRepository.findByIdAndLanguageCode(libraryBookId, lang)
                 .orElseThrow(() -> new NotFoundException("error.library_book.view_not_found"));
     }
 

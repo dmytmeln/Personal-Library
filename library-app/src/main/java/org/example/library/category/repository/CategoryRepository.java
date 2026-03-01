@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,43 +14,47 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Query("""
             SELECT
                 c.id AS id,
-                c.name AS name,
-                c.description AS description,
+                tr.name AS name,
+                tr.description AS description,
                 COUNT(b) AS booksCount
             FROM Category c
+            JOIN c.translations tr ON tr.languageCode = :lang
             LEFT JOIN c.books b
-            WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
-            GROUP BY c.id, c.name, c.description
+            WHERE (:name IS NULL OR LOWER(tr.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
+            GROUP BY c.id, tr.name, tr.description
             HAVING (:booksCountMin IS NULL OR COUNT(b) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(b) <= :booksCountMax)
             """)
     Page<CategoryWithBooksCount> searchWithBooksCount(
-            @Param("name") String name,
-            @Param("booksCountMin") Integer booksCountMin,
-            @Param("booksCountMax") Integer booksCountMax,
+            String name,
+            Integer booksCountMin,
+            Integer booksCountMax,
+            String lang,
             Pageable pageable
     );
 
     @Query("""
             SELECT
                 c.id AS id,
-                c.name AS name,
-                c.description AS description,
+                tr.name AS name,
+                tr.description AS description,
                 COUNT(DISTINCT lb.id) AS booksCount
             FROM Category c
+            JOIN c.translations tr ON tr.languageCode = :lang
             JOIN c.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-              AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
-            GROUP BY c.id, c.name, c.description
+              AND (:name IS NULL OR LOWER(tr.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
+            GROUP BY c.id, tr.name, tr.description
             HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
             """)
     Page<CategoryWithBooksCount> searchForUser(
-            @Param("userId") Integer userId,
-            @Param("name") String name,
-            @Param("booksCountMin") Integer booksCountMin,
-            @Param("booksCountMax") Integer booksCountMax,
+            Integer userId,
+            String name,
+            Integer booksCountMin,
+            Integer booksCountMax,
+            String lang,
             Pageable pageable
     );
 

@@ -17,11 +17,6 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: books_pk
               - column:
-                  name: title
-                  type: varchar(100)
-                  constraints:
-                    nullable: false
-              - column:
                   name: category_id
                   type: integer
                   constraints:
@@ -35,11 +30,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: language
-                  type: varchar(100)
-                  constraints:
-                    nullable: false
-              - column:
                   name: pages
                   type: smallint
                   constraints:
@@ -49,8 +39,44 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: create_table_book_translations
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: book_translations
+            columns:
+              - column:
+                  name: book_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: book_translations_books_fk
+                    referencedTableName: books
+                    referencedColumnNames: book_id
+                    deleteCascade: true
+              - column:
+                  name: language_code
+                  type: varchar(2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: book_language
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
               - column:
                   name: description
                   type: text
                   constraints:
                     nullable: true
+        - addPrimaryKey:
+            tableName: book_translations
+            columnNames: book_id, language_code
+            constraintName: book_translations_pk

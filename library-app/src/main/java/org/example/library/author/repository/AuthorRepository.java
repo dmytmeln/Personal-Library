@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -16,83 +15,89 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
     @Query("""
             SELECT
                 a.id AS id,
-                a.fullName AS fullName,
-                a.country AS country,
+                tr.fullName AS fullName,
+                tr.country AS country,
                 a.birthYear AS birthYear,
                 a.deathYear AS deathYear,
                 COUNT(b) AS booksCount
             FROM Author a
+            JOIN a.translations tr ON tr.languageCode = :lang
             LEFT JOIN a.books b
-            WHERE (:name IS NULL OR LOWER(a.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
-              AND (:country IS NULL OR a.country = :country)
+            WHERE (:name IS NULL OR LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
+              AND (:country IS NULL OR LOWER(tr.country) = LOWER(CAST(:country AS string)))
               AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
               AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
-            GROUP BY a.id, a.fullName, a.country, a.birthYear, a.deathYear
+            GROUP BY a.id, tr.fullName, tr.country, a.birthYear, a.deathYear
             HAVING (:booksCountMin IS NULL OR COUNT(b) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(b) <= :booksCountMax)
             """)
     Page<AuthorWithBooksCount> searchWithBooksCount(
-            @Param("name") String name,
-            @Param("country") String country,
-            @Param("birthYearMin") Short birthYearMin,
-            @Param("birthYearMax") Short birthYearMax,
-            @Param("booksCountMin") Integer booksCountMin,
-            @Param("booksCountMax") Integer booksCountMax,
+            String name,
+            String country,
+            Short birthYearMin,
+            Short birthYearMax,
+            Integer booksCountMin,
+            Integer booksCountMax,
+            String lang,
             Pageable pageable
     );
 
     @Query("""
             SELECT
-                a.country AS country,
+                tr.country AS country,
                 COUNT(a) AS count
             FROM Author a
-            GROUP BY a.country
+            JOIN a.translations tr ON tr.languageCode = :lang
+            GROUP BY tr.country
             ORDER BY COUNT(a) DESC
             """)
-    List<CountryWithCount> findAllCountriesWithCount();
+    List<CountryWithCount> findAllCountriesWithCount(String lang);
 
     @Query("""
             SELECT
                 a.id AS id,
-                a.fullName AS fullName,
-                a.country AS country,
+                tr.fullName AS fullName,
+                tr.country AS country,
                 a.birthYear AS birthYear,
                 a.deathYear AS deathYear,
                 COUNT(DISTINCT lb.id) AS booksCount
             FROM Author a
+            JOIN a.translations tr ON tr.languageCode = :lang
             JOIN a.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-              AND (:name IS NULL OR LOWER(a.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
-              AND (:country IS NULL OR a.country = :country)
+              AND (:name IS NULL OR LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')))
+              AND (:country IS NULL OR LOWER(tr.country) = LOWER(CAST(:country AS string)))
               AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
               AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
-            GROUP BY a.id, a.fullName, a.country, a.birthYear, a.deathYear
+            GROUP BY a.id, tr.fullName, tr.country, a.birthYear, a.deathYear
             HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
             """)
     Page<AuthorWithBooksCount> searchForUser(
-            @Param("userId") Integer userId,
-            @Param("name") String name,
-            @Param("country") String country,
-            @Param("birthYearMin") Short birthYearMin,
-            @Param("birthYearMax") Short birthYearMax,
-            @Param("booksCountMin") Integer booksCountMin,
-            @Param("booksCountMax") Integer booksCountMax,
+            Integer userId,
+            String name,
+            String country,
+            Short birthYearMin,
+            Short birthYearMax,
+            Integer booksCountMin,
+            Integer booksCountMax,
+            String lang,
             Pageable pageable
     );
 
     @Query("""
             SELECT
-                a.country AS country,
+                tr.country AS country,
                 COUNT(DISTINCT a.id) AS count
             FROM Author a
+            JOIN a.translations tr ON tr.languageCode = :lang
             JOIN a.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-            GROUP BY a.country
+            GROUP BY tr.country
             ORDER BY COUNT(DISTINCT a.id) DESC
             """)
-    List<CountryWithCount> findAllCountriesForUser(@Param("userId") Integer userId);
+    List<CountryWithCount> findAllCountriesForUser(Integer userId, String lang);
 
 }

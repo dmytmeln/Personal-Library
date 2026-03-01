@@ -7,11 +7,13 @@ import org.example.library.author.dto.AuthorSearchParams;
 import org.example.library.author.dto.AuthorWithBooksCount;
 import org.example.library.author.dto.CountryWithCount;
 import org.example.library.author.mapper.AuthorMapper;
+import org.example.library.author.repository.AuthorDisplayViewRepository;
 import org.example.library.author.repository.AuthorRepository;
 import org.example.library.exception.NotFoundException;
 import org.example.library.pagination.PageRequestBuilder;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +24,13 @@ import java.util.List;
 public class AuthorService {
 
     private final AuthorRepository repository;
+    private final AuthorDisplayViewRepository displayViewRepository;
     private final AuthorMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
     public Page<AuthorWithBooksCount> search(PaginationParams paginationParams, AuthorSearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
+        var lang = LocaleContextHolder.getLocale().getLanguage();
         return repository.searchWithBooksCount(
                 searchParams.getName(),
                 searchParams.getCountry(),
@@ -34,8 +38,16 @@ public class AuthorService {
                 searchParams.getBirthYearMax(),
                 searchParams.getBooksCountMin(),
                 searchParams.getBooksCountMax(),
+                lang,
                 pageable
         );
+    }
+
+    public AuthorDto getById(Integer authorId) {
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        return displayViewRepository.findByIdAndLanguageCode(authorId, lang)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new NotFoundException("Author not found"));
     }
 
     public Author getExistingById(Integer authorId) {
@@ -43,16 +55,14 @@ public class AuthorService {
                 .orElseThrow(() -> new NotFoundException("Author not found"));
     }
 
-    public AuthorDto getById(Integer authorId) {
-        return mapper.toDto(getExistingById(authorId));
-    }
-
     public List<CountryWithCount> getAllCountries() {
-        return repository.findAllCountriesWithCount();
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        return repository.findAllCountriesWithCount(lang);
     }
 
     public Page<AuthorWithBooksCount> searchForUser(Integer userId, PaginationParams paginationParams, AuthorSearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
+        var lang = LocaleContextHolder.getLocale().getLanguage();
         return repository.searchForUser(
                 userId,
                 searchParams.getName(),
@@ -61,12 +71,14 @@ public class AuthorService {
                 searchParams.getBirthYearMax(),
                 searchParams.getBooksCountMin(),
                 searchParams.getBooksCountMax(),
+                lang,
                 pageable
         );
     }
 
     public List<CountryWithCount> getCountriesForUser(Integer userId) {
-        return repository.findAllCountriesForUser(userId);
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        return repository.findAllCountriesForUser(userId, lang);
     }
 
 }

@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_view_books_display_view
+      author: Dmytro Melnyk
+      changes:
+        - createView:
+            viewName: books_display_view
+            selectQuery: |
+              SELECT 
+                  b.book_id,
+                  b.category_id,
+                  b.publish_year,
+                  b.pages,
+                  b.cover_image_url,
+                  bt.language_code,
+                  bt.title,
+                  bt.description,
+                  bt.book_language,
+                  ct.name as category_name
+              FROM books b
+              JOIN book_translations bt ON b.book_id = bt.book_id
+              JOIN category_translations ct ON b.category_id = ct.category_id 
+                                           AND bt.language_code = ct.language_code
+
+  - changeSet:
+      id: create_view_authors_display_view
+      author: Dmytro Melnyk
+      changes:
+        - createView:
+            viewName: authors_display_view
+            selectQuery: |
+              SELECT 
+                  a.author_id,
+                  a.birth_year,
+                  a.death_year,
+                  at.language_code,
+                  at.full_name,
+                  at.country,
+                  at.biography
+              FROM authors a
+              JOIN author_translations at ON a.author_id = at.author_id
+
+  - changeSet:
+      id: create_view_categories_display_view
+      author: Dmytro Melnyk
+      changes:
+        - createView:
+            viewName: categories_display_view
+            selectQuery: |
+              SELECT 
+                  c.category_id,
+                  ct.language_code,
+                  ct.name,
+                  ct.description
+              FROM categories c
+              JOIN category_translations ct ON c.category_id = ct.category_id

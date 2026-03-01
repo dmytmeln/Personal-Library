@@ -1,16 +1,19 @@
 package org.example.library.library_book.dto;
 
-import lombok.Builder;
+import lombok.*;
 import org.example.library.book.dto.BookDto;
 
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public record LibraryBookDto(
-        Integer id,
-        String status,
-        LocalDateTime addedAt,
-        Byte rating,
-        BookDto book
-) {
+public class LibraryBookDto {
+    private Integer id;
+    private String status;
+    private LocalDateTime addedAt;
+    private Byte rating;
+    private BookDto book;
 }

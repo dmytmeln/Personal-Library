@@ -6,6 +6,7 @@ import jakarta.persistence.Query;
 import org.example.library.collection_book.dto.CollectionBookSearchParams;
 import org.example.library.library_book.domain.LibraryBookView;
 import org.example.library.library_book.domain.LibraryBookView_;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,6 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         SORT_MAPPING.put(LibraryBookView_.ID, "library_book_id");
         SORT_MAPPING.put(LibraryBookView_.ADDED_AT, "added_at");
         SORT_MAPPING.put(LibraryBookView_.PUBLISH_YEAR, "publish_year");
-        SORT_MAPPING.put(LibraryBookView_.CATEGORY_NAME, "category_name");
     }
 
 
@@ -34,17 +34,18 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
 
     @Override
     public Page<LibraryBookView> findCollectionBooks(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, Pageable pageable) {
+        var lang = LocaleContextHolder.getLocale().getLanguage();
         var whereSql = buildWhereQueryPart(searchParams);
-        var totalCount = getLibraryBooksCount(userId, collectionId, searchParams, whereSql);
-        var results = getLibraryBooks(userId, collectionId, searchParams, pageable, whereSql);
+        var totalCount = getLibraryBooksCount(userId, collectionId, searchParams, whereSql, lang);
+        var results = getLibraryBooks(userId, collectionId, searchParams, pageable, whereSql, lang);
         return new PageImpl<>(results, pageable, totalCount);
     }
 
-    private List<LibraryBookView> getLibraryBooks(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, Pageable pageable, StringBuilder whereSql) {
+    private List<LibraryBookView> getLibraryBooks(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, Pageable pageable, StringBuilder whereSql, String lang) {
         var dataSql = buildLibraryBookQuery(pageable, whereSql);
 
         Query query = entityManager.createNativeQuery(dataSql.toString(), LibraryBookView.class);
-        bindParameters(query, userId, collectionId, searchParams);
+        bindParameters(query, userId, collectionId, searchParams, lang);
         query.setParameter("limit", pageable.getPageSize());
         query.setParameter("offset", pageable.getOffset());
 
@@ -70,10 +71,10 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         return dataSql;
     }
 
-    private long getLibraryBooksCount(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, StringBuilder whereSql) {
+    private long getLibraryBooksCount(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, StringBuilder whereSql, String lang) {
         var countSql = "SELECT count(DISTINCT lbv.library_book_id) " + whereSql;
         var countQuery = entityManager.createNativeQuery(countSql);
-        bindParameters(countQuery, userId, collectionId, searchParams);
+        bindParameters(countQuery, userId, collectionId, searchParams, lang);
         return ((Number) countQuery.getSingleResult()).longValue();
     }
 
@@ -81,7 +82,7 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         var baseSql = """
                 FROM library_books_view lbv
                 JOIN collection_books cb ON lbv.library_book_id = cb.library_book_id
-                WHERE lbv.user_id = :userId
+                WHERE lbv.user_id = :userId AND lbv.language_code = :lang
                 """;
 
         var whereSql = new StringBuilder(baseSql);
@@ -98,9 +99,10 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         return whereSql;
     }
 
-    private void bindParameters(Query query, Integer userId, Integer collectionId, CollectionBookSearchParams searchParams) {
+    private void bindParameters(Query query, Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, String lang) {
         query.setParameter("userId", userId);
         query.setParameter("collectionId", collectionId);
+        query.setParameter("lang", lang);
         if (searchParams.getTitle() != null && !searchParams.getTitle().isBlank()) {
             query.setParameter("title", "%" + searchParams.getTitle() + "%");
         }

@@ -16,15 +16,39 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     primaryKeyName: categories_pk
+
+  - changeSet:
+      id: create_table_category_translations
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: category_translations
+            columns:
+              - column:
+                  name: category_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: category_translations_categories_fk
+                    referencedTableName: categories
+                    referencedColumnNames: category_id
+                    deleteCascade: true
+              - column:
+                  name: language_code
+                  type: varchar(2)
+                  constraints:
+                    nullable: false
               - column:
                   name: name
                   type: varchar(30)
                   constraints:
                     nullable: false
-                    unique: true
-                    uniqueConstraintName: categories_name_uq
               - column:
                   name: description
                   type: text
                   constraints:
                     nullable: true
+        - addPrimaryKey:
+            tableName: category_translations
+            columnNames: category_id, language_code
+            constraintName: category_translations_pk

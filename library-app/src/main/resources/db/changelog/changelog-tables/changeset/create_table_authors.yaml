@@ -17,6 +17,38 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: authors_pk
               - column:
+                  name: birth_year
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: death_year
+                  type: smallint
+                  constraints:
+                    nullable: true
+
+  - changeSet:
+      id: create_table_author_translations
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: author_translations
+            columns:
+              - column:
+                  name: author_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: author_translations_authors_fk
+                    referencedTableName: authors
+                    referencedColumnNames: author_id
+                    deleteCascade: true
+              - column:
+                  name: language_code
+                  type: varchar(2)
+                  constraints:
+                    nullable: false
+              - column:
                   name: full_name
                   type: varchar(100)
                   constraints:
@@ -27,17 +59,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: birth_year
-                  type: smallint
-                  constraints:
-                    nullable: false
-              - column:
-                  name: death_year
-                  type: smallint
-                  constraints:
-                    nullable: true
-              - column:
                   name: biography
                   type: text
                   constraints:
                     nullable: true
+        - addPrimaryKey:
+            tableName: author_translations
+            columnNames: author_id, language_code
+            constraintName: author_translations_pk

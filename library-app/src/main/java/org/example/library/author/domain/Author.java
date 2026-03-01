@@ -6,6 +6,7 @@ import org.example.library.book.domain.Book;
 import org.example.library.book.domain.Book_;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -23,20 +24,15 @@ public class Author {
     @Column(name = "author_id")
     private Integer id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
-
-    @Column(name = "country", nullable = false)
-    private String country;
-
     @Column(name = "birth_year", nullable = false)
     private Short birthYear;
 
-    @Column(name = "death_year", nullable = false)
+    @Column(name = "death_year")
     private Short deathYear;
 
-    @Column(name = "biography")
-    private String biography;
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MapKey(name = "languageCode")
+    private Map<String, AuthorTranslation> translations;
 
     @ManyToMany(mappedBy = Book_.AUTHORS)
     private List<Book> books;

@@ -14,14 +14,16 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
 
     @Query("""
             SELECT
-                lb.book.language AS language,
+                COALESCE(lb.language, tr.bookLanguage) AS language,
                 COUNT(lb) AS count
             FROM LibraryBook lb
+            JOIN lb.book b
+            JOIN b.translations tr ON tr.languageCode = :lang
             WHERE lb.user.id = :userId
-            GROUP BY lb.book.language
+            GROUP BY COALESCE(lb.language, tr.bookLanguage)
             ORDER BY COUNT(lb) DESC
             """)
-    List<LanguageWithCount> findLanguagesWithCountByUserId(Integer userId);
+    List<LanguageWithCount> findLanguagesWithCountByUserId(Integer userId, String lang);
 
     @Modifying
     @Query("DELETE FROM LibraryBook lb WHERE lb.id IN :ids AND lb.user.id = :userId")

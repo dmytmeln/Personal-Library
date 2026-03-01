@@ -6,6 +6,7 @@ import org.example.library.book.domain.Book;
 import org.example.library.book.domain.Book_;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -23,14 +24,12 @@ public class Category {
     @Column(name = "category_id")
     private Integer id;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
-
-    @Column(name = "description")
-    private String description;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MapKey(name = "languageCode")
+    private Map<String, CategoryTranslation> translations;
 
     @OneToMany(mappedBy = Book_.CATEGORY)
-    List<Book> books;
+    private List<Book> books;
 
     @Override
     public boolean equals(Object o) {

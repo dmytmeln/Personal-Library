@@ -1,19 +1,23 @@
 package org.example.library.book.dto;
 
-import lombok.Builder;
+import lombok.*;
 
 import java.util.Map;
 
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public record BookDto(
-        Integer id,
-        String title,
-        Integer categoryId,
-        String categoryName,
-        Short publishYear,
-        String language,
-        Short pages,
-        String description,
-        String coverImageUrl,
-        Map<Integer, String> authors
-) {}
+public class BookDto {
+    private Integer id;
+    private String title;
+    private Integer categoryId;
+    private String categoryName;
+    private Short publishYear;
+    private String language;
+    private Short pages;
+    private String description;
+    private String coverImageUrl;
+    private Map<Integer, String> authors;
+}

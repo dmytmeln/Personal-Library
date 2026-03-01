@@ -37,23 +37,26 @@ public class LibraryBookView {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "publish_year")
     private Short publishYear;
 
     @Column(name = "pages")
     private Short pages;
 
-    @Column(name = "language")
-    private String language;
-
-    @Column(name = "description")
-    private String description;
+    @Column(name = "language_code")
+    private String languageCode;
 
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
     @Column(name = "category_id")
     private Integer categoryId;
+
+    @Column(name = "book_language")
+    private String bookLanguage;
 
     @Column(name = "category_name")
     private String categoryName;

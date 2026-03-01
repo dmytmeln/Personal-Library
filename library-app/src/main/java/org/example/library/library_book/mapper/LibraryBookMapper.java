@@ -1,6 +1,7 @@
 package org.example.library.library_book.mapper;
 
 import org.example.library.author.domain.Author;
+import org.example.library.book.dto.BookDto;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookView;
 import org.example.library.library_book.dto.LibraryBookDto;
@@ -9,26 +10,30 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.springframework.context.i18n.LocaleContextHolder;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.stream.Collectors.toMap;
 
 @Mapper(componentModel = "spring")
 public interface LibraryBookMapper {
 
-    @Mapping(target = "book.id", source = "bookId")
-    @Mapping(target = "book.title", source = "title")
-    @Mapping(target = "book.categoryId", source = "categoryId")
-    @Mapping(target = "book.categoryName", source = "categoryName")
-    @Mapping(target = "book.publishYear", source = "publishYear")
-    @Mapping(target = "book.language", source = "language")
-    @Mapping(target = "book.pages", source = "pages")
-    @Mapping(target = "book.description", source = "description")
-    @Mapping(target = "book.coverImageUrl", source = "coverImageUrl")
-    @Mapping(target = "book.authors", source = "authors", qualifiedByName = "authorsToMap")
+    @Mapping(target = "book", source = "libraryBookView")
     LibraryBookDto toDto(LibraryBookView libraryBookView);
+
+    @Mapping(target = "id", source = "bookId")
+    @Mapping(target = "title", source = "title")
+    @Mapping(target = "categoryId", source = "categoryId")
+    @Mapping(target = "categoryName", source = "categoryName")
+    @Mapping(target = "publishYear", source = "publishYear")
+    @Mapping(target = "language", source = "bookLanguage")
+    @Mapping(target = "pages", source = "pages")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "coverImageUrl", source = "coverImageUrl")
+    @Mapping(target = "authors", source = "authors", qualifiedByName = "authorsToMap")
+    BookDto toBookDto(LibraryBookView view);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -39,12 +44,19 @@ public interface LibraryBookMapper {
     void update(@MappingTarget LibraryBook libraryBook, UpdateLibraryBookDetailsDto dto);
 
     @Named("authorsToMap")
-    default Map<Integer, String> authorsToMap(Set<Author> authors) {
+    default Map<Integer, String> authorsToMap(Collection<Author> authors) {
         if (authors == null)
             return null;
 
+        var lang = LocaleContextHolder.getLocale().getLanguage();
         return authors.stream()
-                .collect(toMap(Author::getId, Author::getFullName));
+                .collect(toMap(Author::getId, a -> {
+                    var translation = a.getTranslations().get(lang);
+                    if (translation == null)
+                        throw new IllegalStateException("Translation not found for author: " + a.getId());
+
+                    return translation.getFullName();
+                }));
     }
 
 }

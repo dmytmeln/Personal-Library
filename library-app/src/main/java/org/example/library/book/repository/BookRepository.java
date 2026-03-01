@@ -17,13 +17,14 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
 
     @Query("""
             SELECT
-                b.language AS language,
+                tr.bookLanguage AS language,
                 COUNT(b) AS count
             FROM Book b
-            GROUP BY b.language
+            JOIN b.translations tr ON tr.languageCode = :lang
+            GROUP BY tr.bookLanguage
             ORDER BY COUNT(b) DESC
             """)
-    List<LanguageWithCount> findAllLanguagesWithCount();
+    List<LanguageWithCount> findAllLanguagesWithCount(String lang);
 
     @Override
     @EntityGraph(attributePaths = {"category"}, type = EntityGraph.EntityGraphType.LOAD)

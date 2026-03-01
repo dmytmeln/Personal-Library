@@ -1,5 +1,6 @@
 package org.example.library.library_book.repository;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
 import org.example.library.author.domain.Author_;
 import org.example.library.library_book.domain.LibraryBookStatus;
@@ -12,8 +13,9 @@ import java.util.List;
 
 public class LibraryBookViewSpecification {
 
-    public static Specification<LibraryBookView> fromSearchCriteria(Integer userId, LibraryBookSearchCriteria criteria) {
+    public static Specification<LibraryBookView> fromSearchCriteria(Integer userId, String lang, LibraryBookSearchCriteria criteria) {
         return Specification.where(hasUserId(userId))
+                .and(hasLanguageCode(lang))
                 .and(hasTitleLike(criteria.getTitle()))
                 .and(hasStatus(criteria.getStatus()))
                 .and(hasAuthorId(criteria.getAuthorId()))
@@ -30,6 +32,15 @@ public class LibraryBookViewSpecification {
                 return null;
 
             return cb.equal(root.get(LibraryBookView_.USER_ID), userId);
+        };
+    }
+
+    public static Specification<LibraryBookView> hasLanguageCode(String lang) {
+        return (root, query, cb) -> {
+            if (lang == null)
+                return null;
+
+            return cb.equal(root.get(LibraryBookView_.LANGUAGE_CODE), lang);
         };
     }
 
@@ -119,7 +130,7 @@ public class LibraryBookViewSpecification {
             if (languages == null || languages.isEmpty())
                 return null;
 
-            return root.get(LibraryBookView_.LANGUAGE).in(languages);
+            return root.get(LibraryBookView_.BOOK_LANGUAGE).in(languages);
         };
     }
 
