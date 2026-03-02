@@ -52,6 +52,7 @@ import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component'
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {LIBRARY_BOOK_STATUSES} from '../interfaces/library-book';
 
 const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   title: '',
@@ -110,6 +111,16 @@ export class CollectionComponent implements OnInit {
 
   readonly isFiltersExpanded = signal(false);
   readonly activeFiltersCount = computed(() => 0);
+
+  readonly statusOptions = toSignal(
+    this.translocoService.selectTranslateObject('library.statuses').pipe(
+      map(t => LIBRARY_BOOK_STATUSES.map(s => ({
+        value: s,
+        label: t[s]
+      })))
+    ),
+    {initialValue: []}
+  );
 
   readonly bookSortOptions = toSignal(
     this.translocoService.selectTranslateObject('library.sort').pipe(
@@ -498,6 +509,18 @@ export class CollectionComponent implements OnInit {
         },
         error: (err) => this.snackCommon.showError(err)
       });
+    });
+  }
+
+  bulkUpdateStatus(status: LibraryBookStatus): void {
+    const ids = this.selection.selectedIds();
+    this.libraryBookService.bulkUpdateStatus(ids, status).subscribe({
+      next: () => {
+        this.loadBooks();
+        this.selection.clear();
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.statusChanged'));
+      },
+      error: (err) => this.snackCommon.showError(err)
     });
   }
 

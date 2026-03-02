@@ -136,8 +136,9 @@
       "popularity": "Popularity"
     },
     "bulkActions": {
-      "addToCollection": "Add to collection",
-      "removeFromLibrary": "Remove from library"
+      "changeStatus": "Change Status",
+      "addToCollection": "Add to Collection",
+      "removeFromLibrary": "Remove from Library"
     },
     "menu": {
       "bookDetails": "Book Details",

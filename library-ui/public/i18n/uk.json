@@ -136,8 +136,9 @@
       "popularity": "Популярність"
     },
     "bulkActions": {
+      "changeStatus": "Змінити статус",
       "addToCollection": "Додати до колекції",
-      "removeFromLibrary": "Видалити"
+      "removeFromLibrary": "Видалити з бібліотеки"
     },
     "menu": {
       "bookDetails": "Деталі книги",

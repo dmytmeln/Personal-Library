@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.library_book.domain.LibraryBookStatus;
-import org.example.library.library_book.dto.BulkLibraryBookRequest;
-import org.example.library.library_book.dto.LibraryBookDto;
-import org.example.library.library_book.dto.LibraryBookSearchCriteria;
-import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
+import org.example.library.library_book.dto.*;
 import org.example.library.library_book.service.LibraryBookService;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.security.UserDetailsImpl;
@@ -68,6 +65,12 @@ public class LibraryBookController {
                                        @RequestParam LibraryBookStatus status
     ) {
         return service.updateStatus(libraryBookId, userDetails.getId(), status);
+    }
+
+    @PutMapping("/bulk-status")
+    @ResponseStatus(HttpStatus.OK)
+    public void bulkUpdateStatus(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkStatusUpdateRequest request) {
+        service.bulkUpdateStatus(request.getIds(), userDetails.getId(), request.getStatus());
     }
 
     @PutMapping("/{libraryBookId}/details")

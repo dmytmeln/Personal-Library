@@ -102,6 +102,10 @@
   </div>
 
   <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button [matMenuTriggerFor]="bulkStatusMenu">
+      <mat-icon>label</mat-icon>
+      <span *transloco="let lb; prefix: 'library.bulkActions'">{{ lb('changeStatus') }}</span>
+    </button>
     <button mat-flat-button (click)="openBulkAddToOtherCollectionDialog()">
       <mat-icon>playlist_add</mat-icon>
       <span>{{ t('addToOtherCollection') }}</span>
@@ -113,6 +117,14 @@
       <span>{{ t('removeFromCollection') }}</span>
     </button>
   </app-bulk-action-bar>
+
+  <mat-menu #bulkStatusMenu="matMenu">
+    @for (option of statusOptions(); track option.value) {
+      <button mat-menu-item (click)="bulkUpdateStatus(option.value)">
+        <span>{{ option.label }}</span>
+      </button>
+    }
+  </mat-menu>
 
   <mat-menu #collectionMenu="matMenu">
     <ng-container *transloco="let c; prefix: 'common'">

@@ -60,6 +60,11 @@ export class LibraryBookService {
     return this.apiService.post('/users/me/library-books/bulk-remove', {body});
   }
 
+  bulkUpdateStatus(ids: number[], status: LibraryBookStatus): Observable<void> {
+    const body = {ids, status};
+    return this.apiService.put('/users/me/library-books/bulk-status', {body});
+  }
+
   changeStatus(libraryBookId: number, status: LibraryBookStatus): Observable<LibraryBook> {
     return this.apiService.put(`/users/me/library-books/${libraryBookId}/status`, {params: {status}});
   }

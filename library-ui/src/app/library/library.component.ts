@@ -349,6 +349,18 @@ export class LibraryComponent implements OnInit {
     });
   }
 
+  bulkUpdateStatus(status: LibraryBookStatus): void {
+    const ids = this.selection.selectedIds();
+    this.libraryBookService.bulkUpdateStatus(ids, status).subscribe({
+      next: () => {
+        this.loadBooks();
+        this.selection.clear();
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.statusChanged'));
+      },
+      error: (err) => this.snackCommon.showError(err)
+    });
+  }
+
   openBulkAddToCollectionDialog(): void {
     const ids = this.selection.selectedIds();
     const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {

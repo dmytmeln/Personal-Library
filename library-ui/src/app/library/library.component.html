@@ -126,6 +126,10 @@
 
 <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
   <ng-container *transloco="let b; prefix: 'library.bulkActions'">
+    <button mat-flat-button [matMenuTriggerFor]="bulkStatusMenu">
+      <mat-icon>label</mat-icon>
+      <span>{{ b('changeStatus') }}</span>
+    </button>
     <button mat-flat-button (click)="openBulkAddToCollectionDialog()">
       <mat-icon>playlist_add</mat-icon>
       <span>{{ b('addToCollection') }}</span>
@@ -136,6 +140,14 @@
     </button>
   </ng-container>
 </app-bulk-action-bar>
+
+<mat-menu #bulkStatusMenu="matMenu">
+  @for (option of statusOptions(); track option.value) {
+    <button mat-menu-item (click)="bulkUpdateStatus(option.value)">
+      <span>{{ option.label }}</span>
+    </button>
+  }
+</mat-menu>
 
 <mat-menu #libraryBookMenu="matMenu">
   <ng-template matMenuContent let-libraryBook="libraryBook">

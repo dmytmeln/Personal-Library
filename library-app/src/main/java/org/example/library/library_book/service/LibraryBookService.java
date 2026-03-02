@@ -115,6 +115,23 @@ public class LibraryBookService {
     @Transactional
     public LibraryBookDto updateStatus(Integer libraryBookId, Integer userId, LibraryBookStatus status) {
         var libraryBook = getExistingById(libraryBookId, userId);
+        updateBookStatus(libraryBook, status);
+        repository.saveAndFlush(libraryBook);
+
+        var view = getViewById(libraryBookId);
+        return mapper.toDto(view);
+    }
+
+    @Transactional
+    public void bulkUpdateStatus(List<Integer> libraryBookIds, Integer userId, LibraryBookStatus status) {
+        var libraryBooks = repository.findAllByIdInAndUserId(libraryBookIds, userId);
+        if (libraryBooks.isEmpty()) return;
+
+        libraryBooks.forEach(lb -> updateBookStatus(lb, status));
+        repository.saveAll(libraryBooks);
+    }
+
+    private void updateBookStatus(LibraryBook libraryBook, LibraryBookStatus status) {
         var oldStatus = libraryBook.getStatus();
 
         if (status == LibraryBookStatus.READ && oldStatus != LibraryBookStatus.READ) {
@@ -124,10 +141,6 @@ public class LibraryBookService {
         }
 
         libraryBook.setStatus(status);
-        repository.saveAndFlush(libraryBook);
-
-        var view = getViewById(libraryBookId);
-        return mapper.toDto(view);
     }
 
     @Transactional
