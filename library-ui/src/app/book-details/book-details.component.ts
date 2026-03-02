@@ -1,7 +1,7 @@
-import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {Book} from '../interfaces/book';
-import {NgOptimizedImage} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
 import {BookDetails} from '../interfaces/book-details';
 import {BookService} from '../services/book.service';
@@ -14,10 +14,18 @@ import {MatSnackCommon} from '../common/mat-snack-common';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
+import {RecommendationService} from '../services/recommendation.service';
+import {BookCardComponent} from '../book-card/book-card.component';
+import {SelectionStore} from '../services/selection.store';
+import {BookListItemComponent} from '../book-list-item/book-list-item.component';
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-book-details',
   imports: [
+    CommonModule,
     NgOptimizedImage,
     BookRatingComponent,
     MatButton,
@@ -25,6 +33,11 @@ import {MatTooltip} from '@angular/material/tooltip';
     TranslocoDirective,
     MatIcon,
     MatTooltip,
+    BookCardComponent,
+    BookListItemComponent,
+    BulkActionBarComponent,
+    MatButtonToggleModule,
+    MatMenuModule,
   ],
   templateUrl: './book-details.component.html',
   styleUrl: './book-details.component.scss'
@@ -36,11 +49,16 @@ export class BookDetailsComponent implements OnInit {
 
   bookId: number;
   bookDetails?: BookDetails;
+  similarBooks = signal<Book[]>([]);
+  viewMode = signal<'grid' | 'list'>('grid');
+  readonly selection = new SelectionStore();
+  private libraryBookIds: Set<number> = new Set<number>();
 
   constructor(
     private router: Router,
     private bookService: BookService,
     private libraryBookService: LibraryBookService,
+    private recommendationService: RecommendationService,
     matSnackBar: MatSnackBar,
     private translocoService: TranslocoService,
   ) {
@@ -57,6 +75,7 @@ export class BookDetailsComponent implements OnInit {
 
     this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.loadBookDetails();
+      this.loadSimilarBooks();
     });
   }
 
@@ -85,12 +104,49 @@ export class BookDetailsComponent implements OnInit {
     });
   }
 
+  addSimilarBookToLibrary(book: Book): void {
+    this.libraryBookService.addBook(book.id).subscribe({
+      next: () => {
+        this.libraryBookIds.add(book.id);
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
+      },
+      error: (err) => {
+        this.snackCommon.showError(err);
+        if (err.status === 400) {
+          this.libraryBookIds.add(book.id);
+        }
+      }
+    });
+  }
+
+  bulkAddSimilarBooks(): void {
+    const ids = this.selection.selectedIds();
+    this.libraryBookService.bulkAdd(ids).subscribe({
+      next: () => {
+        ids.forEach(id => this.libraryBookIds.add(id));
+        this.selection.clear();
+        this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
+      },
+      error: err => this.snackCommon.showError(err)
+    });
+  }
+
+  isSimilarBookInLibrary(book: Book): boolean {
+    return this.libraryBookIds.has(book.id);
+  }
+
   goToCollection(collection: BasicCollection): void {
     this.router.navigate(['/collections', collection.id]);
   }
 
   goToAuthorDetails(id: number): void {
     this.router.navigate(['/author-details'], {state: {id}});
+  }
+
+  goToBookDetails(id: number): void {
+    this.router.navigateByUrl('/', {skipLocationChange: true}).then(() => {
+      this.router.navigate(['/book-details'], {state: {id}});
+    });
   }
 
   changeRating(rating: number): void {
@@ -111,6 +167,12 @@ export class BookDetailsComponent implements OnInit {
   private loadBookDetails(): void {
     this.bookService.getBookDetails(this.bookId).subscribe(bookDetails => {
       this.bookDetails = bookDetails;
+    });
+  }
+
+  private loadSimilarBooks(): void {
+    this.recommendationService.getSimilar(this.bookId, 10).subscribe(books => {
+      this.similarBooks.set(books);
     });
   }
 

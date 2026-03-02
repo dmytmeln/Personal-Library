@@ -263,7 +263,8 @@
     "genre": "Жанр",
     "description": "Опис",
     "addToLibrary": "Додати до бібліотеки",
-    "noDescription": "Опис відсутній"
+    "noDescription": "Опис відсутній",
+    "similarBooks": "Схожі книги"
   },
   "profile": {
     "title": "Профіль користувача",

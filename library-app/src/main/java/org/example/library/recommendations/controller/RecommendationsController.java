@@ -23,22 +23,26 @@ public class RecommendationsController {
     @GetMapping
     public List<BookDto> getRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                             @RequestParam(required = false) Integer limit) {
-        var languageCode = LocaleContextHolder.getLocale().getLanguage();
-        return recommendationService.getRecommendations(userDetails.getId(), languageCode, limit);
+        return recommendationService.getRecommendations(userDetails.getId(), limit);
     }
 
     @GetMapping("/popular")
     public List<BookDto> getPopularBooks(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @RequestParam(required = false) Integer limit) {
-        var languageCode = LocaleContextHolder.getLocale().getLanguage();
-        return recommendationService.getPopularBooks(userDetails.getId(), languageCode, limit);
+        return recommendationService.getPopularBooks(userDetails.getId(), limit);
     }
 
     @GetMapping("/new")
     public List<BookDto> getNewArrivals(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestParam(required = false) Integer limit) {
-        var languageCode = LocaleContextHolder.getLocale().getLanguage();
-        return recommendationService.getNewArrivals(userDetails.getId(), languageCode, limit);
+        return recommendationService.getNewArrivals(userDetails.getId(), limit);
+    }
+
+    @GetMapping("/similar/{bookId}")
+    public List<BookDto> getSimilarBooks(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                         @org.springframework.web.bind.annotation.PathVariable Integer bookId,
+                                         @RequestParam(required = false) Integer limit) {
+        return recommendationService.getSimilarBooks(bookId, userDetails.getId(), limit);
     }
 
 }

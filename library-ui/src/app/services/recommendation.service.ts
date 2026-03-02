@@ -25,4 +25,8 @@ export class RecommendationService {
     return this.apiService.get<Book[]>(`${this.baseUrl}/new`, {params: {limit}});
   }
 
+  getSimilar(bookId: number, limit?: number): Observable<Book[]> {
+    return this.apiService.get<Book[]>(`${this.baseUrl}/similar/${bookId}`, {params: {limit}});
+  }
+
 }

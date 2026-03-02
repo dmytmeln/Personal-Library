@@ -263,7 +263,8 @@
     "genre": "Genre",
     "description": "Description",
     "addToLibrary": "Add to Library",
-    "noDescription": "No description available"
+    "noDescription": "No description available",
+    "similarBooks": "Similar books"
   },
   "profile": {
     "title": "User Profile",

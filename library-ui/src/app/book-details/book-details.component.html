@@ -75,5 +75,59 @@
         <p class="book-description-text">{{ displayBook.description }}</p>
       </div>
     }
+
+    @if (similarBooks().length > 0) {
+      <div class="similar-books-section">
+        <div class="section-header">
+          <h4>{{ t('similarBooks') }}</h4>
+          <div class="header-actions">
+            <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
+              <mat-button-toggle value="grid">
+                <mat-icon>grid_view</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="list">
+                <mat-icon>view_list</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </div>
+
+        <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
+          @for (book of similarBooks(); track book.id) {
+            @if (viewMode() === 'grid') {
+              <app-book-card [book]="book"
+                             [isSelected]="selection.isSelected(book.id)"
+                             [selectionMode]="selection.isSelectionMode()"
+                             (toggleSelection)="selection.toggle(book.id)"
+                             [actionsMenu]="similarBookMenu"></app-book-card>
+            } @else {
+              <app-book-list-item [book]="book"
+                                  [isSelected]="selection.isSelected(book.id)"
+                                  [selectionMode]="selection.isSelectionMode()"
+                                  (toggleSelection)="selection.toggle(book.id)"
+                                  [actionsMenu]="similarBookMenu"></app-book-list-item>
+            }
+          }
+        </div>
+      </div>
+    }
   }
+
+  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button (click)="bulkAddSimilarBooks()">
+      <mat-icon>add_circle</mat-icon>
+      <span *transloco="let st; prefix: 'search.bulkActions'">{{ st('addToLibrary') }}</span>
+    </button>
+  </app-bulk-action-bar>
+
+  <mat-menu #similarBookMenu="matMenu">
+    <ng-template matMenuContent let-book>
+      <ng-container *transloco="let m; prefix: 'search.menu'">
+        <button mat-menu-item (click)="addSimilarBookToLibrary(book)" [disabled]="isSimilarBookInLibrary(book)">
+          <mat-icon>add_circle</mat-icon>
+          <span>{{ isSimilarBookInLibrary(book) ? m('alreadyInLibrary') : m('addToLibrary') }}</span>
+        </button>
+      </ng-container>
+    </ng-template>
+  </mat-menu>
 </div>
