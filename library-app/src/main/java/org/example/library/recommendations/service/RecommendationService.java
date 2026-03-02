@@ -28,7 +28,7 @@ public class RecommendationService {
     private final PaginationProperties paginationProperties;
 
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookDto> getRecommendations(Integer userId, Integer limit) {
         float[] userVector = userProfileService.calculateUserProfileVector(userId);
 

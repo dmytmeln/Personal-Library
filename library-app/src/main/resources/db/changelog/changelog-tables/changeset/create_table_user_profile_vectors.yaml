@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_table_user_profile_vectors
+      author: Dmytro Melnyk
+      changes:
+        - createTable:
+            tableName: user_profile_vectors
+            columns:
+              - column:
+                  name: user_id
+                  type: integer
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: user_profile_vectors_pk
+                    foreignKeyName: user_profile_vectors_users_fk
+                    referencedTableName: users
+                    referencedColumnNames: user_id
+                    deleteCascade: true
+              - column:
+                  name: vector
+                  type: vector(1100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false

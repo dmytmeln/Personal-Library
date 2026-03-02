@@ -6,7 +6,15 @@ import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.recommendations.config.RecommendationProperties;
+import org.example.library.recommendations.domain.UserProfileVector;
+import org.example.library.recommendations.event.UserProfileUpdatedEvent;
+import org.example.library.recommendations.repository.UserProfileVectorRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -17,10 +25,57 @@ import java.time.temporal.ChronoUnit;
 public class UserProfileService {
 
     private final LibraryBookRepository libraryBookRepository;
+    private final UserProfileVectorRepository userProfileVectorRepository;
+    private final VocabularyMetadataService vocabularyMetadataService;
     private final RecommendationProperties properties;
 
 
+    @Transactional
     public float[] calculateUserProfileVector(Integer userId) {
+        var metadata = vocabularyMetadataService.getMetadata();
+        int currentVersion = metadata.getCurrentVersion();
+
+        var storedVector = userProfileVectorRepository.findById(userId);
+
+        if (storedVector.isPresent() && storedVector.get().getVersion() == currentVersion) {
+            log.debug("Using saved user profile vector for user {} (version {})", userId, currentVersion);
+            return storedVector.get().getVector();
+        }
+
+        log.info("Stored vector for user {} is missing or outdated. Recalculating...", userId);
+        return calculateAndSaveVector(userId, currentVersion);
+    }
+
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onUserProfileUpdated(UserProfileUpdatedEvent event) {
+        log.info("Asynchronously rebuilding user profile vector for user {}", event.userId());
+        var metadata = vocabularyMetadataService.getMetadata();
+        calculateAndSaveVector(event.userId(), metadata.getCurrentVersion());
+    }
+
+    private float[] calculateAndSaveVector(Integer userId, int version) {
+        float[] vector = performCalculation(userId);
+
+        if (vector != null) {
+            var userProfileVector = UserProfileVector.builder()
+                    .userId(userId)
+                    .vector(vector)
+                    .version(version)
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            userProfileVectorRepository.save(userProfileVector);
+            log.debug("Saved user profile vector for user {}", userId);
+        } else {
+            userProfileVectorRepository.deleteById(userId);
+        }
+
+        return vector;
+    }
+
+    private float[] performCalculation(Integer userId) {
         var userLibrary = libraryBookRepository.findAllWithVectorsByUserId(userId);
 
         if (userLibrary.isEmpty()) {

@@ -24,9 +24,11 @@ public class GenreMappingService {
 
     @Transactional
     public boolean hasNewCategories() {
-        var categoryCount = categoryRepository.count();
-        var mappingCount = genreMappingRepository.count();
-        return categoryCount > mappingCount;
+        var existingCategoryIds = genreMappingRepository.findAllCategoryIds();
+        var newCategoryIds = categoryRepository.findAllIds().stream()
+                .filter(id -> !existingCategoryIds.contains(id))
+                .toList();
+        return !newCategoryIds.isEmpty();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -1,9 +1,10 @@
 package org.example.library.recommendations.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.springframework.data.domain.Persistable;
-import org.springframework.lang.Nullable;
 
 @Entity
 @Table(name = "genre_mapping")
@@ -12,7 +13,7 @@ import org.springframework.lang.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GenreMapping implements Persistable<Integer> {
+public class GenreMapping {
 
     @Id
     @Column(name = "category_id", nullable = false)
@@ -20,26 +21,5 @@ public class GenreMapping implements Persistable<Integer> {
 
     @Column(name = "vector_index", nullable = false, unique = true)
     private Integer vectorIndex;
-
-    @Transient
-    @Builder.Default
-    private boolean isNew = true;
-
-    @Nullable
-    @Override
-    public Integer getId() {
-        return this.categoryId;
-    }
-
-    @Override
-    public boolean isNew() {
-        return isNew;
-    }
-
-    @PostLoad
-    @PostPersist
-    void markNotNew() {
-        this.isNew = false;
-    }
 
 }

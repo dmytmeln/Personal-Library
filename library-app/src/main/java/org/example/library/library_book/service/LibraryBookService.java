@@ -21,7 +21,9 @@ import org.example.library.library_book.repository.LibraryBookViewSpecification;
 import org.example.library.pagination.PageRequestBuilder;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
+import org.example.library.recommendations.event.UserProfileUpdatedEvent;
 import org.example.library.user.domain.User;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ public class LibraryBookService {
     private final CategoryRepository categoryRepository;
     private final LibraryBookMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Transactional(readOnly = true)
@@ -74,6 +77,7 @@ public class LibraryBookService {
 
         repository.save(LibraryBook.of(bookRepository.getReferenceById(bookId), user));
         incrementPopularity(List.of(bookId));
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
     }
 
     @Transactional
@@ -96,6 +100,7 @@ public class LibraryBookService {
 
         repository.saveAll(libraryBooks);
         incrementPopularity(newBookIds);
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
     }
 
     @Transactional
@@ -108,6 +113,7 @@ public class LibraryBookService {
             throw new NotFoundException("error.library_book.not_found");
 
         repository.flush();
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
         var view = getViewById(libraryBookId);
         return mapper.toDto(view);
     }
@@ -118,6 +124,7 @@ public class LibraryBookService {
         updateBookStatus(libraryBook, status);
         repository.saveAndFlush(libraryBook);
 
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
         var view = getViewById(libraryBookId);
         return mapper.toDto(view);
     }
@@ -129,6 +136,7 @@ public class LibraryBookService {
 
         libraryBooks.forEach(lb -> updateBookStatus(lb, status));
         repository.saveAll(libraryBooks);
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
     }
 
     private void updateBookStatus(LibraryBook libraryBook, LibraryBookStatus status) {
@@ -171,6 +179,7 @@ public class LibraryBookService {
         collectionBookRepository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
         repository.delete(libraryBook);
         decrementPopularity(List.of(bookId));
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
     }
 
     @Transactional
@@ -182,6 +191,7 @@ public class LibraryBookService {
         collectionBookRepository.deleteAllByLibraryBookIdInAndUserId(libraryBookIds, userId);
         repository.deleteAll(libraryBooks);
         decrementPopularity(bookIds);
+        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
     }
 
     private void incrementPopularity(List<Integer> bookIds) {

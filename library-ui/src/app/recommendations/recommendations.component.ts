@@ -64,7 +64,6 @@ export class RecommendationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupLanguageSubscription();
-    this.loadAll();
   }
 
   addBookToLibrary(book: Book): void {
