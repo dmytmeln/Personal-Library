@@ -39,6 +39,22 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+              - column:
+                  name: description_vector
+                  type: vector(1100)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: NEW
+                  constraints:
+                    nullable: false
+              - column:
+                  name: vector_version
+                  type: integer
+                  constraints:
+                    nullable: true
 
   - changeSet:
       id: create_table_book_translations

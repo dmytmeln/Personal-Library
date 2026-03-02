@@ -1,12 +1,5 @@
 databaseChangeLog:
   - changeSet:
-      id: enable_pg_trgm_extension
-      author: Dmytro Melnyk
-      changes:
-        - sql:
-            sql: CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
-  - changeSet:
       id: create_index_book_translations_title_trgm
       author: Dmytro Melnyk
       changes:

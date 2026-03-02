@@ -93,6 +93,9 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
 
     boolean existsByBookIdAndUserId(Integer bookId, Integer userId);
 
+    @Query("SELECT lb FROM LibraryBook lb JOIN lb.book b WHERE lb.user.id = :userId")
+    List<LibraryBook> findAllWithVectorsByUserId(Integer userId);
+
     List<LibraryBook> findAllByIdInAndUserId(List<Integer> ids, Integer userId);
 
 }

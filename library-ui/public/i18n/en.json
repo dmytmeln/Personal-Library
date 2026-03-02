@@ -443,5 +443,12 @@
       "cancel": "Cancel",
       "delete": "Delete"
     }
+  },
+  "recommendations": {
+    "title": "Book Recommendations",
+    "personalized": "Picked for You",
+    "popular": "Trending Recently",
+    "newArrivals": "Fresh Releases",
+    "noRecommendations": "No recommendations found yet. Try adding more books to your library!"
   }
 }

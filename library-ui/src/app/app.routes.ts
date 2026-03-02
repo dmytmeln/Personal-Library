@@ -12,10 +12,12 @@ import { OAuth2RedirectComponent } from './oauth2-redirect/oauth2-redirect.compo
 import { SearchComponent } from './search/search.component';
 import { AuthGuard } from './guards/auth.guard';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { RecommendationsComponent } from './recommendations/recommendations.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/library', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'recommendations', component: RecommendationsComponent, canActivate: [AuthGuard] },
   { path: 'library', component: LibraryComponent, canActivate: [AuthGuard] },
   { path: 'collections', component: CollectionsComponent, canActivate: [AuthGuard] },
   { path: 'collections/:id', component: CollectionComponent, canActivate: [AuthGuard] },

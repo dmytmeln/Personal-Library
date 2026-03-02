@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.library.author.domain.Author;
 import org.example.library.category.domain.Category;
+import org.hibernate.annotations.Array;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +39,19 @@ public class Book {
 
     @Column(name = "cover_image_url", nullable = false)
     private String coverImageUrl;
+
+    @Column(name = "description_vector", columnDefinition = "vector(1100)")
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Array(length = 1100)
+    private float[] descriptionVector;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private BookStatus status = BookStatus.NEW;
+
+    @Column(name = "vector_version")
+    private Integer vectorVersion;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(name = "languageCode")

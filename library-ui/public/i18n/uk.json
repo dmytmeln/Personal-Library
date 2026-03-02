@@ -248,7 +248,7 @@
     "pages": "Сторінки",
     "language": "Мова",
     "addedAt": "Дата додавання",
-    "status": "Статус",
+    "status": "Status",
     "myRating": "Моя оцінка",
     "averageRating": "Середня оцінка",
     "ratingsCount": "Кількість відгуків: {{count}}",
@@ -443,5 +443,12 @@
       "cancel": "Скасувати",
       "delete": "Видалити"
     }
+  },
+  "recommendations": {
+    "title": "Рекомендації книг",
+    "personalized": "Підібрано для вас",
+    "popular": "Популярні книги",
+    "newArrivals": "Свіжі надходження",
+    "noRecommendations": "Рекомендацій поки немає. Спробуйте додати більше книг до своєї бібліотеки!"
   }
 }

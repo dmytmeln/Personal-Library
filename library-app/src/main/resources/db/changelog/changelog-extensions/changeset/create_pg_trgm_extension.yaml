@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: enable_pg_trgm_extension
+      author: Dmytro Melnyk
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS pg_trgm;

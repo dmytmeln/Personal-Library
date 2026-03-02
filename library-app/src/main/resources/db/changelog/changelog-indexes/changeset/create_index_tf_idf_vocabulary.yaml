@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_index_tf_idf_vocabulary
+      author: Dmytro Melnyk
+      changes:
+        - createIndex:
+            indexName: idx_vocabulary_index
+            tableName: tf_idf_vocabulary
+            columns:
+              - column:
+                  name: vector_index

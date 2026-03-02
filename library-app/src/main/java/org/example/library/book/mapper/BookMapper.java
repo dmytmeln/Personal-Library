@@ -32,6 +32,8 @@ public interface BookMapper {
     @Mapping(target = "language", source = "bookLanguage")
     BookDto toBookDto(BookDisplayView view);
 
+    List<BookDto> toBookDtos(List<BookDisplayView> views);
+
     @Named("getLocalizedTitle")
     default String getLocalizedTitle(Book book) {
         var lang = LocaleContextHolder.getLocale().getLanguage();

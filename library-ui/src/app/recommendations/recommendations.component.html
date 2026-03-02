@@ -1,0 +1,124 @@
+<ng-container *transloco="let t; prefix: 'recommendations'">
+  <div class="recommendations-container">
+    <div class="header-row">
+      <h1 class="page-title">{{ t('title') }}</h1>
+      <div class="header-actions">
+        <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" aria-label="View Mode">
+          <mat-button-toggle value="grid">
+            <mat-icon>grid_view</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="list">
+            <mat-icon>view_list</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loader-container">
+        <mat-spinner></mat-spinner>
+      </div>
+    } @else {
+      <mat-accordion multi>
+        @if (personalized().length > 0) {
+          <mat-expansion-panel [expanded]="false" class="rec-section">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ t('personalized') }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
+              @for (book of personalized(); track book.id) {
+                @if (viewMode() === 'grid') {
+                  <app-book-card [book]="book"
+                                 [isSelected]="selection.isSelected(book.id)"
+                                 [selectionMode]="selection.count() > 0"
+                                 (toggleSelection)="selection.toggle(book.id)"
+                                 [actionsMenu]="recommendationBookMenu"></app-book-card>
+                } @else {
+                  <app-book-list-item [book]="book"
+                                      [isSelected]="selection.isSelected(book.id)"
+                                      [selectionMode]="selection.count() > 0"
+                                      (toggleSelection)="selection.toggle(book.id)"
+                                      [actionsMenu]="recommendationBookMenu"></app-book-list-item>
+                }
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+
+        @if (popular().length > 0) {
+          <mat-expansion-panel [expanded]="false" class="rec-section">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ t('popular') }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
+              @for (book of popular(); track book.id) {
+                @if (viewMode() === 'grid') {
+                  <app-book-card [book]="book"
+                                 [isSelected]="selection.isSelected(book.id)"
+                                 [selectionMode]="selection.count() > 0"
+                                 (toggleSelection)="selection.toggle(book.id)"
+                                 [actionsMenu]="recommendationBookMenu"></app-book-card>
+                } @else {
+                  <app-book-list-item [book]="book"
+                                      [isSelected]="selection.isSelected(book.id)"
+                                      [selectionMode]="selection.count() > 0"
+                                      (toggleSelection)="selection.toggle(book.id)"
+                                      [actionsMenu]="recommendationBookMenu"></app-book-list-item>
+                }
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+
+        @if (newArrivals().length > 0) {
+          <mat-expansion-panel [expanded]="false" class="rec-section">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ t('newArrivals') }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
+              @for (book of newArrivals(); track book.id) {
+                @if (viewMode() === 'grid') {
+                  <app-book-card [book]="book"
+                                 [isSelected]="selection.isSelected(book.id)"
+                                 [selectionMode]="selection.count() > 0"
+                                 (toggleSelection)="selection.toggle(book.id)"
+                                 [actionsMenu]="recommendationBookMenu"></app-book-card>
+                } @else {
+                  <app-book-list-item [book]="book"
+                                      [isSelected]="selection.isSelected(book.id)"
+                                      [selectionMode]="selection.count() > 0"
+                                      (toggleSelection)="selection.toggle(book.id)"
+                                      [actionsMenu]="recommendationBookMenu"></app-book-list-item>
+                }
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+
+      @if (personalized().length === 0 && popular().length === 0 && newArrivals().length === 0) {
+        <div class="no-results">
+          <p>{{ t('noRecommendations') }}</p>
+        </div>
+      }
+    }
+  </div>
+
+  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+    <button mat-flat-button (click)="bulkAddBooks()">
+      <mat-icon>add_circle</mat-icon>
+      <span *transloco="let st; prefix: 'search.bulkActions'">{{ st('addToLibrary') }}</span>
+    </button>
+  </app-bulk-action-bar>
+
+  <mat-menu #recommendationBookMenu="matMenu">
+    <ng-template matMenuContent let-book>
+      <ng-container *transloco="let m; prefix: 'search.menu'">
+        <button mat-menu-item (click)="addBookToLibrary(book)" [disabled]="isBookInLibrary(book)">
+          <mat-icon>add_circle</mat-icon>
+          <span>{{ isBookInLibrary(book) ? m('alreadyInLibrary') : m('addToLibrary') }}</span>
+        </button>
+      </ng-container>
+    </ng-template>
+  </mat-menu>
+</ng-container>

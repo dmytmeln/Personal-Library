@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -28,6 +29,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 @EnableAspectJAutoProxy
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 @EnableConfigurationProperties(value = PaginationProperties.class)
+@EnableScheduling
 public class AppConfig {
 
     @Bean

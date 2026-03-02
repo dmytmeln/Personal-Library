@@ -1,6 +1,7 @@
 package org.example.library.book.repository;
 
 import org.example.library.book.domain.Book;
+import org.example.library.book.domain.BookStatus;
 import org.example.library.book.dto.LanguageWithCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,5 +30,30 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
     @Override
     @EntityGraph(attributePaths = {"category"}, type = EntityGraph.EntityGraphType.LOAD)
     Page<Book> findAll(@Nullable Specification<Book> spec, Pageable pageable);
+
+    @Query("SELECT COUNT(b) FROM Book b WHERE b.status <> :status")
+    long countWhereBookStatusNot(BookStatus status);
+
+    @Query("SELECT COUNT(b) FROM Book b WHERE b.vectorVersion < :currentVersion OR b.vectorVersion IS NULL")
+    long countBooksWithOldVersion(Integer currentVersion);
+
+    @Query("SELECT concat(tr.title, ' ', tr.description) FROM Book b JOIN b.translations tr WHERE tr.description IS NOT NULL AND tr.languageCode = :lang")
+    List<String> findAllDescriptions(String lang);
+
+    @EntityGraph(attributePaths = {"category"}, type = EntityGraph.EntityGraphType.LOAD)
+    @Query("SELECT b FROM Book b WHERE b.vectorVersion < :targetVersion OR b.vectorVersion IS NULL")
+    Page<Book> findOutdatedBooks(int targetVersion, Pageable pageable);
+
+    @Query("""
+            SELECT b
+            FROM Book b
+            LEFT JOIN LibraryBook lb ON b.id = lb.book.id
+            GROUP BY b.id
+            ORDER BY COUNT(lb) DESC
+            """)
+    List<Book> findPopularBooks(Pageable pageable);
+
+    @Query("SELECT b FROM Book b WHERE b.publishYear = :year ORDER BY b.id DESC")
+    List<Book> findNewArrivals(short year, Pageable pageable);
 
 }
