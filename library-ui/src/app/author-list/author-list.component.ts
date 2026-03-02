@@ -91,6 +91,7 @@ export class AuthorListComponent implements OnInit {
         {field: 'country', label: t.country},
         {field: 'birthYear', label: t.birthYear},
         {field: 'booksCount', label: t.booksCount},
+        {field: 'popularityCount', label: t.popularity},
       ])
     ),
     {initialValue: []}

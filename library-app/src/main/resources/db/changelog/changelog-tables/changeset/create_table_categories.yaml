@@ -16,6 +16,12 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     primaryKeyName: categories_pk
+              - column:
+                  name: popularity_count
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: create_table_category_translations

@@ -9,7 +9,7 @@ public class LibraryApplication {
     // todo:
     //  recalculate books vector category part if category is deleted
     //  save user profile vector and update it when library is updated, instead of calculating it on the fly for every recommendation request
-    //  BE + FE: book, author and category - popularity count , similar books, recommendations in author, trends in favorite genres
+    //  similar books, recommendations in author, trends in favorite genres
     //  google books api and openlibrary api integrations for fetching books
     //  batch update status of books in library
     //  admin panel

@@ -85,7 +85,11 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
             """)
     int resetOverriddenFields(Integer id, Integer userId);
 
+
     Optional<LibraryBook> findByIdAndUserId(Integer libraryBookId, Integer userId);
+
+    @Query("SELECT lb FROM LibraryBook lb JOIN FETCH lb.book WHERE lb.id = :libraryBookId AND lb.user.id = :userId")
+    Optional<LibraryBook> findByIdAndUserIdWithBook(Integer libraryBookId, Integer userId);
 
     boolean existsByIdAndUserId(Integer libraryBookId, Integer userId);
 
@@ -97,5 +101,8 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
     List<LibraryBook> findAllWithVectorsByUserId(Integer userId);
 
     List<LibraryBook> findAllByIdInAndUserId(List<Integer> ids, Integer userId);
+
+    @Query("SELECT lb FROM LibraryBook lb JOIN FETCH lb.book WHERE lb.id IN :ids AND lb.user.id = :userId")
+    List<LibraryBook> findAllByIdInAndUserIdWithBook(List<Integer> ids, Integer userId);
 
 }

@@ -6,4 +6,5 @@ export interface Author {
   deathYear?: number;
   biography?: string;
   booksCount?: number;
+  popularityCount?: number;
 }

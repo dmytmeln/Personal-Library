@@ -120,6 +120,7 @@ export class SearchComponent implements OnInit {
         {field: 'language', label: t.language},
         {field: 'pages', label: t.pages},
         {field: 'categoryName', label: t.category},
+        {field: 'popularityCount', label: t.popularity},
       ])
     ),
     {initialValue: []}

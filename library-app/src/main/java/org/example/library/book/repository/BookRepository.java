@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
 
@@ -44,16 +45,18 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
     @Query("SELECT b FROM Book b WHERE b.vectorVersion < :targetVersion OR b.vectorVersion IS NULL")
     Page<Book> findOutdatedBooks(int targetVersion, Pageable pageable);
 
-    @Query("""
-            SELECT b
-            FROM Book b
-            LEFT JOIN LibraryBook lb ON b.id = lb.book.id
-            GROUP BY b.id
-            ORDER BY COUNT(lb) DESC
-            """)
+    @Query("SELECT b FROM Book b ORDER BY b.popularityCount DESC")
     List<Book> findPopularBooks(Pageable pageable);
 
     @Query("SELECT b FROM Book b WHERE b.publishYear = :year ORDER BY b.id DESC")
     List<Book> findNewArrivals(short year, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Book b SET b.popularityCount = b.popularityCount + 1 WHERE b.id IN :ids")
+    void incrementPopularityCount(List<Integer> ids);
+
+    @Modifying
+    @Query("UPDATE Book b SET b.popularityCount = b.popularityCount - 1 WHERE b.id IN :ids")
+    void decrementPopularityCount(List<Integer> ids);
 
 }

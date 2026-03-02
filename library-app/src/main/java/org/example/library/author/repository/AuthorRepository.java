@@ -6,6 +6,7 @@ import org.example.library.author.dto.CountryWithCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
                 tr.country AS country,
                 a.birthYear AS birthYear,
                 a.deathYear AS deathYear,
+                a.popularityCount AS popularityCount,
                 COUNT(b) AS booksCount
             FROM Author a
             JOIN a.translations tr ON tr.languageCode = :lang
@@ -60,6 +62,7 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
                 tr.country AS country,
                 a.birthYear AS birthYear,
                 a.deathYear AS deathYear,
+                a.popularityCount AS popularityCount,
                 COUNT(DISTINCT lb.id) AS booksCount
             FROM Author a
             JOIN a.translations tr ON tr.languageCode = :lang
@@ -99,5 +102,13 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             ORDER BY COUNT(DISTINCT a.id) DESC
             """)
     List<CountryWithCount> findAllCountriesForUser(Integer userId, String lang);
+
+    @Modifying
+    @Query(value = "UPDATE authors SET popularity_count = popularity_count + 1 WHERE author_id IN (SELECT author_id FROM book_authors WHERE book_id IN :bookIds)", nativeQuery = true)
+    void incrementPopularityCountByBookIds(List<Integer> bookIds);
+
+    @Modifying
+    @Query(value = "UPDATE authors SET popularity_count = popularity_count - 1 WHERE author_id IN (SELECT author_id FROM book_authors WHERE book_id IN :bookIds)", nativeQuery = true)
+    void decrementPopularityCountByBookIds(List<Integer> bookIds);
 
 }

@@ -79,6 +79,7 @@ export class CategoryListComponent implements OnInit {
       map(t => [
         {field: 'name', label: t.name},
         {field: 'booksCount', label: t.booksCount},
+        {field: 'popularityCount', label: t.popularity},
       ])
     ),
     {initialValue: []}

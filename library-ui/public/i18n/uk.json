@@ -22,6 +22,7 @@
     "move": "Перемістити",
     "status": "Статус",
     "rating": "Оцінка",
+    "popularity": "Популярність",
     "details": "Деталі",
     "notes": "Нотатки",
     "any": "Будь-який",
@@ -131,7 +132,8 @@
       "publishYear": "Рік видання",
       "rating": "Оцінка",
       "addedAt": "Дата додавання",
-      "pages": "Сторінки"
+      "pages": "Сторінки",
+      "popularity": "Популярність"
     },
     "bulkActions": {
       "addToCollection": "Додати до колекції",
@@ -248,7 +250,7 @@
     "pages": "Сторінки",
     "language": "Мова",
     "addedAt": "Дата додавання",
-    "status": "Status",
+    "status": "Статус",
     "myRating": "Моя оцінка",
     "averageRating": "Середня оцінка",
     "ratingsCount": "Кількість відгуків: {{count}}",
@@ -301,7 +303,8 @@
       "publishYear": "Рік видання",
       "language": "Мова",
       "pages": "Сторінки",
-      "category": "Категорія"
+      "category": "Категорія",
+      "popularity": "Популярність"
     },
     "bulkActions": {
       "addToLibrary": "Додати до бібліотеки"
@@ -311,57 +314,6 @@
       "addToLibrary": "Додати до бібліотеки",
       "alreadyInLibrary": "Вже у бібліотеці"
     }
-  },
-  "authors": {
-    "lifeYears": "Роки життя",
-    "presentDay": "теп. час",
-    "biography": "Біографія",
-    "authorBooks": "Книги автора",
-    "filters": {
-      "name": "Пошук за ім'ям",
-      "country": "Країна",
-      "birthYear": "Рік народження",
-      "booksCount": "Кількість книг"
-    },
-    "sort": {
-      "fullName": "ПІБ",
-      "country": "Країна",
-      "birthYear": "Рік народження",
-      "booksCount": "Кількість книг"
-    },
-    "actions": {
-      "showBooks": "Книги"
-    },
-    "table": {
-      "fullName": "ПІБ",
-      "country": "Країна",
-      "birthYear": "Рік народження",
-      "deathYear": "Рік смерті",
-      "booksCount": "Кількість книг",
-      "actions": "Дії"
-    },
-    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}"
-  },
-  "categories": {
-    "filters": {
-      "name": "Пошук за назвою",
-      "booksCount": "Кількість книг"
-    },
-    "sort": {
-      "name": "Назва",
-      "booksCount": "Кількість книг"
-    },
-    "actions": {
-      "showBooks": "Книги"
-    },
-    "table": {
-      "name": "Назва",
-      "description": "Опис",
-      "booksCount": "Кількість книг",
-      "actions": "Дії"
-    },
-    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}",
-    "categoryBooks": "Книги жанру"
   },
   "auth": {
     "or": "АБО",
@@ -393,6 +345,61 @@
       "fullNameRequired": "Повне ім'я обов'язкове",
       "fullNameMinLength": "Повне ім'я має бути не менше {{min}} символів"
     }
+  },
+  "authors": {
+    "lifeYears": "Роки життя",
+    "presentDay": "теп. час",
+    "biography": "Біографія",
+    "authorBooks": "Книги автора",
+    "filters": {
+      "name": "Пошук за ім'ям",
+      "country": "Країна",
+      "birthYear": "Рік народження",
+      "booksCount": "Кількість книг"
+    },
+    "sort": {
+      "fullName": "ПІБ",
+      "country": "Країна",
+      "birthYear": "Рік народження",
+      "booksCount": "Кількість книг",
+      "popularity": "Популярність"
+    },
+    "actions": {
+      "showBooks": "Книги"
+    },
+    "table": {
+      "fullName": "ПІБ",
+      "country": "Країна",
+      "birthYear": "Рік народження",
+      "deathYear": "Рік смерті",
+      "booksCount": "Кількість книг",
+      "popularity": "Популярність",
+      "actions": "Дії"
+    },
+    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}"
+  },
+  "categories": {
+    "filters": {
+      "name": "Пошук за назвою",
+      "booksCount": "Кількість книг"
+    },
+    "sort": {
+      "name": "Назва",
+      "booksCount": "Кількість книг",
+      "popularity": "Популярність"
+    },
+    "actions": {
+      "showBooks": "Книги"
+    },
+    "table": {
+      "name": "Назва",
+      "description": "Опис",
+      "booksCount": "Кількість книг",
+      "popularity": "Популярність",
+      "actions": "Дії"
+    },
+    "booksCount": "{count, plural, one {# книга} few {# книги} other {# книг}}",
+    "categoryBooks": "Книги жанру"
   },
   "dashboard": {
     "title": "Панель читання",
@@ -447,7 +454,7 @@
   "recommendations": {
     "title": "Рекомендації книг",
     "personalized": "Підібрано для вас",
-    "popular": "Популярні книги",
+    "popular": "Популярні останнім часом",
     "newArrivals": "Свіжі надходження",
     "noRecommendations": "Рекомендацій поки немає. Спробуйте додати більше книг до своєї бібліотеки!"
   }

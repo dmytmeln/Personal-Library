@@ -22,6 +22,7 @@
     "move": "Move",
     "status": "Status",
     "rating": "Rating",
+    "popularity": "Popularity",
     "details": "Details",
     "notes": "Notes",
     "any": "Any",
@@ -131,7 +132,8 @@
       "publishYear": "Publish Year",
       "rating": "Rating",
       "addedAt": "Added At",
-      "pages": "Pages"
+      "pages": "Pages",
+      "popularity": "Popularity"
     },
     "bulkActions": {
       "addToCollection": "Add to collection",
@@ -301,7 +303,8 @@
       "publishYear": "Publish Year",
       "language": "Language",
       "pages": "Pages",
-      "category": "Category"
+      "category": "Category",
+      "popularity": "Popularity"
     },
     "bulkActions": {
       "addToLibrary": "Add to library"
@@ -358,7 +361,8 @@
       "fullName": "Full Name",
       "country": "Country",
       "birthYear": "Birth Year",
-      "booksCount": "Books Count"
+      "booksCount": "Books Count",
+      "popularity": "Popularity"
     },
     "actions": {
       "showBooks": "Show books"
@@ -369,6 +373,7 @@
       "birthYear": "Birth Year",
       "deathYear": "Death Year",
       "booksCount": "Books Count",
+      "popularity": "Popularity",
       "actions": "Actions"
     },
     "booksCount": "{count, plural, =1 {# book} other {# books}}"
@@ -380,7 +385,8 @@
     },
     "sort": {
       "name": "Name",
-      "booksCount": "Books Count"
+      "booksCount": "Books Count",
+      "popularity": "Popularity"
     },
     "actions": {
       "showBooks": "Show books"
@@ -389,6 +395,7 @@
       "name": "Name",
       "description": "Description",
       "booksCount": "Books Count",
+      "popularity": "Popularity",
       "actions": "Actions"
     },
     "booksCount": "{count, plural, =1 {# book} other {# books}}",

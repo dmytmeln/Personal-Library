@@ -33,6 +33,7 @@
           <th>{{ col('name') }}</th>
           <th>{{ col('description') }}</th>
           <th>{{ col('booksCount') }}</th>
+          <th>{{ col('popularity') }}</th>
           <th>{{ col('actions') }}</th>
         </tr>
         </thead>
@@ -47,6 +48,9 @@
               </td>
               <td>
                 {{ t('booksCount', { count: category.booksCount || 0 }) }}
+              </td>
+              <td>
+                {{ category.popularityCount || 0 }}
               </td>
               <td *transloco="let c; prefix: 'common'">
                 <div class="action-buttons">

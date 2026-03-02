@@ -55,6 +55,12 @@ databaseChangeLog:
                   type: integer
                   constraints:
                     nullable: true
+              - column:
+                  name: popularity_count
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: create_table_book_translations

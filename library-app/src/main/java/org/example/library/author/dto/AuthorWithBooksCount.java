@@ -12,4 +12,6 @@ public interface AuthorWithBooksCount {
     Short getDeathYear();
 
     Long getBooksCount();
+
+    Integer getPopularityCount();
 }

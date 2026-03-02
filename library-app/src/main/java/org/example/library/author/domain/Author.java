@@ -30,6 +30,9 @@ public class Author {
     @Column(name = "death_year")
     private Short deathYear;
 
+    @Column(name = "popularity_count", nullable = false)
+    private Integer popularityCount;
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(name = "languageCode")
     private Map<String, AuthorTranslation> translations;

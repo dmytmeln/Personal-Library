@@ -18,7 +18,7 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
     Optional<BookDisplayView> findByIdAndLanguageCode(Integer id, String languageCode);
 
     @Query(value = """
-            SELECT b.book_id, b.category_id, b.publish_year, b.pages, b.cover_image_url, 
+            SELECT b.book_id, b.category_id, b.publish_year, b.pages, b.cover_image_url, b.popularity_count, 
                    bt.language_code, bt.title, bt.description, bt.book_language, ct.name as category_name
             FROM books b
             JOIN book_translations bt ON b.book_id = bt.book_id
@@ -45,7 +45,7 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
             LEFT JOIN library_books ulb ON v.book_id = ulb.book_id AND ulb.user_id = :userId
             WHERE v.language_code = :languageCode
               AND ulb.library_book_id IS NULL
-            ORDER BY COALESCE(p.popularity, 0) DESC
+            ORDER BY COALESCE(p.popularity, 0) DESC, v.popularity_count DESC
             LIMIT :limit
             """, nativeQuery = true)
     List<BookDisplayView> findPopularBooksRecently(String languageCode, Integer userId, LocalDateTime since, int limit);

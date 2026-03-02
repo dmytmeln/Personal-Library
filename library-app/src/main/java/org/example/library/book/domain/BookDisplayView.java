@@ -29,6 +29,9 @@ public class BookDisplayView {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    @Column(name = "popularity_count")
+    private Integer popularityCount;
+
     @Column(name = "language_code")
     private String languageCode;
 

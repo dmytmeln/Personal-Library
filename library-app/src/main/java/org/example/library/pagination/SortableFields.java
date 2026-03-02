@@ -5,6 +5,7 @@ import java.util.Set;
 public class SortableFields {
 
     private static final String BOOKS_COUNT_FIELD = "booksCount";
+    private static final String POPULARITY_COUNT_FIELD = "popularityCount";
     private static final String FULL_NAME_FIELD = "fullName";
     private static final String NAME_FIELD = "name";
     private static final String TITLE_FIELD = "title";
@@ -28,15 +29,16 @@ public class SortableFields {
 
     public static final Set<String> BOOK_FIELDS = Set.of(
             ID_FIELD, TITLE_FIELD, PUBLISH_YEAR_FIELD, LANGUAGE_FIELD, PAGES_FIELD,
-            CATEGORY_ID_FIELD, CATEGORY_NAME_FIELD
+            CATEGORY_ID_FIELD, CATEGORY_NAME_FIELD, POPULARITY_COUNT_FIELD
     );
 
     public static final Set<String> AUTHOR_FIELDS = Set.of(
-            ID_FIELD, FULL_NAME_FIELD, COUNTRY_FIELD, BIRTH_YEAR_FIELD, DEATH_YEAR_FIELD, BOOKS_COUNT_FIELD
+            ID_FIELD, FULL_NAME_FIELD, COUNTRY_FIELD, BIRTH_YEAR_FIELD, DEATH_YEAR_FIELD, 
+            BOOKS_COUNT_FIELD, POPULARITY_COUNT_FIELD
     );
 
     public static final Set<String> CATEGORY_FIELDS = Set.of(
-            ID_FIELD, NAME_FIELD, BOOKS_COUNT_FIELD
+            ID_FIELD, NAME_FIELD, BOOKS_COUNT_FIELD, POPULARITY_COUNT_FIELD
     );
 
     public static final Set<String> LIBRARY_BOOK_FIELDS = Set.of(

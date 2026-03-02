@@ -17,6 +17,9 @@ public class CategoryDisplayView {
     @Column(name = "category_id")
     private Integer id;
 
+    @Column(name = "popularity_count")
+    private Integer popularityCount;
+
     @Column(name = "language_code")
     private String languageCode;
 

@@ -20,6 +20,9 @@ public class AuthorDisplayView {
     @Column(name = "death_year")
     private Short deathYear;
 
+    @Column(name = "popularity_count")
+    private Integer popularityCount;
+
     @Column(name = "language_code")
     private String languageCode;
 

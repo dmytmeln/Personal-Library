@@ -5,4 +5,5 @@ public interface CategoryWithBooksCount {
     String getName();
     String getDescription();
     Long getBooksCount();
+    Integer getPopularityCount();
 }

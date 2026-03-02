@@ -24,6 +24,9 @@ public class Category {
     @Column(name = "category_id")
     private Integer id;
 
+    @Column(name = "popularity_count", nullable = false)
+    private Integer popularityCount;
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(name = "languageCode")
     private Map<String, CategoryTranslation> translations;

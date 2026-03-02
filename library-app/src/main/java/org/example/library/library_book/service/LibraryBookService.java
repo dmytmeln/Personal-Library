@@ -1,8 +1,10 @@
 package org.example.library.library_book.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.book.repository.BookRepository;
+import org.example.library.category.repository.CategoryRepository;
 import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
@@ -26,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +42,8 @@ public class LibraryBookService {
     private final LibraryBookViewRepository viewRepository;
     private final CollectionBookRepository collectionBookRepository;
     private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
+    private final CategoryRepository categoryRepository;
     private final LibraryBookMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
@@ -69,6 +73,7 @@ public class LibraryBookService {
             throw new NotFoundException("error.book.not_found");
 
         repository.save(LibraryBook.of(bookRepository.getReferenceById(bookId), user));
+        incrementPopularity(List.of(bookId));
     }
 
     @Transactional
@@ -81,7 +86,7 @@ public class LibraryBookService {
 
         if (newBookIds.isEmpty()) return;
 
-        var books = bookRepository.findAllById(bookIds);
+        var books = bookRepository.findAllById(newBookIds);
         if (books.isEmpty())
             throw new NotFoundException("error.book.none_found");
 
@@ -89,9 +94,8 @@ public class LibraryBookService {
                 .map(book -> LibraryBook.of(book, user))
                 .toList();
 
-        if (!libraryBooks.isEmpty()) {
-            repository.saveAll(libraryBooks);
-        }
+        repository.saveAll(libraryBooks);
+        incrementPopularity(newBookIds);
     }
 
     @Transactional
@@ -148,33 +152,35 @@ public class LibraryBookService {
 
     @Transactional
     public void delete(Integer libraryBookId, Integer userId) {
+        var libraryBook = repository.findByIdAndUserIdWithBook(libraryBookId, userId)
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+        var bookId = libraryBook.getBook().getId();
         collectionBookRepository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
-        repository.deleteByIdAndUserId(libraryBookId, userId);
+        repository.delete(libraryBook);
+        decrementPopularity(List.of(bookId));
     }
 
     @Transactional
     public void bulkDelete(List<Integer> libraryBookIds, Integer userId) {
+        var libraryBooks = repository.findAllByIdInAndUserIdWithBook(libraryBookIds, userId);
+        if (libraryBooks.isEmpty()) return;
+
+        var bookIds = libraryBooks.stream().map(lb -> lb.getBook().getId()).toList();
         collectionBookRepository.deleteAllByLibraryBookIdInAndUserId(libraryBookIds, userId);
-        repository.deleteAllByIdInAndUserId(libraryBookIds, userId);
+        repository.deleteAll(libraryBooks);
+        decrementPopularity(bookIds);
     }
 
-    public Map.Entry<Double, Integer> getBookAverageRatingAndCount(Integer bookId) {
-        var bookRatings = repository.findBookRatings(bookId).stream()
-                .filter(Objects::nonNull)
-                .toList();
-        var averageRating = bookRatings.stream()
-                .mapToInt(r -> r)
-                .average()
-                .orElse(0);
-        return new AbstractMap.SimpleEntry<>(averageRating, bookRatings.size());
+    private void incrementPopularity(List<Integer> bookIds) {
+        bookRepository.incrementPopularityCount(bookIds);
+        categoryRepository.incrementPopularityCountByBookIds(bookIds);
+        authorRepository.incrementPopularityCountByBookIds(bookIds);
     }
 
-    public Optional<LibraryBookStatus> getBookStatus(Integer bookId, Integer userId) {
-        return repository.findStatusByBookIdAndUserId(bookId, userId); // todo refactor
-    }
-
-    public Optional<Integer> getUserRatingOfBook(Integer bookId, Integer userId) {
-        return repository.findUserRatingOfBook(bookId, userId); // todo refactor
+    private void decrementPopularity(List<Integer> bookIds) {
+        bookRepository.decrementPopularityCount(bookIds);
+        categoryRepository.decrementPopularityCountByBookIds(bookIds);
+        authorRepository.decrementPopularityCountByBookIds(bookIds);
     }
 
     private LibraryBook getExistingById(Integer libraryBookId, Integer userId) {

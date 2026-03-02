@@ -12,6 +12,7 @@ databaseChangeLog:
                   b.publish_year,
                   b.pages,
                   b.cover_image_url,
+                  b.popularity_count,
                   bt.language_code,
                   bt.title,
                   bt.description,
@@ -33,6 +34,7 @@ databaseChangeLog:
                   a.author_id,
                   a.birth_year,
                   a.death_year,
+                  a.popularity_count,
                   at.language_code,
                   at.full_name,
                   at.country,
@@ -49,6 +51,7 @@ databaseChangeLog:
             selectQuery: |
               SELECT 
                   c.category_id,
+                  c.popularity_count,
                   ct.language_code,
                   ct.name,
                   ct.description

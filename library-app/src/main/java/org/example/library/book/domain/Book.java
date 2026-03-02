@@ -53,6 +53,9 @@ public class Book {
     @Column(name = "vector_version")
     private Integer vectorVersion;
 
+    @Column(name = "popularity_count", nullable = false)
+    private Integer popularityCount;
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(name = "languageCode")
     private Map<String, BookTranslation> translations;
