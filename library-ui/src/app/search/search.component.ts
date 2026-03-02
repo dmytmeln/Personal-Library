@@ -239,7 +239,7 @@ export class SearchComponent implements OnInit {
   }
 
   goToBookDetails(book: Book): void {
-    this.router.navigate(['/book-details'], {state: {id: book.id}});
+    this.router.navigate(['/book-details', book.id]);
   }
 
   private loadBooks(): void {

@@ -21,7 +21,7 @@ export const routes: Routes = [
   { path: 'library', component: LibraryComponent, canActivate: [AuthGuard] },
   { path: 'collections', component: CollectionsComponent, canActivate: [AuthGuard] },
   { path: 'collections/:id', component: CollectionComponent, canActivate: [AuthGuard] },
-  { path: 'book-details', component: BookDetailsComponent },
+  { path: 'book-details/:id', component: BookDetailsComponent },
   { path: 'author-details', component: AuthorDetailsComponent },
   { path: 'category-details', component: CategoryDetailsComponent },
   { path: 'search', component: SearchComponent },

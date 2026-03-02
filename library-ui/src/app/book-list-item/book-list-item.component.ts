@@ -44,6 +44,6 @@ export class BookListItemComponent {
   }
 
   goToBookDetails(): void {
-    this.router.navigate(['/book-details'], {state: {id: this.book().id}});
+    this.router.navigate(['/book-details', this.book().id]);
   }
 }

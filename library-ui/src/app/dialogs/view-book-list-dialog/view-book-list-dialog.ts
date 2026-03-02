@@ -141,7 +141,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
   }
 
   goToBookDetails(book: Book) {
-    this.router.navigate(['book-details'], {state: {id: book.id}}).then(() => {
+    this.router.navigate(['/book-details', book.id]).then(() => {
     });
   }
 

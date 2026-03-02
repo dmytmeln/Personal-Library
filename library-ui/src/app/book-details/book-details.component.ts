@@ -1,5 +1,5 @@
 import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Book} from '../interfaces/book';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
@@ -47,7 +47,7 @@ export class BookDetailsComponent implements OnInit {
   private snackCommon: MatSnackCommon;
   private destroyRef = inject(DestroyRef);
 
-  bookId: number;
+  bookId!: number;
   bookDetails?: BookDetails;
   similarBooks = signal<Book[]>([]);
   viewMode = signal<'grid' | 'list'>('grid');
@@ -55,6 +55,7 @@ export class BookDetailsComponent implements OnInit {
   private libraryBookIds: Set<number> = new Set<number>();
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private bookService: BookService,
     private libraryBookService: LibraryBookService,
@@ -62,20 +63,24 @@ export class BookDetailsComponent implements OnInit {
     matSnackBar: MatSnackBar,
     private translocoService: TranslocoService,
   ) {
-    const state = this.router.getCurrentNavigation()?.extras?.state as { id: number };
-    this.bookId = state?.id;
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
-    if (!this.bookId) {
-      this.router.navigate(['/']);
-      return;
-    }
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.bookId = Number(id);
+        this.loadAll();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
 
     this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.loadBookDetails();
-      this.loadSimilarBooks();
+      if (this.bookId) {
+        this.loadAll();
+      }
     });
   }
 
@@ -144,9 +149,7 @@ export class BookDetailsComponent implements OnInit {
   }
 
   goToBookDetails(id: number): void {
-    this.router.navigateByUrl('/', {skipLocationChange: true}).then(() => {
-      this.router.navigate(['/book-details'], {state: {id}});
-    });
+    this.router.navigate(['/book-details', id]);
   }
 
   changeRating(rating: number): void {
@@ -162,6 +165,12 @@ export class BookDetailsComponent implements OnInit {
       },
       error: (err) => this.snackCommon.showError(err)
     });
+  }
+
+  private loadAll(): void {
+    this.loadBookDetails();
+    this.loadSimilarBooks();
+    this.selection.clear();
   }
 
   private loadBookDetails(): void {
