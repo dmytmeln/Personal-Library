@@ -47,12 +47,12 @@ public class AuthorService {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         return displayViewRepository.findByIdAndLanguageCode(authorId, lang)
                 .map(mapper::toDto)
-                .orElseThrow(() -> new NotFoundException("Author not found"));
+                .orElseThrow(() -> new NotFoundException("error.author.not_found"));
     }
 
     public Author getExistingById(Integer authorId) {
         return repository.findById(authorId)
-                .orElseThrow(() -> new NotFoundException("Author not found"));
+                .orElseThrow(() -> new NotFoundException("error.author.not_found"));
     }
 
     public List<CountryWithCount> getAllCountries() {

@@ -45,7 +45,7 @@ public class LibraryBookController {
 
     @PostMapping("/bulk")
     @ResponseStatus(HttpStatus.CREATED)
-    public void bulkAdd(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkLibraryBookRequest request) {
+    public void bulkAdd(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkRequest request) {
         service.bulkAdd(request.getIds(), userDetails.user());
     }
 
@@ -98,7 +98,7 @@ public class LibraryBookController {
 
     @PostMapping("/bulk-remove")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void bulkDelete(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkLibraryBookRequest request) {
+    public void bulkDelete(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkRequest request) {
         service.bulkDelete(request.getIds(), userDetails.getId());
     }
 

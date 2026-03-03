@@ -2,10 +2,9 @@ package org.example.library.collection_book.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.library.collection_book.dto.CollectionBookDto;
 import org.example.library.collection_book.dto.CollectionBookSearchParams;
 import org.example.library.collection_book.service.CollectionBookService;
-import org.example.library.library_book.dto.BulkLibraryBookRequest;
+import org.example.library.library_book.dto.BulkRequest;
 import org.example.library.library_book.dto.LibraryBookDto;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.security.UserDetailsImpl;
@@ -45,7 +44,7 @@ public class CollectionBookController {
     @ResponseStatus(HttpStatus.CREATED)
     public void bulkAddBooksToCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @PathVariable int collectionId,
-                                         @Valid @RequestBody BulkLibraryBookRequest request
+                                         @Valid @RequestBody BulkRequest request
     ) {
         service.bulkAddBooksToCollection(userDetails.getId(), collectionId, request.getIds());
     }
@@ -63,7 +62,7 @@ public class CollectionBookController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void bulkRemoveBooksFromCollection(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                               @PathVariable int collectionId,
-                                              @Valid @RequestBody BulkLibraryBookRequest request
+                                              @Valid @RequestBody BulkRequest request
     ) {
         service.bulkRemoveBooksFromCollection(userDetails.getId(), collectionId, request.getIds());
     }

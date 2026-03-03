@@ -5,8 +5,11 @@ import org.example.library.admin.dto.AdminAuthorDto;
 import org.example.library.admin.dto.AdminBookDto;
 import org.example.library.admin.dto.AdminCategoryDto;
 import org.example.library.admin.service.AdminService;
+import org.example.library.library_book.dto.BulkRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -38,10 +41,10 @@ public class AdminController {
         adminService.deleteBook(id);
     }
 
-    @DeleteMapping("/books")
+    @PostMapping("/books/bulk-delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBooks(@RequestBody java.util.List<Integer> ids) {
-        adminService.deleteBooks(ids);
+    public void deleteBooks(@RequestBody BulkRequest request) {
+        adminService.deleteBooks(request.getIds());
     }
 
     // Authors
@@ -67,10 +70,10 @@ public class AdminController {
         adminService.deleteAuthor(id);
     }
 
-    @DeleteMapping("/authors")
+    @PostMapping("/authors/bulk-delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAuthors(@RequestBody java.util.List<Integer> ids) {
-        adminService.deleteAuthors(ids);
+    public void deleteAuthors(@RequestBody BulkRequest request) {
+        adminService.deleteAuthors(request.getIds());
     }
 
     // Categories
@@ -96,9 +99,10 @@ public class AdminController {
         adminService.deleteCategory(id);
     }
 
-    @DeleteMapping("/categories")
+    @PostMapping("/categories/bulk-delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategories(@RequestBody java.util.List<Integer> ids) {
-        adminService.deleteCategories(ids);
+    public void deleteCategories(@RequestBody BulkRequest request) {
+        adminService.deleteCategories(request.getIds());
     }
+
 }

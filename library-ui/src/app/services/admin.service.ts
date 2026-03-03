@@ -33,7 +33,7 @@ export class AdminService {
   }
 
   deleteBooks(ids: number[]): Observable<void> {
-    return this.apiService.delete<void>(`${this.baseUrl}/books`, { body: ids });
+    return this.apiService.post<void>(`${this.baseUrl}/books/bulk-delete`, { body: { ids } });
   }
 
   // Authors
@@ -54,7 +54,7 @@ export class AdminService {
   }
 
   deleteAuthors(ids: number[]): Observable<void> {
-    return this.apiService.delete<void>(`${this.baseUrl}/authors`, { body: ids });
+    return this.apiService.post<void>(`${this.baseUrl}/authors/bulk-delete`, { body: { ids } });
   }
 
   // Categories
@@ -75,7 +75,7 @@ export class AdminService {
   }
 
   deleteCategories(ids: number[]): Observable<void> {
-    return this.apiService.delete<void>(`${this.baseUrl}/categories`, { body: ids });
+    return this.apiService.post<void>(`${this.baseUrl}/categories/bulk-delete`, { body: { ids } });
   }
 
 }
