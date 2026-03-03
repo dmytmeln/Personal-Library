@@ -5,6 +5,7 @@ import org.example.library.recommendations.service.GenreMappingService;
 import org.example.library.recommendations.service.GenreMappingService.GenreChangeType;
 import org.example.library.recommendations.service.GlobalRebuildService;
 import org.example.library.recommendations.service.RecommendationTriggerService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
+@ConditionalOnProperty(name = "app.recommendations.enabled", havingValue = "true", matchIfMissing = true)
 public class RecommendationRebuildJob {
 
     private final RecommendationTriggerService triggerService;
