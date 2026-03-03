@@ -3,8 +3,14 @@ name: Frontend CI/CD
 on:
   push:
     branches: [ "master", "dev" ]
+    paths:
+      - 'library-ui/**'
+      - '.github/workflows/frontend-ci-cd.yml'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - 'library-ui/**'
+      - '.github/workflows/frontend-ci-cd.yml'
 
 jobs:
   ci:
