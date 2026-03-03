@@ -2,7 +2,7 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ "master", "dev" ]
+    branches: [ "master" ]
     paths:
       - 'library-ui/**'
       - '.github/workflows/frontend-ci-cd.yml'
