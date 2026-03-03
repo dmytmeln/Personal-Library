@@ -7,19 +7,14 @@ spring:
     password: ${DB_PASSWORD}
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
     properties:
-      hibernate:
-        generate_statistics: true
-        show_sql: true
-        format_sql: true
-        default_batch_fetch_size: ${application.pagination.max-page-size}
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
+      default_batch_fetch_size: ${application.pagination.max-page-size}
+      jdbc:
+        batch_size: 20
+      order_inserts: true
+      order_updates: true
   liquibase:
     enabled: true
   security:
@@ -64,7 +59,3 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
-
-logging:
-  level:
-    org.example.library: DEBUG

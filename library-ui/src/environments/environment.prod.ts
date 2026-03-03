@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'changeit',
+  apiBaseUrl: 'https://personal-library-app.duckdns.org',
   cookieName: 'jwt'
 };

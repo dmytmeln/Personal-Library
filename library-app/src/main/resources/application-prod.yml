@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      total-size-cap: 500MB
+      max-history:
+  file:
+    name: /var/log/app/application.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
