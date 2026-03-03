@@ -16,76 +16,12 @@
   <mat-tab-group [selectedIndex]="uiState.activeTabIndex" (selectedIndexChange)="onTabChange($event)"
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
     <mat-tab [label]="t('tabs.allBooks')">
-      <div class="tab-content">
-        <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
-                          [(isExpanded)]="isFiltersExpanded"
-                          [activeFiltersCount]="activeFiltersCount()"
-                          (resetAll)="clearAllFilters()">
-          <div topRowFilters *transloco="let f; prefix: 'search.filters'">
-            <app-text-filter
-              [label]="f('bookTitle')"
-              [value]="filters.state().title || ''"
-              (valueChange)="filters.update('title', $event)"/>
-          </div>
-
-          <div mainFilters *transloco="let f; prefix: 'search.filters'">
-            <app-autocomplete-filter
-              [label]="f('author')"
-              [searchInput]="authorSearch.query()"
-              [selected]="filters.state().author"
-              [options]="authorSearch.results()"
-              displayField="fullName"
-              (searchInputChange)="onAuthorSearchInput($event)"
-              (optionSelected)="onAuthorSelected($event)"
-              (clear)="clearAuthorFilter()"/>
-
-            <app-autocomplete-filter
-              [label]="f('category')"
-              [searchInput]="categorySearch.query()"
-              [selected]="filters.state().category"
-              [options]="categorySearch.results()"
-              displayField="name"
-              (searchInputChange)="onCategorySearchInput($event)"
-              (optionSelected)="onCategorySelected($event)"
-              (clear)="clearCategoryFilter()"/>
-          </div>
-
-          <div secondaryFilters *transloco="let f; prefix: 'search.filters'">
-            <app-range-filter
-              [label]="f('publishYear')"
-              [range]="filters.state().publishYear"
-              (rangeChange)="filters.update('publishYear', $event)"/>
-
-            <app-range-filter
-              [label]="f('pages')"
-              [range]="filters.state().pages"
-              (rangeChange)="filters.update('pages', $event)"/>
-          </div>
-
-          <div footerFilters>
-            <app-language-filter
-              [available]="languages()"
-              [selected]="filters.state().languages"
-              [showAll]="showAllLanguages()"
-              (toggle)="toggleLanguage($event)"
-              (toggleShowAll)="showAllLanguages.set(!showAllLanguages())"
-              (clear)="filters.update('languages', [])"/>
-          </div>
-        </app-filter-shell>
-
-        <app-sort-bar [options]="DEFAULT_SORT_OPTIONS()" (sortChange)="onBooksSortChange($event)"/>
-
-        <app-books-display
-          [books]="booksState.items"
-          [totalElements]="booksState.pagination.totalElements"
-          [pageSize]="booksState.pagination.pageSize"
-          [pageIndex]="booksState.pagination.currentPage"
-          [loading]="booksState.loading"
-          [actionsMenu]="searchBookMenu"
-          [selectionStore]="selection"
-          [viewMode]="viewMode()"
-          (pageChange)="onBooksPageChange($event)"/>
-      </div>
+      <app-book-list mode="search" [actionsMenu]="searchBookMenu" [viewMode]="viewMode()">
+        <button bulkActions mat-flat-button (click)="bulkAddBooks()">
+          <mat-icon>add_circle</mat-icon>
+          <span>{{ t('bulkActions.addToLibrary') }}</span>
+        </button>
+      </app-book-list>
     </mat-tab>
 
     <mat-tab [label]="t('tabs.authors')">
@@ -100,13 +36,6 @@
       }
     </mat-tab>
   </mat-tab-group>
-
-  <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-    <button mat-flat-button (click)="bulkAddBooks()">
-      <mat-icon>add_circle</mat-icon>
-      <span>{{ t('bulkActions.addToLibrary') }}</span>
-    </button>
-  </app-bulk-action-bar>
 
   <mat-menu #searchBookMenu="matMenu">
     <ng-template matMenuContent let-book>

@@ -1,20 +1,22 @@
-import { Component, signal, viewChild } from '@angular/core';
+import { Component, signal, viewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { SearchComponent } from '../../search/search.component';
+import { BookListComponent } from '../../book-list/book-list.component';
 import { AuthorListComponent } from '../../author-list/author-list.component';
 import { CategoryListComponent } from '../../category-list/category-list.component';
 import { Router } from '@angular/router';
-import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { TranslocoDirective, TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 import { AdminService } from '../../services/admin.service';
 import { Author } from '../../interfaces/author';
 import { Category } from '../../interfaces/category';
+import { Book } from '../../interfaces/book';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackCommon } from '../../common/mat-snack-common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../dialogs/confirmation-dialog/confirmation-dialog.component';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -24,17 +26,20 @@ import { ConfirmationDialogComponent } from '../../dialogs/confirmation-dialog/c
     MatTabsModule,
     MatButtonModule,
     MatIconModule,
-    SearchComponent,
+    BookListComponent,
     AuthorListComponent,
     CategoryListComponent,
     TranslocoDirective,
+    TranslocoPipe,
     MatDialogModule,
+    MatMenuModule,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent {
 
+  bookList = viewChild(BookListComponent);
   authorList = viewChild(AuthorListComponent);
   categoryList = viewChild(CategoryListComponent);
 
@@ -55,6 +60,29 @@ export class AdminDashboardComponent {
     if (this.activeTab === 0) this.router.navigate(['/admin/book/new']);
     if (this.activeTab === 1) this.router.navigate(['/admin/author/new']);
     if (this.activeTab === 2) this.router.navigate(['/admin/category/new']);
+  }
+
+  editBook(book: Book): void {
+    this.router.navigate(['/admin/book', book.id]);
+  }
+
+  onBookDeleted(book: Book): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { message: this.translocoService.translate('common.confirmDelete') }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteBook(book.id).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            const list = this.bookList();
+            if (list) list.loadBooks();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
   }
 
   onAuthorDeleted(author: Author): void {

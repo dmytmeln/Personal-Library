@@ -14,6 +14,7 @@ import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
+import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,6 +130,9 @@ public class AdminService {
         if (!authorRepository.existsById(id))
             throw new NotFoundException("error.author.not_found");
 
+        if (bookRepository.existsByAuthorsId(id))
+            throw new BadRequestException("error.author.has_books");
+
         authorRepository.deleteById(id);
     }
 
@@ -152,6 +156,9 @@ public class AdminService {
     public void deleteCategory(Integer id) {
         if (!categoryRepository.existsById(id))
             throw new NotFoundException("error.category.not_found");
+
+        if (bookRepository.existsByCategoryId(id))
+            throw new BadRequestException("error.category.has_books");
 
         categoryRepository.deleteById(id);
     }

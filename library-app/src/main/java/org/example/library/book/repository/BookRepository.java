@@ -59,4 +59,8 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
     @Query("UPDATE Book b SET b.popularityCount = b.popularityCount - 1 WHERE b.id IN :ids")
     void decrementPopularityCount(List<Integer> ids);
 
+    boolean existsByAuthorsId(Integer authorId);
+
+    boolean existsByCategoryId(Integer categoryId);
+
 }

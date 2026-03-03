@@ -18,10 +18,8 @@ public class LibraryApplication {
 
     // todo:
     //  google books api and openlibrary api integrations for fetching books
-    //  admin panel
+    //  admin panel ?
     //  download cover for books
-    //  elk
-    //  grafana
     //  CI/CD
     //  AWS deployment
     //  BE + FE: share library with other users?

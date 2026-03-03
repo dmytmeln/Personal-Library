@@ -21,92 +21,22 @@
                  mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
 
     <mat-tab [label]="t('tabs.allBooks')">
-      <div class="tab-content">
-
-        <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
-                          [(isExpanded)]="isFiltersExpanded"
-                          [activeFiltersCount]="activeFiltersCount()"
-                          (resetAll)="clearAllFilters()">
-          <div topRowFilters *transloco="let f; prefix: 'library.filters'">
-            <app-text-filter
-              [label]="f('bookTitle')"
-              [value]="filters.state().title"
-              (valueChange)="filters.update('title', $event)"/>
-          </div>
-
-          <div mainFilters *transloco="let f; prefix: 'library.filters'">
-            <app-select-filter
-              [label]="f('status')"
-              [value]="filters.state().status"
-              [options]="statusOptions()"
-              (valueChange)="filters.update('status', $event)"
-              (clear)="filters.update('status', null)"
-            />
-
-            <app-autocomplete-filter
-              [label]="f('author')"
-              [searchInput]="authorSearch.query()"
-              [selected]="filters.state().author"
-              [options]="authorSearch.results()"
-              displayField="fullName"
-              (searchInputChange)="onAuthorSearchInput($event)"
-              (optionSelected)="onAuthorSelected($event)"
-              (clear)="clearAuthorFilter()"/>
-
-            <app-autocomplete-filter
-              [label]="f('category')"
-              [searchInput]="categorySearch.query()"
-              [selected]="filters.state().category"
-              [options]="categorySearch.results()"
-              displayField="name"
-              (searchInputChange)="onCategorySearchInput($event)"
-              (optionSelected)="onCategorySelected($event)"
-              (clear)="clearCategoryFilter()"/>
-          </div>
-
-          <div secondaryFilters *transloco="let f; prefix: 'library.filters'">
-            <ng-container *transloco="let c; prefix: 'common'">
-              <app-range-filter
-                [label]="f('publishYear')"
-                [range]="filters.state().publishYear"
-                (rangeChange)="filters.update('publishYear', $event)"/>
-
-              <app-range-filter
-                [label]="f('pages')"
-                [range]="filters.state().pages"
-                (rangeChange)="filters.update('pages', $event)"/>
-
-              <app-range-filter
-                [label]="f('rating')"
-                [range]="filters.state().rating"
-                (rangeChange)="filters.update('rating', $event)"/>
-            </ng-container>
-          </div>
-
-          <div footerFilters>
-            <app-language-filter
-              [available]="languages()"
-              [selected]="filters.state().languages"
-              [showAll]="showAllLanguages()"
-              (toggle)="toggleLanguage($event)"
-              (toggleShowAll)="showAllLanguages.set(!showAllLanguages())"
-              (clear)="filters.update('languages', [])"/>
-          </div>
-        </app-filter-shell>
-
-        <app-sort-bar [options]="bookSortOptions()" (sortChange)="onSortChange($event)"/>
-
-        <app-books-display
-          [books]="booksState.items"
-          [totalElements]="booksState.totalElements"
-          [pageSize]="booksState.pageSize"
-          [pageIndex]="booksState.currentPage"
-          [loading]="booksState.loading"
-          [actionsMenu]="libraryBookMenu"
-          [selectionStore]="selection"
-          [viewMode]="viewMode()"
-          (pageChange)="onPageChange($event)"/>
-      </div>
+      <app-book-list mode="library" [actionsMenu]="libraryBookMenu" [viewMode]="viewMode()">
+        <ng-container bulkActions *transloco="let b; prefix: 'library.bulkActions'">
+          <button mat-flat-button [matMenuTriggerFor]="bulkStatusMenu">
+            <mat-icon>label</mat-icon>
+            <span>{{ b('changeStatus') }}</span>
+          </button>
+          <button mat-flat-button (click)="openBulkAddToCollectionDialog()">
+            <mat-icon>playlist_add</mat-icon>
+            <span>{{ b('addToCollection') }}</span>
+          </button>
+          <button mat-flat-button color="warn" (click)="bulkRemoveFromLibrary()">
+            <mat-icon>delete</mat-icon>
+            <span>{{ b('removeFromLibrary') }}</span>
+          </button>
+        </ng-container>
+      </app-book-list>
     </mat-tab>
 
     <mat-tab [label]="t('tabs.authors')">
@@ -123,23 +53,6 @@
 
   </mat-tab-group>
 </div>
-
-<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
-  <ng-container *transloco="let b; prefix: 'library.bulkActions'">
-    <button mat-flat-button [matMenuTriggerFor]="bulkStatusMenu">
-      <mat-icon>label</mat-icon>
-      <span>{{ b('changeStatus') }}</span>
-    </button>
-    <button mat-flat-button (click)="openBulkAddToCollectionDialog()">
-      <mat-icon>playlist_add</mat-icon>
-      <span>{{ b('addToCollection') }}</span>
-    </button>
-    <button mat-flat-button color="warn" (click)="bulkRemoveFromLibrary()">
-      <mat-icon>delete</mat-icon>
-      <span>{{ b('removeFromLibrary') }}</span>
-    </button>
-  </ng-container>
-</app-bulk-action-bar>
 
 <mat-menu #bulkStatusMenu="matMenu">
   @for (option of statusOptions(); track option.value) {

@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {LibraryBookService} from '../services/library-book.service';
 import {LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
@@ -29,60 +29,22 @@ import {
   LibraryBookDetailsDialogResult
 } from '../dialogs/library-book-details-dialog/library-book-details-dialog.component';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
-import {EntityFilterStore} from '../services/entity-filter.store';
-import {AutocompleteSearchStore} from '../services/autocomplete-search.store';
-import {LibraryFilters} from '../interfaces/filters';
 import {Author} from '../interfaces/author';
 import {Category} from '../interfaces/category';
-import {LanguageWithCount} from '../interfaces/language-with-count';
-import {PageEvent} from '@angular/material/paginator';
-import {LibraryAuthorService} from '../services/library-author.service';
-import {LibraryCategoryService} from '../services/library-category.service';
 import {CommonModule} from '@angular/common';
-import {
-  FilterShellComponent,
-  FooterFiltersDirective,
-  MainFiltersDirective,
-  SecondaryFiltersDirective,
-  TopRowFiltersDirective
-} from '../common/filter-shell/filter-shell.component';
-import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
-import {AutocompleteFilterComponent} from '../common/filters/autocomplete-filter/autocomplete-filter.component';
-import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
-import {LanguageFilterComponent} from '../common/filters/language-filter/language-filter.component';
-import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
-import {BooksDisplayComponent} from '../books-display/books-display.component';
-import {MatSelectModule} from '@angular/material/select';
-import {FormsModule} from '@angular/forms';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {SelectFilterComponent} from '../common/filters/select-filter/select-filter.component';
 import {AuthorListComponent} from '../author-list/author-list.component';
 import {CategoryListComponent} from '../category-list/category-list.component';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
-import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
-import {SelectionStore} from '../services/selection.store';
 import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {LibraryStore} from '../services/library.store';
-
-const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
-  title: '',
-  author: null,
-  category: null,
-  publishYear: {min: null, max: null},
-  pages: {min: null, max: null},
-  languages: [],
-  status: null,
-  rating: {min: null, max: null}
-};
+import {BookListComponent} from '../book-list/book-list.component';
 
 @Component({
   selector: 'app-library',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     MatTabGroup,
     MatTab,
     MatButtonModule,
@@ -90,26 +52,11 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
     MatExpansionModule,
     LibraryBookMenuItemsComponent,
     MatMenuModule,
-    FilterShellComponent,
-    TopRowFiltersDirective,
-    MainFiltersDirective,
-    SecondaryFiltersDirective,
-    FooterFiltersDirective,
-    TextFilterComponent,
-    AutocompleteFilterComponent,
-    RangeFilterComponent,
-    LanguageFilterComponent,
-    SortBarComponent,
-    BooksDisplayComponent,
-    MatSelectModule,
-    MatTooltipModule,
-    MatProgressSpinnerModule,
-    SelectFilterComponent,
     AuthorListComponent,
     CategoryListComponent,
-    BulkActionBarComponent,
-    MatButtonToggleModule,
     TranslocoDirective,
+    BookListComponent,
+    MatButtonToggleModule,
 
   ],
   templateUrl: './library.component.html',
@@ -118,28 +65,15 @@ const EMPTY_LIBRARY_FILTERS: LibraryFilters = {
 export class LibraryComponent implements OnInit {
 
   private readonly translocoService = inject(TranslocoService);
+  private readonly libraryBookService = inject(LibraryBookService);
+  private readonly dialog = inject(MatDialog);
+  private readonly bookService = inject(BookService);
+  private readonly collectionService = inject(CollectionService);
+  private readonly collectionBookService = inject(CollectionBookService);
+  private readonly libraryStore = inject(LibraryStore);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly bookSortOptions = toSignal(
-    this.translocoService.selectTranslateObject('library.sort').pipe(
-      map(t => [
-        {field: 'title', label: t.title},
-        {field: 'publishYear', label: t.publishYear},
-        {field: 'rating', label: t.rating},
-        {field: 'addedAt', label: t.addedAt},
-        {field: 'pages', label: t.pages},
-      ])
-    ),
-    {initialValue: []}
-  );
-
-  booksState = {
-    items: [] as LibraryBook[],
-    totalElements: 0,
-    pageSize: 15,
-    currentPage: 0,
-    loading: false,
-    sort: undefined as string[] | undefined,
-  };
+  readonly bookList = viewChild(BookListComponent);
 
   readonly statusOptions = toSignal(
     this.translocoService.selectTranslateObject('library.statuses').pipe(
@@ -151,37 +85,7 @@ export class LibraryComponent implements OnInit {
     {initialValue: []}
   );
 
-  readonly selection = new SelectionStore();
-  readonly filters = new EntityFilterStore<LibraryFilters>(EMPTY_LIBRARY_FILTERS);
   readonly viewMode = signal<'grid' | 'list'>('grid');
-
-  readonly isFiltersExpanded = signal(false);
-  readonly activeFiltersCount = computed(() => {
-    const f = this.filters.state();
-    let count = 0;
-    if (f.status) count++;
-    if (f.author) count++;
-    if (f.category) count++;
-    if (f.publishYear.min || f.publishYear.max) count++;
-    if (f.pages.min || f.pages.max) count++;
-    if (f.languages.length > 0) count++;
-    if (f.rating.min || f.rating.max) count++;
-    return count;
-  });
-
-  readonly authorSearch = new AutocompleteSearchStore<Author>(
-    (q, p, s) => this.libraryAuthorService.getAll({name: q, page: p, size: s}),
-    450,
-    10
-  );
-  readonly categorySearch = new AutocompleteSearchStore<Category>(
-    (q, p, s) => this.libraryCategoryService.getAll({name: q, page: p, size: s}),
-    450,
-    10
-  );
-
-  languages = signal<LanguageWithCount[]>([]);
-  showAllLanguages = signal(false);
 
   uiState = {
     activeTabIndex: 0,
@@ -192,22 +96,12 @@ export class LibraryComponent implements OnInit {
   private snackCommon: MatSnackCommon;
 
   constructor(
-    private libraryBookService: LibraryBookService,
-    private dialog: MatDialog,
-    private bookService: BookService,
-    private libraryAuthorService: LibraryAuthorService,
-    private libraryCategoryService: LibraryCategoryService,
-    private collectionService: CollectionService,
-    private collectionBookService: CollectionBookService,
-    private libraryStore: LibraryStore,
-    private destroyRef: DestroyRef,
     matSnackBar: MatSnackBar,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit(): void {
-    this.setupSubscriptions();
   }
 
   onTabChange(index: number): void {
@@ -216,61 +110,22 @@ export class LibraryComponent implements OnInit {
     if (index === 2) this.uiState.categoriesOpened = true;
   }
 
-  //region Books Methods
-
-  onPageChange(event: PageEvent): void {
-    this.booksState.currentPage = event.pageIndex;
-    this.booksState.pageSize = event.pageSize;
-    this.loadBooks();
-  }
-
-  onSortChange(sort: string[] | undefined): void {
-    this.booksState.sort = sort;
-    this.booksState.currentPage = 0;
-    this.loadBooks();
-  }
-
   private loadBooks(): void {
-    this.booksState.loading = true;
-    const f = this.filters.state();
-
-    this.libraryBookService.getAll({
-      page: this.booksState.currentPage,
-      size: this.booksState.pageSize,
-      sort: this.booksState.sort,
-      title: f.title,
-      status: f.status,
-      authorId: f.author?.id,
-      categoryId: f.category?.id,
-      publishYearMin: f.publishYear.min ?? undefined,
-      publishYearMax: f.publishYear.max ?? undefined,
-      pagesMin: f.pages.min ?? undefined,
-      pagesMax: f.pages.max ?? undefined,
-      ratingMin: f.rating.min ?? undefined,
-      ratingMax: f.rating.max ?? undefined,
-      languages: f.languages.length > 0 ? f.languages : undefined,
-    }).subscribe({
-      next: page => {
-        this.booksState.items = page.content;
-        this.booksState.totalElements = page.page.totalElements;
-        this.booksState.loading = false;
-      },
-      error: () => this.booksState.loading = false
-    });
+    this.bookList()?.loadBooks();
   }
-
-  //endregion
 
   goToAuthorBooks(author: Author): void {
     this.uiState.activeTabIndex = 0;
-    this.filters.update('author', author);
-    this.authorSearch.query.set(author.fullName);
+    setTimeout(() => {
+      this.bookList()?.onAuthorSelected(author);
+    });
   }
 
   goToCategoryBooks(category: Category): void {
     this.uiState.activeTabIndex = 0;
-    this.filters.update('category', category);
-    this.categorySearch.query.set(category.name);
+    setTimeout(() => {
+      this.bookList()?.onCategorySelected(category);
+    });
   }
 
   deleteLibraryBook(libraryBook: LibraryBook): void {
@@ -327,7 +182,9 @@ export class LibraryComponent implements OnInit {
   }
 
   bulkRemoveFromLibrary(): void {
-    const ids = this.selection.selectedIds();
+    const list = this.bookList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
     const message = this.translocoService.translate('library.bulkRemoveConfirm', {count: ids.length});
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
@@ -341,7 +198,7 @@ export class LibraryComponent implements OnInit {
         next: () => {
           this.loadBooks();
           this.libraryStore.triggerRefresh();
-          this.selection.clear();
+          list.selection.clear();
           this.snackCommon.showSuccess(this.translocoService.translate('library.success.booksRemoved'));
         },
         error: (err) => this.snackCommon.showError(err)
@@ -350,11 +207,13 @@ export class LibraryComponent implements OnInit {
   }
 
   bulkUpdateStatus(status: LibraryBookStatus): void {
-    const ids = this.selection.selectedIds();
+    const list = this.bookList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
     this.libraryBookService.bulkUpdateStatus(ids, status).subscribe({
       next: () => {
         this.loadBooks();
-        this.selection.clear();
+        list.selection.clear();
         this.snackCommon.showSuccess(this.translocoService.translate('library.success.statusChanged'));
       },
       error: (err) => this.snackCommon.showError(err)
@@ -362,7 +221,9 @@ export class LibraryComponent implements OnInit {
   }
 
   openBulkAddToCollectionDialog(): void {
-    const ids = this.selection.selectedIds();
+    const list = this.bookList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
     const dialogRef = this.dialog.open(CollectionSelectorDialogComponent, {
       data: {
         initialSelectionId: null,
@@ -371,12 +232,11 @@ export class LibraryComponent implements OnInit {
       } as CollectionSelectorDialogData
     });
 
-    // todo duplicate code
     dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
       if (selection.id) {
         this.collectionBookService.bulkAdd(selection.id, ids).subscribe({
           next: () => {
-            this.selection.clear();
+            list.selection.clear();
             this.snackCommon.showSuccess(this.translocoService.translate('library.success.booksAddedToCollection'));
           },
           error: (err) => this.snackCommon.showError(err)
@@ -411,7 +271,6 @@ export class LibraryComponent implements OnInit {
         } as CollectionSelectorDialogData
       });
 
-      // todo duplicate code fragment
       dialogRef.afterClosed().pipe(filter(result => result !== undefined)).subscribe((selection: SelectedCollection) => {
         if (selection.id) {
           this.collectionBookService.addBookToCollection(selection.id, libraryBook.id).subscribe({
@@ -442,7 +301,6 @@ export class LibraryComponent implements OnInit {
     });
   }
 
-  // todo dulicate code
   openNoteDialog(libraryBook: LibraryBook): void {
     this.dialog.open(NoteDialogComponent, {
       data: {
@@ -500,81 +358,6 @@ export class LibraryComponent implements OnInit {
         });
       }
     });
-  }
-
-  private loadLanguages(): void {
-    this.libraryBookService.getLanguages().subscribe(langs => this.languages.set(langs));
-  }
-
-  private setupSubscriptions(): void {
-    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      const hadFilters = this.hasActiveFilters();
-      this.clearAllFilters();
-      if (!hadFilters) {
-        this.loadBooks();
-      }
-      this.loadLanguages();
-    });
-
-    this.filters.filtersChanged$.subscribe(() => {
-      this.booksState.currentPage = 0;
-      this.loadBooks();
-    });
-  }
-
-  onAuthorSearchInput(val: string): void {
-    this.authorSearch.search(val);
-  }
-
-  onCategorySearchInput(val: string): void {
-    this.categorySearch.search(val);
-  }
-
-  onAuthorSelected(author: Author): void {
-    this.filters.update('author', author);
-    this.authorSearch.clear();
-  }
-
-  onCategorySelected(category: Category): void {
-    this.filters.update('category', category);
-    this.categorySearch.clear();
-  }
-
-  clearAuthorFilter(): void {
-    this.filters.update('author', null);
-    this.authorSearch.clear();
-  }
-
-  clearCategoryFilter(): void {
-    this.filters.update('category', null);
-    this.categorySearch.clear();
-  }
-
-  toggleLanguage(language: string): void {
-    const current = [...this.filters.state().languages];
-    const index = current.indexOf(language);
-    if (index === -1) {
-      current.push(language);
-    } else {
-      current.splice(index, 1);
-    }
-    this.filters.update('languages', current);
-  }
-
-  hasActiveFilters(): boolean {
-    return this.filters.hasActiveFilters(f => {
-      return f.author !== null || f.category !== null || f.title !== '' ||
-        f.publishYear.min !== null || f.publishYear.max !== null ||
-        f.pages.min !== null || f.pages.max !== null ||
-        f.languages.length > 0 || f.status !== null ||
-        f.rating.min !== null || f.rating.max !== null
-    });
-  }
-
-  clearAllFilters(): void {
-    this.filters.reset(EMPTY_LIBRARY_FILTERS);
-    this.authorSearch.clear();
-    this.categorySearch.clear();
   }
 
 }

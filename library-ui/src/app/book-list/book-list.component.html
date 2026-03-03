@@ -1,0 +1,93 @@
+<div class="book-list-container" *transloco="let t; prefix: 'search'">
+  <div class="tab-content">
+    <app-filter-shell [hasActiveFilters]="hasActiveFilters()"
+                      [(isExpanded)]="isFiltersExpanded"
+                      [activeFiltersCount]="activeFiltersCount()"
+                      (resetAll)="clearAllFilters()">
+      <div topRowFilters *transloco="let f; prefix: filterPrefix()">
+        <app-text-filter
+          [label]="f('bookTitle')"
+          [value]="filters.state().title || ''"
+          (valueChange)="filters.update('title', $event)"/>
+      </div>
+
+      <div mainFilters *transloco="let f; prefix: filterPrefix()">
+        @if (mode() === 'library') {
+          <app-select-filter
+            [label]="f('status')"
+            [value]="asLibraryFilters(filters.state()).status"
+            [options]="statusOptions()"
+            (valueChange)="filters.update('status', $event)"
+            (clear)="filters.update('status', null)"
+          />
+        }
+
+        <app-autocomplete-filter
+          [label]="f('author')"
+          [searchInput]="authorSearch.query()"
+          [selected]="filters.state().author"
+          [options]="authorSearch.results()"
+          displayField="fullName"
+          (searchInputChange)="onAuthorSearchInput($event)"
+          (optionSelected)="onAuthorSelected($event)"
+          (clear)="clearAuthorFilter()"/>
+
+        <app-autocomplete-filter
+          [label]="f('category')"
+          [searchInput]="categorySearch.query()"
+          [selected]="filters.state().category"
+          [options]="categorySearch.results()"
+          displayField="name"
+          (searchInputChange)="onCategorySearchInput($event)"
+          (optionSelected)="onCategorySelected($event)"
+          (clear)="clearCategoryFilter()"/>
+      </div>
+
+      <div secondaryFilters *transloco="let f; prefix: filterPrefix()">
+        <app-range-filter
+          [label]="f('publishYear')"
+          [range]="filters.state().publishYear"
+          (rangeChange)="filters.update('publishYear', $event)"/>
+
+        <app-range-filter
+          [label]="f('pages')"
+          [range]="filters.state().pages"
+          (rangeChange)="filters.update('pages', $event)"/>
+
+        @if (mode() === 'library') {
+          <app-range-filter
+            [label]="f('rating')"
+            [range]="asLibraryFilters(filters.state()).rating"
+            (rangeChange)="filters.update('rating', $event)"/>
+        }
+      </div>
+
+      <div footerFilters>
+        <app-language-filter
+          [available]="languages()"
+          [selected]="filters.state().languages"
+          [showAll]="showAllLanguages()"
+          (toggle)="toggleLanguage($event)"
+          (toggleShowAll)="showAllLanguages.set(!showAllLanguages())"
+          (clear)="filters.update('languages', [])"/>
+      </div>
+    </app-filter-shell>
+
+    <app-sort-bar [options]="sortOptions()" (sortChange)="onSortChange($event)"/>
+
+    <app-books-display
+      [books]="booksState.items"
+      [totalElements]="booksState.totalElements"
+      [pageSize]="booksState.pageSize"
+      [pageIndex]="booksState.currentPage"
+      [loading]="booksState.loading"
+      [actionsMenu]="actionsMenu()"
+      [selectionStore]="selection"
+      [viewMode]="viewMode()"
+      (pageChange)="onPageChange($event)"/>
+  </div>
+</div>
+
+<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+  <ng-content select="[bulkActions]"></ng-content>
+</app-bulk-action-bar>
