@@ -9,7 +9,8 @@
     "profile": "Profile",
     "logout": "Logout",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "admin": "Admin Panel"
   },
   "common": {
     "confirm": "Confirm",
@@ -43,6 +44,7 @@
     "pagesShort": "p.",
     "viewMode": "View Mode",
     "selectPage": "Select page",
+    "confirmDelete": "Are you sure you want to delete this item? This action cannot be undone.",
     "pagination": {
       "itemsPerPage": "Items per page:",
       "nextPage": "Next page",
@@ -50,6 +52,10 @@
       "firstPage": "First page",
       "lastPage": "Last page",
       "range": "{{startIndex}} – {{endIndex}} of {{length}}"
+    },
+    "success": {
+      "saved": "Saved successfully",
+      "deleted": "Deleted successfully"
     }
   },
   "dialogs": {
@@ -325,7 +331,13 @@
       "google": "Login with Google",
       "noAccount": "Don't have an account?",
       "error": "Invalid email or password",
-      "required": "You must login to access this page."
+      "required": "You must login to access this page.",
+      "user": {
+        "required": "Regular user permissions are required to access this page."
+      },
+      "admin": {
+        "required": "Administrator permissions are required to access this page."
+      }
     },
     "register": {
       "title": "Register",
@@ -367,7 +379,9 @@
       "popularity": "Popularity"
     },
     "actions": {
-      "showBooks": "Show books"
+      "showBooks": "Show books",
+      "details": "Details",
+      "edit": "Edit"
     },
     "table": {
       "fullName": "Full Name",
@@ -391,7 +405,9 @@
       "popularity": "Popularity"
     },
     "actions": {
-      "showBooks": "Show books"
+      "showBooks": "Show books",
+      "details": "Details",
+      "edit": "Edit"
     },
     "table": {
       "name": "Name",
@@ -460,5 +476,80 @@
     "popular": "Trending Recently",
     "newArrivals": "Fresh Releases",
     "noRecommendations": "No recommendations found yet. Try adding more books to your library!"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Panel",
+      "books": "Books",
+      "authors": "Authors",
+      "categories": "Categories",
+      "addBook": "Add Book",
+      "addAuthor": "Add Author",
+      "addCategory": "Add Category"
+    },
+    "bookDetails": {
+      "editTitle": "Edit Book",
+      "newTitle": "New Book",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "tabs": {
+        "general": "General Info",
+        "translations": "Translations"
+      },
+      "fields": {
+        "category": "Category",
+        "publishYear": "Publish Year",
+        "pages": "Pages",
+        "coverImageUrl": "Cover Image URL",
+        "authors": "Authors",
+        "addAuthor": "Add Authors",
+        "authorsRequired": "At least one author is required",
+        "title": "Title",
+        "bookLanguage": "Language Name",
+        "description": "Description"
+      },
+      "authorDialog": {
+        "title": "Select Authors",
+        "searchLabel": "Search by name",
+        "searchPlaceholder": "Type author name...",
+        "noResults": "No authors found.",
+        "cancel": "Cancel",
+        "confirm": "Done"
+      }
+    },
+    "authorDetails": {
+      "editTitle": "Edit Author",
+      "newTitle": "New Author",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "tabs": {
+        "general": "General Info",
+        "translations": "Translations"
+      },
+      "fields": {
+        "birthYear": "Birth Year",
+        "deathYear": "Death Year",
+        "fullName": "Full Name",
+        "country": "Country",
+        "bio": "Biography"
+      }
+    },
+    "categoryDetails": {
+      "editTitle": "Edit Category",
+      "newTitle": "New Category",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "tabs": {
+        "general": "General Info",
+        "translations": "Translations"
+      },
+      "fields": {
+        "name": "Category Name",
+        "description": "Description"
+      }
+    }
   }
 }

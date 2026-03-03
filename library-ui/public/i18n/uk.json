@@ -9,7 +9,8 @@
     "profile": "Профіль",
     "logout": "Вихід",
     "login": "Логін",
-    "register": "Реєстрація"
+    "register": "Реєстрація",
+    "admin": "Панель адміністратора"
   },
   "common": {
     "confirm": "Підтвердити",
@@ -43,6 +44,7 @@
     "pagesShort": "с.",
     "viewMode": "Режим перегляду",
     "selectPage": "Вибрати сторінку",
+    "confirmDelete": "Ви впевнені, що хочете видалити цей елемент? Цю дію неможливо буде скасувати.",
     "pagination": {
       "itemsPerPage": "Кількість на сторінці:",
       "nextPage": "Наступна сторінка",
@@ -50,6 +52,10 @@
       "firstPage": "Перша сторінка",
       "lastPage": "Остання сторінка",
       "range": "{{startIndex}} – {{endIndex}} з {{length}}"
+    },
+    "success": {
+      "saved": "Успішно збережено",
+      "deleted": "Успішно видалено"
     }
   },
   "dialogs": {
@@ -260,7 +266,7 @@
     "notInLibraryStatus": "Книга не в бібліотеці",
     "inCollections": "У колекціях:",
     "noCollections": "Книга не додана до жодної колекції",
-    "inLibraryTooltip": "Ця книга у вашій бібліотеці",
+    "inLibraryTooltip": "Це книга у вашій бібліотеці",
     "genre": "Жанр",
     "description": "Опис",
     "addToLibrary": "Додати до бібліотеки",
@@ -325,7 +331,13 @@
       "google": "Увійти через Google",
       "noAccount": "Ще не маєте акаунту?",
       "error": "Невірний email або пароль",
-      "required": "Ви повинні увійти, щоб отримати доступ до цієї сторінки."
+      "required": "Ви повинні увійти, щоб отримати доступ до цієї сторінки.",
+      "user": {
+        "required": "Для доступу до цієї сторінки потрібні права звичайного користувача."
+      },
+      "admin": {
+        "required": "Для доступу до цієї сторінки потрібні права адміністратора."
+      }
     },
     "register": {
       "title": "Реєстрація",
@@ -367,7 +379,9 @@
       "popularity": "Популярність"
     },
     "actions": {
-      "showBooks": "Книги"
+      "showBooks": "Книги",
+      "details": "Деталі",
+      "edit": "Редагувати"
     },
     "table": {
       "fullName": "ПІБ",
@@ -391,7 +405,9 @@
       "popularity": "Популярність"
     },
     "actions": {
-      "showBooks": "Книги"
+      "showBooks": "Книги",
+      "details": "Деталі",
+      "edit": "Редагувати"
     },
     "table": {
       "name": "Назва",
@@ -460,5 +476,80 @@
     "popular": "Популярні останнім часом",
     "newArrivals": "Свіжі надходження",
     "noRecommendations": "Рекомендацій поки немає. Спробуйте додати більше книг до своєї бібліотеки!"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Панель адміністратора",
+      "books": "Книги",
+      "authors": "Автори",
+      "categories": "Категорії",
+      "addBook": "Додати книгу",
+      "addAuthor": "Додати автора",
+      "addCategory": "Додати категорію"
+    },
+    "bookDetails": {
+      "editTitle": "Редагувати книгу",
+      "newTitle": "Нова книга",
+      "save": "Зберегти",
+      "cancel": "Скасувати",
+      "delete": "Видалити",
+      "tabs": {
+        "general": "Загальна інформація",
+        "translations": "Переклади"
+      },
+      "fields": {
+        "category": "Категорія",
+        "publishYear": "Рік видання",
+        "pages": "Кількість сторінок",
+        "coverImageUrl": "URL обкладинки",
+        "authors": "Автори",
+        "addAuthor": "Додати авторів",
+        "authorsRequired": "Потрібно вказати хоча б одного автора",
+        "title": "Назва",
+        "bookLanguage": "Назва мови",
+        "description": "Опис"
+      },
+      "authorDialog": {
+        "title": "Вибір авторів",
+        "searchLabel": "Пошук за ім'ям",
+        "searchPlaceholder": "Введіть ім'я автора...",
+        "noResults": "Авторів не знайдено.",
+        "cancel": "Скасувати",
+        "confirm": "Готово"
+      }
+    },
+    "authorDetails": {
+      "editTitle": "Редагувати автора",
+      "newTitle": "Новий автор",
+      "save": "Зберегти",
+      "cancel": "Скасувати",
+      "delete": "Видалити",
+      "tabs": {
+        "general": "Загальна інформація",
+        "translations": "Переклади"
+      },
+      "fields": {
+        "birthYear": "Рік народження",
+        "deathYear": "Рік смерті",
+        "fullName": "Повне ім'я",
+        "country": "Країна",
+        "bio": "Біографія"
+      }
+    },
+    "categoryDetails": {
+      "editTitle": "Редагувати категорію",
+      "newTitle": "Нова категорія",
+      "save": "Зберегти",
+      "cancel": "Скасувати",
+      "delete": "Видалити",
+      "tabs": {
+        "general": "Загальна інформація",
+        "translations": "Переклади"
+      },
+      "fields": {
+        "name": "Назва категорії",
+        "description": "Опис"
+      }
+    }
   }
 }

@@ -37,6 +37,7 @@ export class BooksDisplayComponent {
   viewMode = input<'grid' | 'list'>('grid');
 
   selectionStore = input<SelectionStore | null>(null);
+  adminMode = input<boolean>(false);
 
   pageChange = output<PageEvent>();
 

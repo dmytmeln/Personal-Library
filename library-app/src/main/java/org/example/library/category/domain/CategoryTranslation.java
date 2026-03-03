@@ -29,6 +29,7 @@ public class CategoryTranslation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    @MapsId("categoryId")
     private Category category;
 
 }

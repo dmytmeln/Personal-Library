@@ -1,0 +1,38 @@
+<div class="admin-details-container" *transloco="let t; prefix: 'admin.categoryDetails'">
+  <div class="header-row">
+    <h1 class="page-title">{{ categoryId ? t('editTitle') : t('newTitle') }}</h1>
+    <div class="actions">
+      <button mat-button (click)="cancel()">{{ t('cancel') }}</button>
+      @if (categoryId) {
+        <button mat-button color="warn" (click)="delete()">{{ t('delete') }}</button>
+      }
+      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()">{{ t('save') }}</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loader-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="details-form">
+      <mat-tab-group formGroupName="translations" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
+        @for (lang of languages; track lang) {
+          <mat-tab [label]="lang.toUpperCase()" [formGroupName]="lang">
+            <div class="translation-fields">
+              <mat-form-field appearance="outline">
+                <mat-label>{{ t('fields.name') }}</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>{{ t('fields.description') }}</mat-label>
+                <textarea matInput formControlName="description" rows="5"></textarea>
+              </mat-form-field>
+            </div>
+          </mat-tab>
+        }
+      </mat-tab-group>
+    </form>
+  }
+</div>

@@ -31,6 +31,7 @@ export class BookListItemComponent {
 
   isSelected = input<boolean>(false);
   selectionMode = input<boolean>(false);
+  adminMode = input<boolean>(false);
   toggleSelection = output<void>();
 
   constructor(private router: Router) {}
@@ -45,5 +46,9 @@ export class BookListItemComponent {
 
   goToBookDetails(): void {
     this.router.navigate(['/book-details', this.book().id]);
+  }
+
+  goToAdminDetails(): void {
+    this.router.navigate(['/admin/book', this.book().id]);
   }
 }

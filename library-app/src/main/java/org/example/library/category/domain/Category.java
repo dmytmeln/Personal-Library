@@ -20,7 +20,7 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categories_seq")
-    @SequenceGenerator(name = "categories_seq", sequenceName = "categories_seq", allocationSize = 20)
+    @SequenceGenerator(name = "categories_seq", sequenceName = "categories_seq", allocationSize = 20, initialValue = 11) //todo: change initialValue to 1 after testing
     @Column(name = "category_id")
     private Integer id;
 

@@ -30,25 +30,12 @@ import {TranslocoDirective} from '@jsverse/transloco';
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.scss'
 })
-export class MenuComponent implements OnInit, OnDestroy {
-
-  isAuthenticated = false;
-  private authSubscription?: Subscription;
+export class MenuComponent {
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private langService: LangService
   ) {}
-
-  ngOnInit(): void {
-    this.authSubscription = this.authService.isAuthenticated$.subscribe(
-      isAuth => this.isAuthenticated = isAuth
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.authSubscription?.unsubscribe();
-  }
 
   logout(): void {
     this.authService.logout().subscribe();

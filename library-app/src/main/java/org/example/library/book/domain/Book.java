@@ -23,7 +23,7 @@ public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "books_seq")
-    @SequenceGenerator(name = "books_seq", sequenceName = "books_seq", allocationSize = 20)
+    @SequenceGenerator(name = "books_seq", sequenceName = "books_seq", allocationSize = 20, initialValue = 56) //todo: change initialValue to 1 after testing
     @Column(name = "book_id")
     private Integer id;
 

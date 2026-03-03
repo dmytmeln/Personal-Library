@@ -3,15 +3,20 @@
     <a mat-button routerLink="/" routerLinkActive="active">{{ t('appTitle') }}</a>
 
     <ng-container *transloco="let m; prefix: 'menu'">
-      <a mat-button routerLink="/dashboard" routerLinkActive="active">{{ m('dashboard') }}</a>
-      <a mat-button routerLink="/library" routerLinkActive="active">{{ m('library') }}</a>
-      <a mat-button routerLink="/collections" routerLinkActive="active">{{ m('collections') }}</a>
-      <a mat-button routerLink="/recommendations" routerLinkActive="active">{{ m('recommendations') }}</a>
-      <a mat-button routerLink="/search" routerLinkActive="active">{{ m('search') }}</a>
+      @if (authService.isUser()) {
+        <a mat-button routerLink="/dashboard" routerLinkActive="active">{{ m('dashboard') }}</a>
+        <a mat-button routerLink="/library" routerLinkActive="active">{{ m('library') }}</a>
+        <a mat-button routerLink="/collections" routerLinkActive="active">{{ m('collections') }}</a>
+        <a mat-button routerLink="/recommendations" routerLinkActive="active">{{ m('recommendations') }}</a>
+        <a mat-button routerLink="/search" routerLinkActive="active">{{ m('search') }}</a>
+      }
+      @if (authService.isAdmin()) {
+        <a mat-button routerLink="/admin" routerLinkActive="active">{{ m('admin') }}</a>
+      }
 
       <span class="spacer"></span>
 
-      @if (isAuthenticated) {
+      @if (authService.currentUser()) {
         <a mat-button routerLink="/profile" routerLinkActive="active">{{ m('profile') }}</a>
         <button mat-button (click)="logout()">{{ m('logout') }}</button>
       } @else {

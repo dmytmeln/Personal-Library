@@ -70,12 +70,21 @@
               </td>
               <td *transloco="let c; prefix: 'common'">
                 <div class="action-buttons">
-                  <button mat-stroked-button (click)="goToAuthorDetails(author)" class="action-btn">
-                    {{ c('details') }}
-                  </button>
-                  <button mat-stroked-button (click)="onShowBooks(author)" class="action-btn">
-                    {{ c('books') }}
-                  </button>
+                  @if (mode() === 'admin') {
+                    <button mat-stroked-button (click)="goToAdminDetails(author)" class="action-btn">
+                      {{ c('edit') }}
+                    </button>
+                    <button mat-stroked-button color="warn" (click)="authorDeleted.emit(author)" class="action-btn">
+                      {{ c('delete') }}
+                    </button>
+                  } @else {
+                    <button mat-stroked-button (click)="goToAuthorDetails(author)" class="action-btn">
+                      {{ c('details') }}
+                    </button>
+                    <button mat-stroked-button (click)="onShowBooks(author)" class="action-btn">
+                      {{ c('books') }}
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

@@ -55,9 +55,10 @@ const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
 })
 export class AuthorListComponent implements OnInit {
 
-  mode = input.required<'library' | 'search'>();
+  mode = input.required<'library' | 'search' | 'admin'>();
 
   authorBooks = output<Author>();
+  authorDeleted = output<Author>();
 
   authorsState = {
     items: [] as Author[],
@@ -202,7 +203,11 @@ export class AuthorListComponent implements OnInit {
   }
 
   goToAuthorDetails(author: Author): void {
-    this.router.navigate(['/author-details'], {state: {id: author.id}});
+    this.router.navigate(['/author-details', author.id]);
+  }
+
+  goToAdminDetails(author: Author): void {
+    this.router.navigate(['/admin/author', author.id]);
   }
 
   onShowBooks(author: Author): void {

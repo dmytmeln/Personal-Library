@@ -32,6 +32,7 @@ public class BookTranslation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", insertable = false, updatable = false)
+    @MapsId("bookId")
     private Book book;
 
 }

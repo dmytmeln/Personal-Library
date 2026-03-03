@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { ApiService } from './api.service';
-import { UserRegisterRequest } from '../interfaces/user-register-request';
-import { UserResponse } from '../interfaces/user-response';
-import { AuthenticationRequest } from '../interfaces/authentication-request';
-import { UpdateProfileRequest } from '../interfaces/update-profile-request';
+import {Injectable, signal} from '@angular/core';
+import {BehaviorSubject, Observable, of} from 'rxjs';
+import {catchError, map, tap} from 'rxjs/operators';
+import {environment} from '../../environments/environment';
+import {ApiService} from './api.service';
+import {UserRegisterRequest} from '../interfaces/user-register-request';
+import {UserResponse} from '../interfaces/user-response';
+import {AuthenticationRequest} from '../interfaces/authentication-request';
+import {UpdateProfileRequest} from '../interfaces/update-profile-request';
 
 @Injectable({
   providedIn: 'root'
@@ -16,9 +16,11 @@ export class AuthService {
   private cookieName = environment.cookieName;
 
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private apiService: ApiService) {}
+  currentUser = signal<UserResponse | null>(null);
+
+  constructor(private apiService: ApiService) {
+  }
 
   login(credentials: AuthenticationRequest): Observable<void> {
     return this.apiService.post<void>('/auth/authenticate', {
@@ -26,6 +28,7 @@ export class AuthService {
     }).pipe(
       tap(() => {
         this.isAuthenticatedSubject.next(true);
+        this.checkAuthStatus().subscribe();
       })
     );
   }
@@ -39,23 +42,32 @@ export class AuthService {
   updateProfile(request: UpdateProfileRequest): Observable<UserResponse> {
     return this.apiService.patch<UserResponse>('/users/me', {
       body: request
-    });
+    }).pipe(
+      tap(user => this.currentUser.set(user))
+    );
   }
 
   logout(): Observable<void> {
     return this.apiService.post<void>('/auth/logout', {}).pipe(
       tap(() => {
         this.isAuthenticatedSubject.next(false);
+        this.currentUser.set(null);
       })
     );
   }
 
   getCurrentUser(): Observable<UserResponse> {
-    return this.apiService.get<UserResponse>('/users/me', {});
+    return this.apiService.get<UserResponse>('/users/me', {}).pipe(
+      tap(user => this.currentUser.set(user))
+    );
   }
 
-  isAuthenticated(): boolean {
-    return this.isAuthenticatedSubject.value;
+  isAdmin(): boolean {
+    return this.currentUser()?.role === 'ADMIN';
+  }
+
+  isUser(): boolean {
+    return this.currentUser()?.role === 'USER';
   }
 
   loginWithGoogle(): void {
@@ -64,12 +76,14 @@ export class AuthService {
 
   checkAuthStatus(): Observable<boolean> {
     return this.getCurrentUser().pipe(
-      map(() => {
+      map(user => {
         this.isAuthenticatedSubject.next(true);
+        this.currentUser.set(user);
         return true;
       }),
       catchError(() => {
         this.isAuthenticatedSubject.next(false);
+        this.currentUser.set(null);
         return of(false);
       })
     );

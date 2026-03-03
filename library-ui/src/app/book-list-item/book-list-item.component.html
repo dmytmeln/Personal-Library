@@ -37,6 +37,12 @@
               class="menu-trigger">
         <mat-icon>more_vert</mat-icon>
       </button>
+    } @else if (adminMode() && !selectionMode()) {
+      <button mat-icon-button
+              (click)="$event.stopPropagation(); goToAdminDetails()"
+              class="menu-trigger">
+        <mat-icon>edit</mat-icon>
+      </button>
     }
   </div>
 </div>

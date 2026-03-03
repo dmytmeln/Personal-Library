@@ -1,0 +1,51 @@
+<div *transloco="let t; prefix: 'admin.bookDetails.authorDialog'">
+  <h2 mat-dialog-title>{{ t('title') }}</h2>
+  
+  <mat-dialog-content class="dialog-content">
+    <div class="selected-authors">
+      <mat-chip-set>
+        @for (author of selectedAuthors(); track author.id) {
+          <mat-chip (removed)="removeAuthor(author.id)">
+            {{ author.fullName }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+        }
+      </mat-chip-set>
+    </div>
+
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ t('searchLabel') }}</mat-label>
+      <input matInput 
+             [value]="authorSearch.query()" 
+             (input)="onSearch(searchInput.value)" 
+             #searchInput
+             [placeholder]="t('searchPlaceholder')">
+      @if (loading()) {
+        <mat-spinner matSuffix diameter="20"></mat-spinner>
+      }
+    </mat-form-field>
+
+    <mat-selection-list [multiple]="false" class="results-list">
+      @for (author of authorSearch.results(); track author.id) {
+        <mat-list-item (click)="addAuthor(author)">
+          <span matListItemTitle>{{ author.fullName }}</span>
+          <span matListItemLine>{{ author.country }} ({{ author.birthYear }})</span>
+          <button mat-icon-button matListItemMeta>
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-list-item>
+      } @empty {
+        @if (authorSearch.query().length >= 2 && !loading()) {
+          <p class="no-results">{{ t('noResults') }}</p>
+        }
+      }
+    </mat-selection-list>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>{{ t('cancel') }}</button>
+    <button mat-flat-button color="primary" (click)="confirm()">{{ t('confirm') }}</button>
+  </mat-dialog-actions>
+</div>

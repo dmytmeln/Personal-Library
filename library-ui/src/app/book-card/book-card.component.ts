@@ -36,6 +36,7 @@ export class BookCardComponent {
 
   isSelected = input<boolean>(false);
   selectionMode = input<boolean>(false);
+  adminMode = input<boolean>(false);
   toggleSelection = output<void>();
 
   constructor(
@@ -53,6 +54,10 @@ export class BookCardComponent {
 
   goToBookDetails(): void {
     this.router.navigate(['/book-details', this.book().id]);
+  }
+
+  goToAdminDetails(): void {
+    this.router.navigate(['/admin/book', this.book().id]);
   }
 
   truncateTitle(title: string): string {

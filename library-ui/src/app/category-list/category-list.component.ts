@@ -49,9 +49,11 @@ const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
   styleUrl: './category-list.component.scss'
 })
 export class CategoryListComponent implements OnInit {
-  mode = input.required<'library' | 'search'>();
+
+  mode = input.required<'library' | 'search' | 'admin'>();
 
   categoryBooks = output<Category>();
+  categoryDeleted = output<Category>();
 
   categoriesState = {
     items: [] as Category[],
@@ -170,10 +172,15 @@ export class CategoryListComponent implements OnInit {
   }
 
   goToCategoryDetails(category: Category): void {
-    this.router.navigate(['/category-details'], {state: {id: category.id}});
+    this.router.navigate(['/category-details', category.id]);
+  }
+
+  goToAdminDetails(category: Category): void {
+    this.router.navigate(['/admin/category', category.id]);
   }
 
   onShowBooks(category: Category): void {
     this.categoryBooks.emit(category);
   }
+
 }

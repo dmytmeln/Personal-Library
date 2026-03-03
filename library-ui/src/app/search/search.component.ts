@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
@@ -42,7 +42,6 @@ import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.
 import {LanguageFilterComponent} from '../common/filters/language-filter/language-filter.component';
 import {AuthorListComponent} from '../author-list/author-list.component';
 import {CategoryListComponent} from '../category-list/category-list.component';
-import {Router} from '@angular/router';
 import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
@@ -110,6 +109,7 @@ const EMPTY_BOOK_FILTERS: BaseBookFilters = {
 })
 export class SearchComponent implements OnInit {
 
+  adminMode = input<boolean>(false);
   private translocoService = inject(TranslocoService);
 
   readonly DEFAULT_SORT_OPTIONS = toSignal(
@@ -178,7 +178,6 @@ export class SearchComponent implements OnInit {
   };
 
   constructor(
-    private router: Router,
     private bookService: BookService,
     private authorService: AuthorService,
     private categoryService: CategoryService,
@@ -236,10 +235,6 @@ export class SearchComponent implements OnInit {
 
   isBookInLibrary(book: Book): boolean {
     return this.libraryBookIds.has(book.id);
-  }
-
-  goToBookDetails(book: Book): void {
-    this.router.navigate(['/book-details', book.id]);
   }
 
   private loadBooks(): void {

@@ -32,6 +32,7 @@ public class AuthorTranslation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", insertable = false, updatable = false)
+    @MapsId("authorId")
     private Author author;
 
 }
