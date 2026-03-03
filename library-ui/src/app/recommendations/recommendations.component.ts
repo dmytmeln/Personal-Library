@@ -45,6 +45,7 @@ export class RecommendationsComponent implements OnInit {
   personalized = signal<Book[]>([]);
   popular = signal<Book[]>([]);
   newArrivals = signal<Book[]>([]);
+  trendingGenres = signal<Book[]>([]);
 
   loading = signal<boolean>(true);
   viewMode = signal<'grid' | 'list'>('grid');
@@ -111,7 +112,8 @@ export class RecommendationsComponent implements OnInit {
     forkJoin({
       personalized: this.recommendationService.getPersonalized(20),
       popular: this.recommendationService.getPopular(20),
-      newArrivals: this.recommendationService.getNewArrivals(20)
+      newArrivals: this.recommendationService.getNewArrivals(20),
+      trendingGenres: this.recommendationService.getTrendingInFavoriteGenres(20)
     }).pipe(
       finalize(() => this.loading.set(false))
     ).subscribe({
@@ -119,6 +121,7 @@ export class RecommendationsComponent implements OnInit {
         this.personalized.set(results.personalized);
         this.popular.set(results.popular);
         this.newArrivals.set(results.newArrivals);
+        this.trendingGenres.set(results.trendingGenres);
       },
       error: (err) => {
         console.error('Error loading recommendations', err);

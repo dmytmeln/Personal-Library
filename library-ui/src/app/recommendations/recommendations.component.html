@@ -45,6 +45,31 @@
           </mat-expansion-panel>
         }
 
+        @if (trendingGenres().length > 0) {
+          <mat-expansion-panel [expanded]="false" class="rec-section">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ t('trendingGenres') }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
+              @for (book of trendingGenres(); track book.id) {
+                @if (viewMode() === 'grid') {
+                  <app-book-card [book]="book"
+                                 [isSelected]="selection.isSelected(book.id)"
+                                 [selectionMode]="selection.count() > 0"
+                                 (toggleSelection)="selection.toggle(book.id)"
+                                 [actionsMenu]="recommendationBookMenu"></app-book-card>
+                } @else {
+                  <app-book-list-item [book]="book"
+                                      [isSelected]="selection.isSelected(book.id)"
+                                      [selectionMode]="selection.count() > 0"
+                                      (toggleSelection)="selection.toggle(book.id)"
+                                      [actionsMenu]="recommendationBookMenu"></app-book-list-item>
+                }
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+
         @if (popular().length > 0) {
           <mat-expansion-panel [expanded]="false" class="rec-section">
             <mat-expansion-panel-header>
@@ -96,7 +121,7 @@
         }
       </mat-accordion>
 
-      @if (personalized().length === 0 && popular().length === 0 && newArrivals().length === 0) {
+      @if (personalized().length === 0 && trendingGenres().length === 0 && popular().length === 0 && newArrivals().length === 0) {
         <div class="no-results">
           <p>{{ t('noRecommendations') }}</p>
         </div>

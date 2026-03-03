@@ -79,6 +79,14 @@ public class RecommendationService {
         return bookMapper.toBookDtos(books);
     }
 
+    @Transactional(readOnly = true)
+    public List<BookDto> getTrendingInFavoriteGenres(Integer userId, Integer limit) {
+        int validatedLimit = validateLimit(limit);
+        var languageCode = LocaleContextHolder.getLocale().getLanguage();
+        var books = bookDisplayViewRepository.findTrendingInFavoriteGenres(languageCode, userId, validatedLimit);
+        return bookMapper.toBookDtos(books);
+    }
+
     private int validateLimit(Integer limit) {
         if (limit == null)
             return paginationProperties.getDefaultPageSize();

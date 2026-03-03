@@ -28,7 +28,17 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
             WHERE bt.language_code = :languageCode
               AND b.description_vector IS NOT NULL
               AND lb.library_book_id IS NULL
-            ORDER BY b.description_vector <=> cast(:vector as vector)
+            ORDER BY
+                (EXISTS (
+                    SELECT 1 FROM book_authors ba
+                    WHERE ba.book_id = b.book_id
+                    AND ba.author_id IN (
+                        SELECT ba2.author_id FROM book_authors ba2
+                        JOIN library_books lb2 ON ba2.book_id = lb2.book_id
+                        WHERE lb2.user_id = :userId
+                    )
+                )) DESC,
+                b.description_vector <=> cast(:vector as vector)
             LIMIT :limit
             """, nativeQuery = true)
     List<BookDisplayView> findSimilarBooks(float[] vector, String languageCode, Integer userId, int limit);
@@ -45,7 +55,15 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
               AND b.description_vector IS NOT NULL
               AND lb.library_book_id IS NULL
               AND b.book_id <> :excludeBookId
-            ORDER BY b.description_vector <=> cast(:vector as vector)
+            ORDER BY
+                (EXISTS (
+                    SELECT 1 FROM book_authors ba
+                    WHERE ba.book_id = b.book_id
+                    AND ba.author_id IN (
+                        SELECT author_id FROM book_authors WHERE book_id = :excludeBookId
+                    )
+                )) DESC,
+                b.description_vector <=> cast(:vector as vector)
             LIMIT :limit
             """, nativeQuery = true)
     List<BookDisplayView> findSimilarBooksExcluding(float[] vector, String languageCode, Integer userId, Integer excludeBookId, int limit);
@@ -78,6 +96,26 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
             LIMIT :limit
             """, nativeQuery = true)
     List<BookDisplayView> findNewArrivals(String languageCode, Integer userId, short year, int limit);
+
+    @Query(value = """
+            SELECT v.*
+            FROM books_display_view v
+            JOIN (
+                SELECT b.category_id, COUNT(*) as user_count
+                FROM library_books lb
+                JOIN books b ON lb.book_id = b.book_id
+                WHERE lb.user_id = :userId
+                GROUP BY b.category_id
+                ORDER BY user_count DESC
+                LIMIT 3
+            ) fav ON v.category_id = fav.category_id
+            LEFT JOIN library_books ulb ON v.book_id = ulb.book_id AND ulb.user_id = :userId
+            WHERE v.language_code = :languageCode
+              AND ulb.library_book_id IS NULL
+            ORDER BY v.popularity_count DESC, v.book_id DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<BookDisplayView> findTrendingInFavoriteGenres(String languageCode, Integer userId, int limit);
 
 }
 

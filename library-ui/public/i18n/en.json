@@ -456,6 +456,7 @@
   "recommendations": {
     "title": "Book Recommendations",
     "personalized": "Picked for You",
+    "trendingGenres": "Trending in Your Favorite Genres",
     "popular": "Trending Recently",
     "newArrivals": "Fresh Releases",
     "noRecommendations": "No recommendations found yet. Try adding more books to your library!"

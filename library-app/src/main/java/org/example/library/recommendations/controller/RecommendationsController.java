@@ -34,10 +34,15 @@ public class RecommendationsController {
 
     @GetMapping("/new")
     public List<BookDto> getNewArrivals(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                        @RequestParam(required = false) Integer limit) {
+                                         @RequestParam(required = false) Integer limit) {
         return recommendationService.getNewArrivals(userDetails.getId(), limit);
     }
 
+    @GetMapping("/trending-genres")
+    public List<BookDto> getTrendingInFavoriteGenres(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                      @RequestParam(required = false) Integer limit) {
+        return recommendationService.getTrendingInFavoriteGenres(userDetails.getId(), limit);
+    }
     @GetMapping("/similar/{bookId}")
     public List<BookDto> getSimilarBooks(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @org.springframework.web.bind.annotation.PathVariable Integer bookId,

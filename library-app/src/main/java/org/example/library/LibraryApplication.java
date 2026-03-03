@@ -17,7 +17,6 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 public class LibraryApplication {
 
     // todo:
-    //  trends in favorite genres, consider author in recommendations
     //  google books api and openlibrary api integrations for fetching books
     //  admin panel
     //  download cover for books
