@@ -11,14 +11,6 @@ spring:
   liquibase:
     enabled: false
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: test-id
-            client-secret: test-secret
-
 app:
   recommendations:
     enabled: false

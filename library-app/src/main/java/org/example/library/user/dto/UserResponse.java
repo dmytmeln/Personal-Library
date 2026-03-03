@@ -2,7 +2,6 @@ package org.example.library.user.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import org.example.library.user.domain.Provider;
 import org.example.library.user.domain.Role;
 
 @Data
@@ -13,6 +12,5 @@ public class UserResponse {
     private String email;
     private String fullName;
     private Role role;
-    private Provider provider;
 
 }

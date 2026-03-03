@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.library.auth.dto.UserRegisterRequest;
 import org.example.library.exception.BadRequestException;
 import org.example.library.exception.NotFoundException;
-import org.example.library.user.domain.Provider;
 import org.example.library.user.domain.User;
 import org.example.library.user.dto.UpdateProfileRequest;
 import org.example.library.user.dto.UserResponse;
@@ -28,7 +27,7 @@ public class UserService {
         if (repository.existsByEmail(request.getEmail()))
             throw new BadRequestException("error.auth.email_already_registered");
 
-        var user = mapper.toHostUser(request);
+        var user = mapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         var savedUser = repository.save(user);
@@ -36,20 +35,10 @@ public class UserService {
         return mapper.toResponse(savedUser);
     }
 
-    public User syncUser(String email, String fullName, String providerId, Provider provider) {
-        return repository.findUserByEmail(email)
-                .orElseGet(() -> repository.save(
-                        mapper.createProvidedUser(email, fullName, providerId, provider)
-                ));
-    }
-
     @Transactional
     public UserResponse updateProfile(Integer userId, UpdateProfileRequest request) {
         var user = repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("error.user.not_found"));
-
-        if (user.getProvider() != Provider.HOST)
-            throw new BadRequestException("error.user.profile_read_only");
 
         if (!user.getEmail().equalsIgnoreCase(request.getEmail()) && repository.existsByEmail(request.getEmail()))
             throw new BadRequestException("error.auth.email_already_registered");

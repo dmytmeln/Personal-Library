@@ -10,7 +10,7 @@
         <h2 class="user-name">{{ user()?.fullName }}</h2>
         <p class="user-email">{{ user()?.email }}</p>
 
-        @if (user()?.provider === 'HOST' && !isEditing()) {
+        @if (!isEditing()) {
           <button mat-stroked-button color="primary" class="edit-btn" (click)="toggleEdit()">
             <mat-icon>edit</mat-icon>
             {{ t('edit') }}
@@ -78,12 +78,6 @@
               <div matListItemLine class="detail-value">
                 <span class="role-chip">{{ user()?.role }}</span>
               </div>
-            </mat-list-item>
-
-            <mat-list-item>
-              <mat-icon matListItemIcon class="detail-icon">login</mat-icon>
-              <div matListItemTitle class="detail-label">{{ t('provider') }}</div>
-              <div matListItemLine class="detail-value">{{ user()?.provider }}</div>
             </mat-list-item>
           </mat-list>
         }

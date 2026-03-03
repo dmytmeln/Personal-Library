@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: remove_oauth_from_users
+      author: Dmytro Melnyk
+      changes:
+        - dropUniqueConstraint:
+            tableName: users
+            constraintName: users_provider_provider_id_uq
+        - dropColumn:
+            tableName: users
+            columnName: provider
+        - dropColumn:
+            tableName: users
+            columnName: provider_id

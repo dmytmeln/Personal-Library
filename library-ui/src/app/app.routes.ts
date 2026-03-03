@@ -8,7 +8,6 @@ import { CategoryDetailsComponent } from './category-details/category-details.co
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ProfileComponent } from './profile/profile.component';
-import { OAuth2RedirectComponent } from './oauth2-redirect/oauth2-redirect.component';
 import { SearchComponent } from './search/search.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
@@ -29,7 +28,6 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'oauth2/redirect', component: OAuth2RedirectComponent },
   {
     path: 'admin',
     canActivate: [AdminGuard],

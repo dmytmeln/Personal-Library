@@ -18,14 +18,7 @@ public class LibraryApplication {
 
     // todo:
     //  google books api and openlibrary api integrations for fetching books
-    //  admin panel ?
-    //  download cover for books
-    //  CI/CD
-    //  AWS deployment
-    //  BE + FE: share library with other users?
-    //  BE: JWT refresh tokens
-    //  BE: password reset
-    //  confirm email after registration
+    //  admin panel
 
     public static void main(String[] args) {
         SpringApplication.run(LibraryApplication.class, args);

@@ -278,7 +278,6 @@
     "fullName": "Full Name",
     "email": "Email",
     "role": "Role",
-    "provider": "Provider",
     "loadError": "Failed to load user profile",
     "loading": "Loading profile...",
     "edit": "Edit",
@@ -324,11 +323,9 @@
     }
   },
   "auth": {
-    "or": "OR",
     "login": {
       "title": "Login",
       "submit": "Sign In",
-      "google": "Login with Google",
       "noAccount": "Don't have an account?",
       "error": "Invalid email or password",
       "required": "You must login to access this page.",

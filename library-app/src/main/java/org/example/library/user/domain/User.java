@@ -34,13 +34,6 @@ public class User {
     @Column(name = "role", nullable = false)
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "provider", nullable = false)
-    private Provider provider;
-
-    @Column(name = "provider_id")
-    private String providerId;
-
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof User user)) return false;
