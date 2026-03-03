@@ -115,6 +115,12 @@ public class AdminService {
     }
 
     @Transactional
+    public void deleteBooks(java.util.List<Integer> ids) {
+        bookRepository.deleteAllById(ids);
+        log.info("[ADMIN_BOOKS_BULK_DELETE] Count: {}", ids.size());
+    }
+
+    @Transactional
     public void createAuthor(AdminAuthorDto dto) {
         var author = new Author();
         author.setPopularityCount(0);
@@ -145,6 +151,17 @@ public class AdminService {
     }
 
     @Transactional
+    public void deleteAuthors(java.util.List<Integer> ids) {
+        for (Integer id : ids) {
+            if (bookRepository.existsByAuthorsId(id)) {
+                throw new BadRequestException("error.author.has_books");
+            }
+        }
+        authorRepository.deleteAllById(ids);
+        log.info("[ADMIN_AUTHORS_BULK_DELETE] Count: {}", ids.size());
+    }
+
+    @Transactional
     public void createCategory(AdminCategoryDto dto) {
         var category = new Category();
         category.setPopularityCount(0);
@@ -172,6 +189,17 @@ public class AdminService {
 
         categoryRepository.deleteById(id);
         log.info("[ADMIN_CATEGORY_DELETE] Category ID: {}", id);
+    }
+
+    @Transactional
+    public void deleteCategories(java.util.List<Integer> ids) {
+        for (Integer id : ids) {
+            if (bookRepository.existsByCategoryId(id)) {
+                throw new BadRequestException("error.category.has_books");
+            }
+        }
+        categoryRepository.deleteAllById(ids);
+        log.info("[ADMIN_CATEGORIES_BULK_DELETE] Count: {}", ids.size());
     }
 
     private void updateBookFields(Book book, AdminBookDto dto) {

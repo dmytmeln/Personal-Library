@@ -30,6 +30,9 @@
       <table class="authors-table">
         <thead>
         <tr *transloco="let col; prefix: 'categories.table'">
+          @if (mode() === 'admin') {
+            <th class="checkbox-col"></th>
+          }
           <th>{{ col('name') }}</th>
           <th>{{ col('description') }}</th>
           <th>{{ col('booksCount') }}</th>
@@ -39,7 +42,13 @@
         </thead>
         <tbody>
           @for (category of categoriesState.items; track category.id) {
-            <tr>
+            <tr [class.selected]="selection.isSelected(category.id)">
+              @if (mode() === 'admin') {
+                <td class="checkbox-col">
+                  <mat-checkbox [checked]="selection.isSelected(category.id)"
+                                (change)="selection.toggle(category.id)"></mat-checkbox>
+                </td>
+              }
               <td>
                 <a class="category-link" (click)="goToCategoryDetails(category)">{{ category.name }}</a>
               </td>
@@ -86,3 +95,7 @@
     </mat-paginator>
   </div>
 </div>
+
+<app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">
+  <ng-content select="[bulkActions]"></ng-content>
+</app-bulk-action-bar>

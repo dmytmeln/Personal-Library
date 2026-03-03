@@ -38,6 +38,12 @@ public class AdminController {
         adminService.deleteBook(id);
     }
 
+    @DeleteMapping("/books")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteBooks(@RequestBody java.util.List<Integer> ids) {
+        adminService.deleteBooks(ids);
+    }
+
     // Authors
     @GetMapping("/authors/{id}")
     public AdminAuthorDto getAuthor(@PathVariable Integer id) {
@@ -61,6 +67,12 @@ public class AdminController {
         adminService.deleteAuthor(id);
     }
 
+    @DeleteMapping("/authors")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAuthors(@RequestBody java.util.List<Integer> ids) {
+        adminService.deleteAuthors(ids);
+    }
+
     // Categories
     @GetMapping("/categories/{id}")
     public AdminCategoryDto getCategory(@PathVariable Integer id) {
@@ -82,5 +94,11 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Integer id) {
         adminService.deleteCategory(id);
+    }
+
+    @DeleteMapping("/categories")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategories(@RequestBody java.util.List<Integer> ids) {
+        adminService.deleteCategories(ids);
     }
 }

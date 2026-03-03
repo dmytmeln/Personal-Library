@@ -55,6 +55,17 @@
   tr:hover td {
     background-color: var(--mat-sys-surface-container-highest);
   }
+
+  tr.selected td {
+    background-color: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+}
+
+.checkbox-col {
+  width: 48px;
+  padding: 0 8px !important;
+  text-align: center;
 }
 
 .category-link {

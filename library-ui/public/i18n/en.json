@@ -45,6 +45,7 @@
     "viewMode": "View Mode",
     "selectPage": "Select page",
     "confirmDelete": "Are you sure you want to delete this item? This action cannot be undone.",
+    "confirmDeleteBulk": "Are you sure you want to delete {{count}} selected items? This action cannot be undone.",
     "pagination": {
       "itemsPerPage": "Items per page:",
       "nextPage": "Next page",

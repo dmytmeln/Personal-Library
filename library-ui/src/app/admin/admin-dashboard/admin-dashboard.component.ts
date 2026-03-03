@@ -96,7 +96,7 @@ export class AdminDashboardComponent {
           next: () => {
             this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
             const list = this.authorList();
-            if (list) (list as any).loadAuthors();
+            if (list) list.loadAuthors();
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -115,7 +115,76 @@ export class AdminDashboardComponent {
           next: () => {
             this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
             const list = this.categoryList();
-            if (list) (list as any).loadCategories();
+            if (list) list.loadCategories();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  bulkDeleteBooks(): void {
+    const list = this.bookList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { message: this.translocoService.translate('common.confirmDeleteBulk', { count: ids.length }) }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteBooks(ids).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            list.selection.clear();
+            list.loadBooks();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  bulkDeleteAuthors(): void {
+    const list = this.authorList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { message: this.translocoService.translate('common.confirmDeleteBulk', { count: ids.length }) }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteAuthors(ids).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            list.selection.clear();
+            list.loadAuthors();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  bulkDeleteCategories(): void {
+    const list = this.categoryList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { message: this.translocoService.translate('common.confirmDeleteBulk', { count: ids.length }) }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteCategories(ids).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            list.selection.clear();
+            list.loadCategories();
           },
           error: (err) => this.snackCommon.showError(err)
         });

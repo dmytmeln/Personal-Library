@@ -32,6 +32,10 @@ export class AdminService {
     return this.apiService.delete<void>(`${this.baseUrl}/books/${id}`, {});
   }
 
+  deleteBooks(ids: number[]): Observable<void> {
+    return this.apiService.delete<void>(`${this.baseUrl}/books`, { body: ids });
+  }
+
   // Authors
   getAuthor(id: number): Observable<AdminAuthorDto> {
     return this.apiService.get<AdminAuthorDto>(`${this.baseUrl}/authors/${id}`, {});
@@ -49,6 +53,10 @@ export class AdminService {
     return this.apiService.delete<void>(`${this.baseUrl}/authors/${id}`, {});
   }
 
+  deleteAuthors(ids: number[]): Observable<void> {
+    return this.apiService.delete<void>(`${this.baseUrl}/authors`, { body: ids });
+  }
+
   // Categories
   getCategory(id: number): Observable<AdminCategoryDto> {
     return this.apiService.get<AdminCategoryDto>(`${this.baseUrl}/categories/${id}`, {});
@@ -64,6 +72,10 @@ export class AdminService {
 
   deleteCategory(id: number): Observable<void> {
     return this.apiService.delete<void>(`${this.baseUrl}/categories/${id}`, {});
+  }
+
+  deleteCategories(ids: number[]): Observable<void> {
+    return this.apiService.delete<void>(`${this.baseUrl}/categories`, { body: ids });
   }
 
 }
