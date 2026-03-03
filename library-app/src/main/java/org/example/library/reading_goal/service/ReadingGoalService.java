@@ -1,6 +1,7 @@
 package org.example.library.reading_goal.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.exception.NotFoundException;
 import org.example.library.reading_goal.domain.ReadingGoal;
 import org.example.library.reading_goal.dto.ReadingGoalDto;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReadingGoalService {
 
     private final ReadingGoalRepository repository;
@@ -35,7 +37,10 @@ public class ReadingGoalService {
     @Transactional
     public void delete(Integer userId, Integer year) {
         repository.findByUserIdAndYear(userId, year)
-                .ifPresent(repository::delete);
+                .ifPresent(goal -> {
+                    repository.delete(goal);
+                    log.info("[READING_GOAL_DELETE] User ID: {}, Year: {}", userId, year);
+                });
     }
 
     private ReadingGoalDto createNew(ReadingGoalDto dto, User user) {
@@ -45,12 +50,16 @@ public class ReadingGoalService {
                 .targetBooks(dto.getTargetBooks())
                 .targetPages(dto.getTargetPages())
                 .build();
-        return mapper.toDto(repository.save(goal));
+        var savedGoal = repository.save(goal);
+        log.info("[READING_GOAL_CREATE] User ID: {}, Year: {}", user.getId(), dto.getYear());
+        return mapper.toDto(savedGoal);
     }
 
     private ReadingGoalDto updateExisting(ReadingGoal existingGoal, ReadingGoalDto dto) {
         mapper.update(existingGoal, dto);
-        return mapper.toDto(repository.save(existingGoal));
+        var savedGoal = repository.save(existingGoal);
+        log.info("[READING_GOAL_UPDATE] User ID: {}, Year: {}", existingGoal.getUser().getId(), existingGoal.getYear());
+        return mapper.toDto(savedGoal);
     }
 
 }

@@ -2,6 +2,7 @@
 package org.example.library.collection.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.collection.domain.Collection;
 import org.example.library.collection.dto.*;
 import org.example.library.collection.mapper.CollectionMapper;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CollectionService {
 
     private static final int MAX_ALLOWED_DEPTH = 4;
@@ -98,6 +100,7 @@ public class CollectionService {
         }
 
         var savedCollection = collectionRepository.save(newCollection);
+        log.info("[COLLECTION_CREATE] User ID: {}, Collection ID: {}", user.getId(), savedCollection.getId());
         return collectionMapper.toBasicDto(savedCollection);
     }
 
@@ -108,6 +111,7 @@ public class CollectionService {
 
         collectionMapper.updateFromDto(dto, collection);
         var savedCollection = collectionRepository.save(collection);
+        log.info("[COLLECTION_UPDATE] User ID: {}, Collection ID: {}", userId, collectionId);
         return collectionMapper.toBasicDto(savedCollection);
     }
 
@@ -130,6 +134,7 @@ public class CollectionService {
         }
 
         collectionRepository.save(collectionToMove);
+        log.info("[COLLECTION_MOVE] User ID: {}, Collection ID: {}, New Parent ID: {}", userId, collectionId, newParentId);
     }
 
     @Transactional
@@ -137,6 +142,7 @@ public class CollectionService {
         int deletedCount = collectionRepository.deleteById(collectionId, userId);
         if (deletedCount == 0)
             throw new NotFoundException("error.collection.not_found");
+        log.info("[COLLECTION_DELETE] User ID: {}, Collection ID: {}", userId, collectionId);
     }
 
     @Transactional
@@ -166,6 +172,7 @@ public class CollectionService {
                 .collection(collectionRef)
                 .build();
         collectionBookRepository.save(newMapping);
+        log.info("[COLLECTION_BOOK_MOVE] User ID: {}, Library Book ID: {}, Source Collection ID: {}, Target Collection ID: {}", userId, libraryBookId, sourceCollectionId, targetCollectionId);
     }
 
     private void validateMove(Collection toMove, Collection newParent) {

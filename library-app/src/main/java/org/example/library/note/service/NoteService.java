@@ -1,6 +1,7 @@
 package org.example.library.note.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.exception.NotFoundException;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.note.domain.Note;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NoteService {
 
     private final NoteRepository repository;
@@ -37,6 +39,7 @@ public class NoteService {
     @Transactional
     public void delete(Integer libraryBookId, Integer userId) {
         repository.deleteByLibraryBookIdAndLibraryBookUserId(libraryBookId, userId);
+        log.info("[NOTE_DELETE] User ID: {}, Library Book ID: {}", userId, libraryBookId);
     }
 
     private NoteDto createNew(NoteRequest request, Integer userId) {
@@ -44,12 +47,16 @@ public class NoteService {
                 .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
         var note = mapper.toEntity(request);
         note.setLibraryBook(libraryBook);
-        return mapper.toDto(repository.saveAndFlush(note));
+        var savedNote = repository.saveAndFlush(note);
+        log.info("[NOTE_CREATE] User ID: {}, Library Book ID: {}", userId, request.libraryBookId());
+        return mapper.toDto(savedNote);
     }
 
     private NoteDto updateExisting(Note existingNote, NoteRequest request) {
         mapper.update(existingNote, request);
-        return mapper.toDto(repository.saveAndFlush(existingNote));
+        var savedNote = repository.saveAndFlush(existingNote);
+        log.info("[NOTE_UPDATE] User ID: {}, Library Book ID: {}", existingNote.getLibraryBook().getUser().getId(), existingNote.getLibraryBook().getId());
+        return mapper.toDto(savedNote);
     }
 
 }

@@ -1,6 +1,7 @@
 package org.example.library.library_book.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.book.repository.BookRepository;
@@ -34,6 +35,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LibraryBookService {
 
     private static final int RATING_LOWER_BOUND = 0;
@@ -78,6 +80,7 @@ public class LibraryBookService {
         repository.save(LibraryBook.of(bookRepository.getReferenceById(bookId), user));
         incrementPopularity(List.of(bookId));
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
+        log.info("[LIBRARY_BOOK_ADD] User ID: {}, Book ID: {}", user.getId(), bookId);
     }
 
     @Transactional
@@ -101,6 +104,7 @@ public class LibraryBookService {
         repository.saveAll(libraryBooks);
         incrementPopularity(newBookIds);
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
+        log.info("[LIBRARY_BOOK_BULK_ADD] User ID: {}, Book IDs: {}", user.getId(), newBookIds);
     }
 
     @Transactional
@@ -115,6 +119,7 @@ public class LibraryBookService {
         repository.flush();
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
         var view = getViewById(libraryBookId);
+        log.info("[LIBRARY_BOOK_RATE] User ID: {}, Library Book ID: {}, Rating: {}", userId, libraryBookId, rating);
         return mapper.toDto(view);
     }
 
@@ -126,6 +131,7 @@ public class LibraryBookService {
 
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
         var view = getViewById(libraryBookId);
+        log.info("[LIBRARY_BOOK_STATUS_UPDATE] User ID: {}, Library Book ID: {}, Status: {}", userId, libraryBookId, status);
         return mapper.toDto(view);
     }
 
@@ -137,6 +143,7 @@ public class LibraryBookService {
         libraryBooks.forEach(lb -> updateBookStatus(lb, status));
         repository.saveAll(libraryBooks);
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
+        log.info("[LIBRARY_BOOK_BULK_STATUS_UPDATE] User ID: {}, Library Book IDs: {}, Status: {}", userId, libraryBookIds, status);
     }
 
     private void updateBookStatus(LibraryBook libraryBook, LibraryBookStatus status) {
@@ -157,6 +164,7 @@ public class LibraryBookService {
         mapper.update(libraryBook, dto);
         repository.saveAndFlush(libraryBook);
         var updatedView = getViewById(libraryBookId);
+        log.info("[LIBRARY_BOOK_DETAILS_UPDATE] User ID: {}, Library Book ID: {}", userId, libraryBookId);
         return mapper.toDto(updatedView);
     }
 
@@ -168,6 +176,7 @@ public class LibraryBookService {
 
         repository.flush();
         var updatedView = getViewById(libraryBookId);
+        log.info("[LIBRARY_BOOK_DETAILS_RESET] User ID: {}, Library Book ID: {}", userId, libraryBookId);
         return mapper.toDto(updatedView);
     }
 
@@ -180,6 +189,7 @@ public class LibraryBookService {
         repository.delete(libraryBook);
         decrementPopularity(List.of(bookId));
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
+        log.info("[LIBRARY_BOOK_DELETE] User ID: {}, Library Book ID: {}", userId, libraryBookId);
     }
 
     @Transactional
@@ -192,6 +202,7 @@ public class LibraryBookService {
         repository.deleteAll(libraryBooks);
         decrementPopularity(bookIds);
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
+        log.info("[LIBRARY_BOOK_BULK_DELETE] User ID: {}, Library Book IDs: {}", userId, libraryBookIds);
     }
 
     private void incrementPopularity(List<Integer> bookIds) {

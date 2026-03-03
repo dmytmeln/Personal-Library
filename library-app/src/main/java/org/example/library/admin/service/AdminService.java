@@ -1,6 +1,7 @@
 package org.example.library.admin.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.admin.dto.AdminAuthorDto;
 import org.example.library.admin.dto.AdminBookDto;
 import org.example.library.admin.dto.AdminCategoryDto;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminService {
 
     private final BookRepository bookRepository;
@@ -90,7 +92,8 @@ public class AdminService {
     public void createBook(AdminBookDto dto) {
         var book = new Book();
         updateBookFields(book, dto);
-        bookRepository.save(book);
+        var savedBook = bookRepository.save(book);
+        log.info("[ADMIN_BOOK_CREATE] Book ID: {}", savedBook.getId());
     }
 
     @Transactional
@@ -99,6 +102,7 @@ public class AdminService {
                 .orElseThrow(() -> new NotFoundException("error.book.not_found"));
         updateBookFields(book, dto);
         bookRepository.save(book);
+        log.info("[ADMIN_BOOK_UPDATE] Book ID: {}", id);
     }
 
     @Transactional
@@ -107,6 +111,7 @@ public class AdminService {
             throw new NotFoundException("error.book.not_found");
 
         bookRepository.deleteById(id);
+        log.info("[ADMIN_BOOK_DELETE] Book ID: {}", id);
     }
 
     @Transactional
@@ -114,7 +119,8 @@ public class AdminService {
         var author = new Author();
         author.setPopularityCount(0);
         updateAuthorFields(author, dto);
-        authorRepository.save(author);
+        var savedAuthor = authorRepository.save(author);
+        log.info("[ADMIN_AUTHOR_CREATE] Author ID: {}", savedAuthor.getId());
     }
 
     @Transactional
@@ -123,6 +129,7 @@ public class AdminService {
                 .orElseThrow(() -> new NotFoundException("error.author.not_found"));
         updateAuthorFields(author, dto);
         authorRepository.save(author);
+        log.info("[ADMIN_AUTHOR_UPDATE] Author ID: {}", id);
     }
 
     @Transactional
@@ -134,6 +141,7 @@ public class AdminService {
             throw new BadRequestException("error.author.has_books");
 
         authorRepository.deleteById(id);
+        log.info("[ADMIN_AUTHOR_DELETE] Author ID: {}", id);
     }
 
     @Transactional
@@ -141,7 +149,8 @@ public class AdminService {
         var category = new Category();
         category.setPopularityCount(0);
         updateCategoryFields(category, dto);
-        categoryRepository.save(category);
+        var savedCategory = categoryRepository.save(category);
+        log.info("[ADMIN_CATEGORY_CREATE] Category ID: {}", savedCategory.getId());
     }
 
     @Transactional
@@ -150,6 +159,7 @@ public class AdminService {
                 .orElseThrow(() -> new NotFoundException("error.category.not_found"));
         updateCategoryFields(category, dto);
         categoryRepository.save(category);
+        log.info("[ADMIN_CATEGORY_UPDATE] Category ID: {}", id);
     }
 
     @Transactional
@@ -161,6 +171,7 @@ public class AdminService {
             throw new BadRequestException("error.category.has_books");
 
         categoryRepository.deleteById(id);
+        log.info("[ADMIN_CATEGORY_DELETE] Category ID: {}", id);
     }
 
     private void updateBookFields(Book book, AdminBookDto dto) {

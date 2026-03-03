@@ -3,6 +3,7 @@ package org.example.library.security;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.library.security.jwt.JwtService;
 import org.example.library.security.util.CookieUtils;
 import org.example.library.user.domain.Provider;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final UserService userService;
@@ -46,6 +48,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         CookieUtils.addCookie(response, cookieName, token, cookieMaxAge);
 
+        log.info("[OAUTH2_LOGIN_SUCCESS] User: {}, Provider: {}", email, Provider.GOOGLE);
         this.getRedirectStrategy().sendRedirect(request, response, frontendUrl + "/oauth2/redirect");
     }
 
