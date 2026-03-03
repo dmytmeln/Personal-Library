@@ -20,6 +20,7 @@ public class RecommendationsController {
 
     private final RecommendationService recommendationService;
 
+
     @GetMapping
     public List<BookDto> getRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                             @RequestParam(required = false) Integer limit) {

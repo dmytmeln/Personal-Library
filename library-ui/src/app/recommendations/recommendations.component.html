@@ -14,17 +14,17 @@
       </div>
     </div>
 
-    @if (loading()) {
-      <div class="loader-container">
-        <mat-spinner></mat-spinner>
-      </div>
-    } @else {
-      <mat-accordion multi>
-        @if (personalized().length > 0) {
-          <mat-expansion-panel [expanded]="false" class="rec-section">
-            <mat-expansion-panel-header>
-              <mat-panel-title>{{ t('personalized') }}</mat-panel-title>
-            </mat-expansion-panel-header>
+    <mat-accordion multi>
+      <mat-expansion-panel [(expanded)]="expandedPersonalized" class="rec-section" (opened)="loadPersonalized()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ t('personalized') }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          @if (loadingPersonalized()) {
+            <div class="section-loader">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (personalized().length > 0) {
             <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
               @for (book of personalized(); track book.id) {
                 @if (viewMode() === 'grid') {
@@ -42,14 +42,22 @@
                 }
               }
             </div>
-          </mat-expansion-panel>
-        }
+          } @else if (loadedPersonalized() && !loadingPersonalized()) {
+            <p class="empty-section">{{ t('noRecommendations') }}</p>
+          }
+        </ng-template>
+      </mat-expansion-panel>
 
-        @if (trendingGenres().length > 0) {
-          <mat-expansion-panel [expanded]="false" class="rec-section">
-            <mat-expansion-panel-header>
-              <mat-panel-title>{{ t('trendingGenres') }}</mat-panel-title>
-            </mat-expansion-panel-header>
+      <mat-expansion-panel [(expanded)]="expandedTrendingGenres" class="rec-section" (opened)="loadTrendingGenres()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ t('trendingGenres') }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          @if (loadingTrendingGenres()) {
+            <div class="section-loader">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (trendingGenres().length > 0) {
             <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
               @for (book of trendingGenres(); track book.id) {
                 @if (viewMode() === 'grid') {
@@ -67,14 +75,22 @@
                 }
               }
             </div>
-          </mat-expansion-panel>
-        }
+          } @else if (loadedTrendingGenres() && !loadingTrendingGenres()) {
+            <p class="empty-section">{{ t('noRecommendations') }}</p>
+          }
+        </ng-template>
+      </mat-expansion-panel>
 
-        @if (popular().length > 0) {
-          <mat-expansion-panel [expanded]="false" class="rec-section">
-            <mat-expansion-panel-header>
-              <mat-panel-title>{{ t('popular') }}</mat-panel-title>
-            </mat-expansion-panel-header>
+      <mat-expansion-panel [(expanded)]="expandedPopular" class="rec-section" (opened)="loadPopular()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ t('popular') }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          @if (loadingPopular()) {
+            <div class="section-loader">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (popular().length > 0) {
             <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
               @for (book of popular(); track book.id) {
                 @if (viewMode() === 'grid') {
@@ -92,14 +108,22 @@
                 }
               }
             </div>
-          </mat-expansion-panel>
-        }
+          } @else if (loadedPopular() && !loadingPopular()) {
+            <p class="empty-section">{{ t('noRecommendations') }}</p>
+          }
+        </ng-template>
+      </mat-expansion-panel>
 
-        @if (newArrivals().length > 0) {
-          <mat-expansion-panel [expanded]="false" class="rec-section">
-            <mat-expansion-panel-header>
-              <mat-panel-title>{{ t('newArrivals') }}</mat-panel-title>
-            </mat-expansion-panel-header>
+      <mat-expansion-panel [(expanded)]="expandedNewArrivals" class="rec-section" (opened)="loadNewArrivals()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ t('newArrivals') }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          @if (loadingNewArrivals()) {
+            <div class="section-loader">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (newArrivals().length > 0) {
             <div [class.books-grid]="viewMode() === 'grid'" [class.books-list]="viewMode() === 'list'">
               @for (book of newArrivals(); track book.id) {
                 @if (viewMode() === 'grid') {
@@ -117,16 +141,12 @@
                 }
               }
             </div>
-          </mat-expansion-panel>
-        }
-      </mat-accordion>
-
-      @if (personalized().length === 0 && trendingGenres().length === 0 && popular().length === 0 && newArrivals().length === 0) {
-        <div class="no-results">
-          <p>{{ t('noRecommendations') }}</p>
-        </div>
-      }
-    }
+          } @else if (loadedNewArrivals() && !loadingNewArrivals()) {
+            <p class="empty-section">{{ t('noRecommendations') }}</p>
+          }
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
   </div>
 
   <app-bulk-action-bar [selectedCount]="selection.count()" (clear)="selection.clear()">

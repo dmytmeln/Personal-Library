@@ -54,6 +54,19 @@
       }
     }
 
+    .section-loader {
+      display: flex;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .empty-section {
+      text-align: center;
+      padding: 32px;
+      color: var(--mat-sys-on-surface-variant);
+      font-style: italic;
+    }
+
     .books-grid {
       padding: 16px 5px;
       display: grid;

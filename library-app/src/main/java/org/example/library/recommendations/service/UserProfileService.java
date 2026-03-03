@@ -70,6 +70,7 @@ public class UserProfileService {
             log.debug("Saved user profile vector for user {}", userId);
         } else {
             userProfileVectorRepository.deleteById(userId);
+            log.debug("Deleted user profile vector for user {} due to no valid data", userId);
         }
 
         return vector;

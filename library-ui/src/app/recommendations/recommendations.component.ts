@@ -7,7 +7,7 @@ import {BookListItemComponent} from '../book-list-item/book-list-item.component'
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {finalize, forkJoin} from 'rxjs';
+import {finalize} from 'rxjs';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatIconModule} from '@angular/material/icon';
 import {SelectionStore} from '../services/selection.store';
@@ -47,7 +47,21 @@ export class RecommendationsComponent implements OnInit {
   newArrivals = signal<Book[]>([]);
   trendingGenres = signal<Book[]>([]);
 
-  loading = signal<boolean>(true);
+  loadingPersonalized = signal<boolean>(false);
+  loadingPopular = signal<boolean>(false);
+  loadingNewArrivals = signal<boolean>(false);
+  loadingTrendingGenres = signal<boolean>(false);
+
+  loadedPersonalized = signal<boolean>(false);
+  loadedPopular = signal<boolean>(false);
+  loadedNewArrivals = signal<boolean>(false);
+  loadedTrendingGenres = signal<boolean>(false);
+
+  expandedPersonalized = signal<boolean>(false);
+  expandedPopular = signal<boolean>(false);
+  expandedNewArrivals = signal<boolean>(false);
+  expandedTrendingGenres = signal<boolean>(false);
+
   viewMode = signal<'grid' | 'list'>('grid');
 
   readonly selection = new SelectionStore();
@@ -67,6 +81,7 @@ export class RecommendationsComponent implements OnInit {
     this.setupLanguageSubscription();
   }
 
+  // todo: duplicate code
   addBookToLibrary(book: Book): void {
     this.libraryBookService.addBook(book.id).subscribe({
       next: () => {
@@ -82,6 +97,7 @@ export class RecommendationsComponent implements OnInit {
     });
   }
 
+  // todo: duplicate code
   bulkAddBooks(): void {
     const ids = this.selection.selectedIds();
     this.libraryBookService.bulkAdd(ids).subscribe({
@@ -102,31 +118,76 @@ export class RecommendationsComponent implements OnInit {
     this.translocoService.langChanges$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        this.loadAll();
+        const needsReload = {
+          personalized: this.personalized().length > 0 && this.expandedPersonalized(),
+          popular: this.popular().length > 0 && this.expandedPopular(),
+          newArrivals: this.newArrivals().length > 0 && this.expandedNewArrivals(),
+          trendingGenres: this.trendingGenres().length > 0 && this.expandedTrendingGenres()
+        };
+
+        this.clearData();
+
+        if (needsReload.personalized) this.loadPersonalized();
+        if (needsReload.popular) this.loadPopular();
+        if (needsReload.newArrivals) this.loadNewArrivals();
+        if (needsReload.trendingGenres) this.loadTrendingGenres();
       });
   }
 
-  private loadAll(): void {
-    this.loading.set(true);
+  private clearData(): void {
+    this.personalized.set([]);
+    this.popular.set([]);
+    this.newArrivals.set([]);
+    this.trendingGenres.set([]);
 
-    forkJoin({
-      personalized: this.recommendationService.getPersonalized(20),
-      popular: this.recommendationService.getPopular(20),
-      newArrivals: this.recommendationService.getNewArrivals(20),
-      trendingGenres: this.recommendationService.getTrendingInFavoriteGenres(20)
-    }).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (results) => {
-        this.personalized.set(results.personalized);
-        this.popular.set(results.popular);
-        this.newArrivals.set(results.newArrivals);
-        this.trendingGenres.set(results.trendingGenres);
-      },
-      error: (err) => {
-        console.error('Error loading recommendations', err);
-      }
-    });
+    this.loadedPersonalized.set(false);
+    this.loadedPopular.set(false);
+    this.loadedNewArrivals.set(false);
+    this.loadedTrendingGenres.set(false);
+  }
+
+  loadPersonalized(): void {
+    if (this.loadedPersonalized() || this.loadingPersonalized()) return;
+    this.loadingPersonalized.set(true);
+    this.recommendationService.getPersonalized(20)
+      .pipe(finalize(() => {
+        this.loadingPersonalized.set(false);
+        this.loadedPersonalized.set(true);
+      }))
+      .subscribe(books => this.personalized.set(books));
+  }
+
+  loadPopular(): void {
+    if (this.loadedPopular() || this.loadingPopular()) return;
+    this.loadingPopular.set(true);
+    this.recommendationService.getPopular(20)
+      .pipe(finalize(() => {
+        this.loadingPopular.set(false);
+        this.loadedPopular.set(true);
+      }))
+      .subscribe(books => this.popular.set(books));
+  }
+
+  loadNewArrivals(): void {
+    if (this.loadedNewArrivals() || this.loadingNewArrivals()) return;
+    this.loadingNewArrivals.set(true);
+    this.recommendationService.getNewArrivals(20)
+      .pipe(finalize(() => {
+        this.loadingNewArrivals.set(false);
+        this.loadedNewArrivals.set(true);
+      }))
+      .subscribe(books => this.newArrivals.set(books));
+  }
+
+  loadTrendingGenres(): void {
+    if (this.loadedTrendingGenres() || this.loadingTrendingGenres()) return;
+    this.loadingTrendingGenres.set(true);
+    this.recommendationService.getTrendingInFavoriteGenres(20)
+      .pipe(finalize(() => {
+        this.loadingTrendingGenres.set(false);
+        this.loadedTrendingGenres.set(true);
+      }))
+      .subscribe(books => this.trendingGenres.set(books));
   }
 
 }
