@@ -51,9 +51,14 @@ public class RecommendationTriggerService {
         return false;
     }
 
-    @Transactional
-    public boolean shouldUpdateGenreMapping() {
-        return genreMappingService.hasNewCategories();
+    @Transactional(readOnly = true)
+    public GenreMappingService.GenreChangeType getGenreChangeType() {
+        return genreMappingService.getGenreChangeType();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasGenreChanges() {
+        return genreMappingService.getGenreChangeType() != GenreMappingService.GenreChangeType.NONE;
     }
 
 }

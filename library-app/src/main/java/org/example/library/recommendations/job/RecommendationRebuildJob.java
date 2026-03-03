@@ -2,6 +2,7 @@ package org.example.library.recommendations.job;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.library.recommendations.service.GenreMappingService;
+import org.example.library.recommendations.service.GenreMappingService.GenreChangeType;
 import org.example.library.recommendations.service.GlobalRebuildService;
 import org.example.library.recommendations.service.RecommendationTriggerService;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -39,16 +40,22 @@ public class RecommendationRebuildJob {
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void run() {
-        if (triggerService.shouldUpdateGenreMapping()) {
-            log.info("New categories detected. Updating genre mapping...");
-            genreMappingService.updateGenreMapping();
-        }
+        boolean shouldRebuildVocab = triggerService.shouldRebuildVocabulary();
+        var genreChangeType = triggerService.getGenreChangeType();
 
-        if (triggerService.shouldRebuildVocabulary()) {
+        if (shouldRebuildVocab) {
+            if (GenreChangeType.REBUILD == genreChangeType) {
+                genreMappingService.rebuildGenreMapping();
+            } else if (GenreChangeType.APPEND == genreChangeType) {
+                genreMappingService.appendNewCategories();
+            }
             log.info("Starting full rebuild of recommendation model...");
             rebuildService.executeFullRebuild();
+        } else if (GenreChangeType.NONE != genreChangeType) {
+            log.info("Incremental genre mapping update...");
+            genreMappingService.appendNewCategories();
         } else {
-            log.info("Vocabulary update not needed. Conditions not met.");
+            log.info("Recommendation model is up to date.");
         }
     }
 

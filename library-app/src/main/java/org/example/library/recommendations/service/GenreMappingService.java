@@ -11,36 +11,42 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class GenreMappingService {
 
+    public enum GenreChangeType {
+        NONE, APPEND, REBUILD
+    }
+
     private final GenreMappingRepository genreMappingRepository;
     private final CategoryRepository categoryRepository;
     private final RecommendationProperties properties;
 
 
-    @Transactional
-    public boolean hasNewCategories() {
-        var existingCategoryIds = genreMappingRepository.findAllCategoryIds();
-        var newCategoryIds = categoryRepository.findAllIds().stream()
-                .filter(id -> !existingCategoryIds.contains(id))
-                .toList();
-        return !newCategoryIds.isEmpty();
+    @Transactional(readOnly = true)
+    public GenreChangeType getGenreChangeType() {
+        var categoryIdsInDb = categoryRepository.findAllIds();
+        var categoryIdsInMapping = genreMappingRepository.findAllCategoryIds();
+
+        boolean hasDeletions = !categoryIdsInDb.containsAll(categoryIdsInMapping);
+        if (hasDeletions) {
+            return GenreChangeType.REBUILD;
+        }
+
+        boolean hasAdditions = !categoryIdsInMapping.containsAll(categoryIdsInDb);
+        if (hasAdditions) {
+            return GenreChangeType.APPEND;
+        }
+
+        return GenreChangeType.NONE;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void updateGenreMapping() {
-        var mappingCount = genreMappingRepository.count();
-        var categoryCount = categoryRepository.count();
-
-        if (categoryCount <= mappingCount) {
-            log.info("No new categories to add to genre mapping.");
-            return;
-        }
-
+    public void appendNewCategories() {
         var existingCategoryIds = genreMappingRepository.findAllCategoryIds();
         var newCategoryIds = categoryRepository.findAllIds().stream()
                 .filter(id -> !existingCategoryIds.contains(id))
@@ -51,31 +57,53 @@ public class GenreMappingService {
             return;
         }
 
-        var currentCount = (int) mappingCount;
+        var currentMappingCount = (int) genreMappingRepository.count();
         var newCount = newCategoryIds.size();
-        var totalCount = currentCount + newCount;
 
-        if (totalCount > properties.getGenreVectorSize()) {
-            log.error("Cannot add {} new categories. Total would be {} which exceeds max size of {}. " +
-                            "Existing mappings: {}, Available slots: {}",
-                    newCount, totalCount, properties.getGenreVectorSize(), currentCount, properties.getGenreVectorSize() - currentCount);
-            newCategoryIds = newCategoryIds.subList(0, properties.getGenreVectorSize() - currentCount);
+        if (currentMappingCount + newCount > properties.getGenreVectorSize()) {
+            log.warn("Cannot add all {} new categories. Limit {} exceeded.", newCount, properties.getGenreVectorSize());
+            newCategoryIds = newCategoryIds.subList(0, Math.max(0, properties.getGenreVectorSize() - currentMappingCount));
         }
 
-        var nextIndex = genreMappingRepository.findMaxVectorIndex().orElse(-1);
+        if (newCategoryIds.isEmpty()) return;
+
+        var nextIndex = genreMappingRepository.findMaxVectorIndex().orElse(-1) + 1;
 
         var newMappings = new ArrayList<GenreMapping>();
         for (var categoryId : newCategoryIds) {
             var mapping = GenreMapping.builder()
                     .categoryId(categoryId)
-                    .vectorIndex(++nextIndex)
+                    .vectorIndex(nextIndex++)
                     .build();
             newMappings.add(mapping);
         }
 
-        genreMappingRepository.saveAllAndFlush(newMappings);
-        log.info("Added {} new category mappings to genre_mapping. Total mappings: {}",
-                newMappings.size(), currentCount + newMappings.size());
+        genreMappingRepository.saveAll(newMappings);
+        log.info("Appended {} new category mappings.", newMappings.size());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void rebuildGenreMapping() {
+        log.info("Rebuilding genre mapping from scratch...");
+        genreMappingRepository.deleteAllInBatch();
+
+        List<Integer> categoryIds = new ArrayList<>(categoryRepository.findAllIds());
+        if (categoryIds.size() > properties.getGenreVectorSize()) {
+            log.warn("Too many categories ({}). Limiting to {}.", categoryIds.size(), properties.getGenreVectorSize());
+            categoryIds = categoryIds.subList(0, properties.getGenreVectorSize());
+        }
+
+        var newMappings = new ArrayList<GenreMapping>();
+        for (int i = 0; i < categoryIds.size(); i++) {
+            var mapping = GenreMapping.builder()
+                    .categoryId(categoryIds.get(i))
+                    .vectorIndex(i)
+                    .build();
+            newMappings.add(mapping);
+        }
+
+        genreMappingRepository.saveAll(newMappings);
+        log.info("Genre mapping rebuilt with {} categories.", newMappings.size());
     }
 
 }
