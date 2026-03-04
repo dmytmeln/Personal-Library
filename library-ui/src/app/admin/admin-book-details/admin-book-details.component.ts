@@ -1,30 +1,30 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AdminService } from '../../services/admin.service';
-import { AdminBookDto } from '../../interfaces/admin-book-dto';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { CategoryService } from '../../services/category.service';
-import { AuthorService } from '../../services/author.service';
-import { Category } from '../../interfaces/category';
-import { Author } from '../../interfaces/author';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSnackCommon } from '../../common/mat-snack-common';
-import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AutocompleteFilterComponent } from '../../common/filters/autocomplete-filter/autocomplete-filter.component';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AuthorSelectionDialogComponent } from '../author-selection-dialog/author-selection-dialog.component';
-import { MatChipsModule } from '@angular/material/chips';
-import { forkJoin, of } from 'rxjs';
-import { AutocompleteSearchStore } from '../../services/autocomplete-search.store';
-import { ConfirmationDialogComponent } from '../../dialogs/confirmation-dialog/confirmation-dialog.component';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AdminService} from '../../services/admin.service';
+import {AdminBookDto} from '../../interfaces/admin-book-dto';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatSelectModule} from '@angular/material/select';
+import {CategoryService} from '../../services/category.service';
+import {AuthorService} from '../../services/author.service';
+import {Category} from '../../interfaces/category';
+import {Author} from '../../interfaces/author';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackCommon} from '../../common/mat-snack-common';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {AutocompleteFilterComponent} from '../../common/filters/autocomplete-filter/autocomplete-filter.component';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {AuthorSelectionDialogComponent} from '../author-selection-dialog/author-selection-dialog.component';
+import {MatChipsModule} from '@angular/material/chips';
+import {forkJoin, of} from 'rxjs';
+import {AutocompleteSearchStore} from '../../services/autocomplete-search.store';
+import {ConfirmationDialogComponent} from '../../dialogs/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-admin-book-details',
@@ -73,7 +73,7 @@ export class AdminBookDetailsComponent implements OnInit {
   ) {
     this.snackCommon = new MatSnackCommon(this.matSnackBar);
     this.categorySearch = new AutocompleteSearchStore<Category>(
-      (query: string, page: number, size: number) => this.categoryService.search({ name: query, page, size })
+      (query: string, page: number, size: number) => this.categoryService.search({name: query, page, size})
     );
 
     this.form = this.fb.group({
@@ -146,38 +146,38 @@ export class AdminBookDetailsComponent implements OnInit {
 
   onCategorySelected(cat: Category): void {
     this.selectedCategory.set(cat);
-    this.form.patchValue({ categoryId: cat.id });
+    this.form.patchValue({categoryId: cat.id});
   }
 
   clearCategory(): void {
     this.selectedCategory.set(null);
-    this.form.patchValue({ categoryId: null });
+    this.form.patchValue({categoryId: null});
     this.categorySearch.clear();
   }
 
   openAuthorDialog(): void {
     const dialogRef = this.dialog.open(AuthorSelectionDialogComponent, {
-      data: { selectedAuthors: this.selectedAuthors() },
+      data: {selectedAuthors: this.selectedAuthors()},
       width: '500px'
     });
 
     dialogRef.afterClosed().subscribe((result: Author[] | undefined) => {
       if (result) {
         this.selectedAuthors.set(result);
-        this.form.patchValue({ authorIds: result.map(a => a.id) });
+        this.form.patchValue({authorIds: result.map(a => a.id)});
       }
     });
   }
 
   removeAuthor(authorId: number): void {
     this.selectedAuthors.update(list => list.filter(a => a.id !== authorId));
-    this.form.patchValue({ authorIds: this.selectedAuthors().map(a => a.id) });
+    this.form.patchValue({authorIds: this.selectedAuthors().map(a => a.id)});
   }
 
   save(): void {
     if (this.form.invalid) return;
     const dto: AdminBookDto = this.form.value;
-    const obs = this.bookId 
+    const obs = this.bookId
       ? this.adminService.updateBook(this.bookId, dto)
       : this.adminService.createBook(dto);
 
@@ -192,9 +192,9 @@ export class AdminBookDetailsComponent implements OnInit {
 
   delete(): void {
     if (!this.bookId) return;
-    
+
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { message: this.translocoService.translate('common.confirmDelete') }
+      data: {message: this.translocoService.translate('common.confirmDelete')}
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
@@ -213,4 +213,5 @@ export class AdminBookDetailsComponent implements OnInit {
   cancel(): void {
     this.router.navigate(['/admin']);
   }
+
 }

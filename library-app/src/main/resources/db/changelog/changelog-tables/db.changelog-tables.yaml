@@ -10,6 +10,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changelog-tables/changeset/create_table_users.yaml
   - include:
+      file: db/changelog/changelog-tables/changeset/remove_oauth_from_users.yaml
+  - include:
       file: db/changelog/changelog-tables/changeset/create_table_reading_goals.yaml
   - include:
       file: db/changelog/changelog-tables/changeset/create_table_library_books.yaml
@@ -25,6 +27,12 @@ databaseChangeLog:
       file: db/changelog/changelog-tables/changeset/create_table_vocabulary_metadata.yaml
   - include:
       file: db/changelog/changelog-tables/changeset/create_table_user_profile_vectors.yaml
+
+  - include:
+      file: db/changelog/changelog-tables/changeset/update_books_and_library_books_for_local.yaml
+
+  - include:
+      file: db/changelog/changelog-tables/changeset/drop_cover_image_url_from_library_books.yaml
 
   - include:
       file: db/changelog/changelog-tables/changeset/seed_data.yaml

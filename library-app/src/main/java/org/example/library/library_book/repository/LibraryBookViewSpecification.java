@@ -40,7 +40,10 @@ public class LibraryBookViewSpecification {
             if (lang == null)
                 return null;
 
-            return cb.equal(root.get(LibraryBookView_.LANGUAGE_CODE), lang);
+            return cb.or(
+                    cb.equal(root.get(LibraryBookView_.LANGUAGE_CODE), lang),
+                    cb.isNull(root.get(LibraryBookView_.LANGUAGE_CODE))
+            );
         };
     }
 

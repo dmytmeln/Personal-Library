@@ -1,11 +1,13 @@
 <div class="container" *transloco="let t; prefix: 'bookDetails'">
   @if (bookDetails && displayBook) {
     <div class="book-header">
-      @if (displayBook.coverImageUrl) {
-        <div class="card-image">
+      <div class="card-image">
+        @if (displayBook.coverImageUrl) {
           <img ngSrc="{{displayBook.coverImageUrl}}" priority width="200" height="300" alt="Book cover"/>
-        </div>
-      }
+        } @else {
+          <div class="no-cover"><mat-icon>book</mat-icon></div>
+        }
+      </div>
 
       <div class="book-info">
         <h3 class="book-title">
@@ -15,8 +17,12 @@
           }
         </h3>
         <div class="book-authors">
-          @for (entry of authors; track entry[0]) {
-            <a class="link" (click)="goToAuthorDetails(entry[0])">{{ entry[1] }}</a>
+          @if (displayBook.customAuthorName) {
+            <span>{{ displayBook.customAuthorName }}</span>
+          } @else {
+            @for (entry of authors; track entry[0]) {
+              <a class="link" (click)="goToAuthorDetails(entry[0])">{{ entry[1] }}</a>
+            }
           }
         </div>
         @if (!bookDetails.libraryBook) {
@@ -39,7 +45,14 @@
       <h4>{{ t('info') }}</h4>
       <div class="book-details-info">
         <div class="book-details-group">
-          <div><span class="book-attribute-label">{{ t('genre') }}:</span> {{ displayBook.categoryName }}</div>
+          <div>
+            <span class="book-attribute-label">{{ t('genre') }}:</span>
+            @if (displayBook.categoryId) {
+              <a class="link" (click)="goToCategoryDetails()">{{ displayBook.categoryName }}</a>
+            } @else {
+              <span>{{ displayBook.categoryName }}</span>
+            }
+          </div>
           <div><span class="book-attribute-label">{{ t('pages') }}:</span> {{ displayBook.pages }}</div>
           <div><span class="book-attribute-label">{{ t('language') }}:</span> {{ displayBook.language }}</div>
           <div><span class="book-attribute-label">{{ t('publishYear') }}:</span> {{ displayBook.publishYear }}</div>

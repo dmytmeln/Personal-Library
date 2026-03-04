@@ -17,11 +17,14 @@ import {
 import {TextFilterComponent} from '../common/filters/text-filter/text-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {CategoryFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
+import {SelectionStore} from '../services/selection.store';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {map} from 'rxjs';
 import {LibraryStore} from '../services/library.store';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
   name: '',
@@ -43,7 +46,9 @@ const EMPTY_CATEGORY_FILTERS: CategoryFilters = {
     TextFilterComponent,
     RangeFilterComponent,
     SortBarComponent,
+    BulkActionBarComponent,
     TranslocoDirective,
+    MatCheckboxModule,
   ],
   templateUrl: './category-list.component.html',
   styleUrl: './category-list.component.scss'
@@ -55,6 +60,9 @@ export class CategoryListComponent implements OnInit {
   categoryBooks = output<Category>();
   categoryDeleted = output<Category>();
 
+  readonly selection = new SelectionStore();
+  readonly filters = new EntityFilterStore<CategoryFilters>(EMPTY_CATEGORY_FILTERS);
+
   categoriesState = {
     items: [] as Category[],
     totalElements: 0,
@@ -63,8 +71,6 @@ export class CategoryListComponent implements OnInit {
     loading: false,
     sort: undefined as string[] | undefined,
   };
-
-  readonly filters = new EntityFilterStore<CategoryFilters>(EMPTY_CATEGORY_FILTERS);
 
   readonly isFiltersExpanded = signal(false);
   readonly activeFiltersCount = computed(() => {
@@ -130,7 +136,7 @@ export class CategoryListComponent implements OnInit {
     this.filters.reset(EMPTY_CATEGORY_FILTERS);
   }
 
-  private loadCategories(): void {
+  loadCategories(): void {
     this.categoriesState.loading = true;
     const f = this.filters.state();
     const options = {

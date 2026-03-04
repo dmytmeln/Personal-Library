@@ -3,6 +3,7 @@ package org.example.library.library_book.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.example.library.author.domain.Author;
+import org.example.library.category.domain.Category;
 import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDateTime;
@@ -55,11 +56,21 @@ public class LibraryBookView {
     @Column(name = "category_id")
     private Integer categoryId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private Category category;
+
     @Column(name = "book_language")
     private String bookLanguage;
 
     @Column(name = "category_name")
     private String categoryName;
+
+    @Column(name = "custom_author_name")
+    private String customAuthorName;
+
+    @Column(name = "owner_user_id")
+    private Integer ownerUserId;
 
     @ManyToMany
     @JoinTable(

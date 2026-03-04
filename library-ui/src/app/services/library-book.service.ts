@@ -6,6 +6,7 @@ import {Page} from '../interfaces/page';
 import {UpdateLibraryBookDetails} from '../interfaces/update-library-book-details';
 import {BulkLibraryBookRequest} from '../interfaces/bulk-library-book-request';
 import {LanguageWithCount} from '../interfaces/language-with-count';
+import {CreateLocalBook} from '../interfaces/create-local-book';
 
 export interface LibraryBookQueryOptions {
   page?: number;
@@ -44,6 +45,14 @@ export class LibraryBookService {
 
   addBook(bookId: number): Observable<LibraryBook> {
     return this.apiService.post('/users/me/library-books', {params: {bookId}});
+  }
+
+  createLocalBook(dto: CreateLocalBook): Observable<void> {
+    return this.apiService.post('/users/me/library-books/local', {body: dto});
+  }
+
+  updateLocalBook(libraryBookId: number, dto: CreateLocalBook): Observable<void> {
+    return this.apiService.put(`/users/me/library-books/local/${libraryBookId}`, {body: dto});
   }
 
   bulkAdd(ids: number[]): Observable<void> {

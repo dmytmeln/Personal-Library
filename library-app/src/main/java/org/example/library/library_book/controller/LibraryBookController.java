@@ -22,6 +22,7 @@ public class LibraryBookController {
 
     private final LibraryBookService service;
 
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<LibraryBookDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -43,9 +44,24 @@ public class LibraryBookController {
         service.create(bookId, userDetails.user());
     }
 
+    @PostMapping("/local")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createLocalBook(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody CreateLocalBookDto dto) {
+        service.createLocalBook(dto, userDetails.user());
+    }
+
+    @PutMapping("/local/{libraryBookId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LibraryBookDto updateLocalBook(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                          @PathVariable Integer libraryBookId,
+                                          @Valid @RequestBody org.example.library.library_book.dto.UpdateLocalBookDto dto
+    ) {
+        return service.updateLocalBook(libraryBookId, dto, userDetails.getId());
+    }
+
     @PostMapping("/bulk")
     @ResponseStatus(HttpStatus.CREATED)
-    public void bulkAdd(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkLibraryBookRequest request) {
+    public void bulkAdd(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkRequest request) {
         service.bulkAdd(request.getIds(), userDetails.user());
     }
 
@@ -98,7 +114,7 @@ public class LibraryBookController {
 
     @PostMapping("/bulk-remove")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void bulkDelete(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkLibraryBookRequest request) {
+    public void bulkDelete(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkRequest request) {
         service.bulkDelete(request.getIds(), userDetails.getId());
     }
 

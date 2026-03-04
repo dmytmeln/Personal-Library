@@ -1,6 +1,6 @@
 import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Author} from '../interfaces/author';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {BookService} from '../services/book.service';
 import {AuthorService} from '../services/author.service';
 import {Book} from '../interfaces/book';
@@ -19,7 +19,7 @@ import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
-import {map} from 'rxjs';
+import {map, skip} from 'rxjs';
 
 @Component({
   selector: 'app-author-details',
@@ -56,7 +56,7 @@ export class AuthorDetailsComponent implements OnInit {
     {initialValue: []}
   );
 
-  private authorId: number;
+  private authorId!: number;
   private libraryBookIds: Set<number> = new Set<number>();
   private snackCommon: MatSnackCommon;
   private currentSort: string[] | undefined;
@@ -71,20 +71,33 @@ export class AuthorDetailsComponent implements OnInit {
   readonly selection = new SelectionStore();
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private bookService: BookService,
     private authorService: AuthorService,
     private libraryBookService: LibraryBookService,
     matSnackBar: MatSnackBar,
   ) {
-    this.authorId = this.router.getCurrentNavigation()?.extras?.state?.['id'] as number;
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit() {
-    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.initAuthor();
-      this.loadBooks();
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.authorId = +id;
+        this.initAuthor();
+        this.loadBooks();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
+
+    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.authorId) {
+        this.initAuthor();
+        this.loadBooks();
+      }
     });
   }
 

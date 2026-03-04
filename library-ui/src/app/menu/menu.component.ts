@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
-import {RouterLink, RouterLinkActive} from '@angular/router';
+import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {AuthService} from '../services/auth.service';
 import {LangService} from '../services/lang.service';
@@ -34,11 +34,20 @@ export class MenuComponent {
 
   constructor(
     public authService: AuthService,
-    private langService: LangService
+    private langService: LangService,
+    private router: Router
   ) {}
 
   logout(): void {
-    this.authService.logout().subscribe();
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   changeLang(lang: string): void {

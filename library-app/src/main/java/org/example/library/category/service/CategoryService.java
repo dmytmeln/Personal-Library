@@ -1,7 +1,6 @@
 package org.example.library.category.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.category.domain.Category;
 import org.example.library.category.dto.CategoryDto;
 import org.example.library.category.dto.CategorySearchParams;
 import org.example.library.category.dto.CategoryWithBooksCount;
@@ -37,16 +36,11 @@ public class CategoryService {
         );
     }
 
-    public Category getExistingById(Integer categoryId) {
-        return repository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Category not found"));
-    }
-
     public CategoryDto getById(Integer categoryId) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         return displayViewRepository.findByIdAndLanguageCode(categoryId, lang)
                 .map(mapper::toDto)
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+                .orElseThrow(() -> new NotFoundException("error.category.not_found"));
     }
 
     public Page<CategoryWithBooksCount> searchForUser(Integer userId, PaginationParams paginationParams, CategorySearchParams searchParams) {

@@ -1,7 +1,6 @@
 package org.example.library.security.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.security.OAuth2LoginSuccessHandler;
 import org.example.library.security.jwt.AuthEntryPointJwt;
 import org.example.library.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +23,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthEntryPointJwt authEntryPointJwt;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 
     @Bean
@@ -38,8 +36,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/library-books/**", "/api/v1/collections/**", "/api/v1/reading-goals/**", "/api/v1/recommendations/**").hasRole("USER")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
-                .oauth2Login(oauth2login ->
-                        oauth2login.successHandler(oAuth2LoginSuccessHandler))
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(authEntryPointJwt))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

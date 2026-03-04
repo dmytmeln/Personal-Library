@@ -1,5 +1,5 @@
 import {Component, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
-import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {LibraryBookService} from '../services/library-book.service';
 import {LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../interfaces/library-book';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
@@ -39,6 +39,7 @@ import {NoteDialogComponent} from '../dialogs/note-dialog/note-dialog.component'
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {LibraryStore} from '../services/library.store';
 import {BookListComponent} from '../book-list/book-list.component';
+import {CreateLocalBookDialogComponent} from '../dialogs/create-local-book-dialog/create-local-book-dialog.component';
 
 @Component({
   selector: 'app-library',
@@ -57,33 +58,15 @@ import {BookListComponent} from '../book-list/book-list.component';
     TranslocoDirective,
     BookListComponent,
     MatButtonToggleModule,
-
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })
 export class LibraryComponent implements OnInit {
 
-  private readonly translocoService = inject(TranslocoService);
-  private readonly libraryBookService = inject(LibraryBookService);
-  private readonly dialog = inject(MatDialog);
-  private readonly bookService = inject(BookService);
-  private readonly collectionService = inject(CollectionService);
-  private readonly collectionBookService = inject(CollectionBookService);
-  private readonly libraryStore = inject(LibraryStore);
-  private readonly destroyRef = inject(DestroyRef);
-
   readonly bookList = viewChild(BookListComponent);
 
-  readonly statusOptions = toSignal(
-    this.translocoService.selectTranslateObject('library.statuses').pipe(
-      map(t => LIBRARY_BOOK_STATUSES.map(s => ({
-        value: s,
-        label: t[s]
-      })))
-    ),
-    {initialValue: []}
-  );
+  readonly statusOptions = signal<{ value: LibraryBookStatus; label: string }[]>([]);
 
   readonly viewMode = signal<'grid' | 'list'>('grid');
 
@@ -96,12 +79,27 @@ export class LibraryComponent implements OnInit {
   private snackCommon: MatSnackCommon;
 
   constructor(
-    matSnackBar: MatSnackBar,
+    private readonly translocoService: TranslocoService,
+    private readonly libraryBookService: LibraryBookService,
+    private readonly dialog: MatDialog,
+    private readonly bookService: BookService,
+    private readonly collectionService: CollectionService,
+    private readonly collectionBookService: CollectionBookService,
+    private readonly libraryStore: LibraryStore,
+    private readonly destroyRef: DestroyRef,
+    private readonly matSnackBar: MatSnackBar
   ) {
-    this.snackCommon = new MatSnackCommon(matSnackBar);
+    this.snackCommon = new MatSnackCommon(this.matSnackBar);
   }
 
   ngOnInit(): void {
+    this.translocoService.selectTranslateObject('library.statuses').pipe(
+      takeUntilDestroyed(this.destroyRef),
+      map((t: Record<string, string>) => LIBRARY_BOOK_STATUSES.map(s => ({
+        value: s,
+        label: t[s]
+      })))
+    ).subscribe(options => this.statusOptions.set(options));
   }
 
   onTabChange(index: number): void {
@@ -301,6 +299,25 @@ export class LibraryComponent implements OnInit {
     });
   }
 
+  openUpdateLocalBookDialog(libraryBook: LibraryBook): void {
+    const dialogRef = this.dialog.open(CreateLocalBookDialogComponent, {
+      width: '600px',
+      autoFocus: false,
+      data: { libraryBook }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((dto) => {
+      this.libraryBookService.updateLocalBook(libraryBook.id, dto).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.libraryStore.triggerRefresh();
+          this.snackCommon.showSuccess(this.translocoService.translate('library.success.detailsUpdated'));
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
+    });
+  }
+
   openNoteDialog(libraryBook: LibraryBook): void {
     this.dialog.open(NoteDialogComponent, {
       data: {
@@ -346,9 +363,9 @@ export class LibraryComponent implements OnInit {
       fetchBooksFn: (options) => this.bookService.getAll(options),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
-    dialogRef.afterClosed().subscribe((bookId: number | undefined) => {
-      if (bookId) {
-        this.libraryBookService.addBook(bookId).subscribe({
+    dialogRef.afterClosed().subscribe((result: number | string | undefined) => {
+      if (typeof result === 'number') {
+        this.libraryBookService.addBook(result).subscribe({
           next: () => {
             this.loadBooks();
             this.libraryStore.triggerRefresh();
@@ -356,7 +373,27 @@ export class LibraryComponent implements OnInit {
           },
           error: (err) => this.snackCommon.showError(err)
         });
+      } else if (result === 'create-local') {
+        this.openCreateLocalBookDialog();
       }
+    });
+  }
+
+  openCreateLocalBookDialog(): void {
+    const dialogRef = this.dialog.open(CreateLocalBookDialogComponent, {
+      width: '600px',
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((dto) => {
+      this.libraryBookService.createLocalBook(dto).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.libraryStore.triggerRefresh();
+          this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
     });
   }
 

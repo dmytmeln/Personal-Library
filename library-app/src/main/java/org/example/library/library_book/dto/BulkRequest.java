@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BulkLibraryBookRequest {
+public class BulkRequest {
 
     @NotEmpty(message = "{validation.bulk.not_empty}")
     @Size(max = 50, message = "{validation.bulk.max_items}")

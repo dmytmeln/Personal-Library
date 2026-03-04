@@ -3,5 +3,4 @@ export interface UserResponse {
   email: string;
   fullName: string;
   role: string;
-  provider: string;
 }

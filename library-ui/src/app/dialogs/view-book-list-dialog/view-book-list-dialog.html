@@ -73,6 +73,12 @@
   </div>
 
   <mat-dialog-actions align="end" *transloco="let common; prefix: 'common'">
+    <button mat-button color="primary" (click)="onCreateLocalBook()">
+      <mat-icon>add_circle_outline</mat-icon>
+      <ng-container *transloco="let clb; prefix: 'dialogs.createLocalBook'">
+        {{ clb('title') }}
+      </ng-container>
+    </button>
     <button mat-button mat-dialog-close>{{ common('close') }}</button>
   </mat-dialog-actions>
 </ng-container>

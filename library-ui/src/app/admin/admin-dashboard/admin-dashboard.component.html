@@ -9,13 +9,28 @@
 
   <mat-tab-group [(selectedIndex)]="activeTab" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="0ms">
     <mat-tab [label]="t('dashboard.books')">
-      <app-book-list mode="admin" [actionsMenu]="adminBookMenu"></app-book-list>
+      <app-book-list mode="admin" [actionsMenu]="adminBookMenu">
+        <button bulkActions mat-stroked-button color="warn" (click)="bulkDeleteBooks()">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'common.delete' | transloco }}</span>
+        </button>
+      </app-book-list>
     </mat-tab>
     <mat-tab [label]="t('dashboard.authors')">
-      <app-author-list mode="admin" (authorDeleted)="onAuthorDeleted($event)"></app-author-list>
+      <app-author-list mode="admin" (authorDeleted)="onAuthorDeleted($event)">
+        <button bulkActions mat-stroked-button color="warn" (click)="bulkDeleteAuthors()">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'common.delete' | transloco }}</span>
+        </button>
+      </app-author-list>
     </mat-tab>
     <mat-tab [label]="t('dashboard.categories')">
-      <app-category-list mode="admin" (categoryDeleted)="onCategoryDeleted($event)"></app-category-list>
+      <app-category-list mode="admin" (categoryDeleted)="onCategoryDeleted($event)">
+        <button bulkActions mat-stroked-button color="warn" (click)="bulkDeleteCategories()">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'common.delete' | transloco }}</span>
+        </button>
+      </app-category-list>
     </mat-tab>
   </mat-tab-group>
 

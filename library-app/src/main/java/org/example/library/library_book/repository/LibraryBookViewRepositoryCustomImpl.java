@@ -82,7 +82,7 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         var baseSql = """
                 FROM library_books_view lbv
                 JOIN collection_books cb ON lbv.library_book_id = cb.library_book_id
-                WHERE lbv.user_id = :userId AND lbv.language_code = :lang
+                WHERE lbv.user_id = :userId AND (lbv.language_code = :lang OR lbv.language_code IS NULL)
                 """;
 
         var whereSql = new StringBuilder(baseSql);

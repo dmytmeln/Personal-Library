@@ -21,6 +21,7 @@ import {BookListItemComponent} from '../book-list-item/book-list-item.component'
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatMenuModule} from '@angular/material/menu';
+import {skip} from 'rxjs';
 
 @Component({
   selector: 'app-book-details',
@@ -77,7 +78,7 @@ export class BookDetailsComponent implements OnInit {
       }
     });
 
-    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.bookId) {
         this.loadAll();
       }
@@ -145,12 +146,14 @@ export class BookDetailsComponent implements OnInit {
     this.router.navigate(['/collections', collection.id]);
   }
 
-  goToAuthorDetails(id: number): void {
-    this.router.navigate(['/author-details'], {state: {id}});
+  goToCategoryDetails(): void {
+    if (this.displayBook?.categoryId) {
+      this.router.navigate(['/category-details', this.displayBook.categoryId]);
+    }
   }
 
-  goToBookDetails(id: number): void {
-    this.router.navigate(['/book-details', id]);
+  goToAuthorDetails(id: string | number): void {
+    this.router.navigate(['/author-details', Number(id)]);
   }
 
   changeRating(rating: number): void {

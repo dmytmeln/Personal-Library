@@ -70,10 +70,6 @@ export class AuthService {
     return this.currentUser()?.role === 'USER';
   }
 
-  loginWithGoogle(): void {
-    window.location.assign(`${environment.apiBaseUrl}/oauth2/authorization/google`);
-  }
-
   checkAuthStatus(): Observable<boolean> {
     return this.getCurrentUser().pipe(
       map(user => {

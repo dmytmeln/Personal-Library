@@ -85,7 +85,7 @@ export class ProfileComponent implements OnInit {
 
   toggleEdit(): void {
     const user = this.user();
-    if (user && user.provider === 'HOST') {
+    if (user) {
       this.profileForm.patchValue({
         email: user.email,
         fullName: user.fullName

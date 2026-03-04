@@ -1,5 +1,4 @@
-import {Component, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {Component, DestroyRef, signal, viewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatIconModule} from '@angular/material/icon';
@@ -38,11 +37,8 @@ import {BookListComponent} from '../book-list/book-list.component';
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
 })
-export class SearchComponent implements OnInit {
+export class SearchComponent {
 
-  private translocoService = inject(TranslocoService);
-  private libraryBookService = inject(LibraryBookService);
-  private destroyRef = inject(DestroyRef);
   private snackCommon: MatSnackCommon;
 
   readonly bookList = viewChild(BookListComponent);
@@ -56,14 +52,13 @@ export class SearchComponent implements OnInit {
     categoriesOpened: false,
   };
 
-  constructor(matSnackBar: MatSnackBar) {
+  constructor(
+    private translocoService: TranslocoService,
+    private libraryBookService: LibraryBookService,
+    private destroyRef: DestroyRef,
+    matSnackBar: MatSnackBar
+  ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
-  }
-
-  ngOnInit(): void {
-    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.libraryBookIds.clear(); // Could be improved to fetch from server
-    });
   }
 
   addBookToLibrary(book: Book): void {

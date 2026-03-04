@@ -13,16 +13,24 @@
             (click)="$event.stopPropagation(); goToBookDetails()"
             [matTooltip]="book().title">{{ book().title }}</span>
       <span class="authors">
-        @for (author of book().authors | keyvalue; track author.key; let last = $last) {
-          <a class="link"
-             (click)="$event.stopPropagation(); goToAuthorDetails(author.key)">{{ author.value }}</a>{{ last ? '' : ', ' }}
+        @if (book().customAuthorName) {
+          <span>{{ book().customAuthorName }}</span>
+        } @else {
+          @for (author of book().authors | keyvalue; track author.key; let last = $last) {
+            <a class="link"
+               (click)="$event.stopPropagation(); goToAuthorDetails(author.key)">{{ author.value }}</a>{{ last ? '' : ', ' }}
+          }
         }
       </span>
     </div>
 
     <div class="secondary-info" *transloco="let c; prefix: 'common'">
       <span class="category">
-        <a class="link" (click)="$event.stopPropagation(); goToCategoryDetails()">{{ book().categoryName }}</a>
+        @if (book().categoryId) {
+          <a class="link" (click)="$event.stopPropagation(); goToCategoryDetails()">{{ book().categoryName }}</a>
+        } @else {
+          <span>{{ book().categoryName }}</span>
+        }
       </span>
       <span class="metadata">{{ book().publishYear }} • {{ book().pages }}{{ c('pagesShort') }} • {{ book().language }}</span>
     </div>

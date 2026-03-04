@@ -20,4 +20,6 @@ public class BookDto {
     private String description;
     private String coverImageUrl;
     private Map<Integer, String> authors;
+    private String customAuthorName;
+    private Integer ownerId;
 }

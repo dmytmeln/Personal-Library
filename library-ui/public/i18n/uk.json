@@ -45,6 +45,7 @@
     "viewMode": "Режим перегляду",
     "selectPage": "Вибрати сторінку",
     "confirmDelete": "Ви впевнені, що хочете видалити цей елемент? Цю дію неможливо буде скасувати.",
+    "confirmDeleteBulk": "Ви впевнені, що хочете видалити {{count}} вибраних елементів? Цю дію неможливо буде скасувати.",
     "pagination": {
       "itemsPerPage": "Кількість на сторінці:",
       "nextPage": "Наступна сторінка",
@@ -99,8 +100,6 @@
         "pagesPlaceholder": "300",
         "language": "Мова",
         "languagePlaceholder": "Українська",
-        "coverUrl": "URL обкладинки",
-        "coverUrlPlaceholder": "https://example.com/cover.jpg",
         "description": "Опис",
         "descriptionPlaceholder": "Опис книги..."
       },
@@ -111,6 +110,32 @@
         "languageRequired": "Мова обов'язкова"
       },
       "resetButton": "Скинути до стандартних"
+    },
+    "createLocalBook": {
+      "title": "Створити книгу вручну",
+      "fields": {
+        "title": "Назва",
+        "description": "Опис",
+        "bookLanguage": "Мова книги",
+        "status": "Статус у бібліотеці",
+        "publishYear": "Рік видання",
+        "pages": "Кількість сторінок",
+        "category": "Категорія",
+        "authors": "Автори",
+        "useGlobalCategory": "Обрати з глобальних категорій",
+        "useCustomCategory": "Вказати власну назву категорії",
+        "useGlobalAuthors": "Обрати з глобальних авторів",
+        "useCustomAuthor": "Вказати власне ім'я автора",
+        "customCategoryName": "Власна назва категорії",
+        "customAuthorName": "Власне ім'я автора",
+        "customCategoryPlaceholder": "напр. Моя приватна категорія",
+        "customAuthorPlaceholder": "напр. Я, Мій друг"
+      },
+      "errors": {
+        "titleRequired": "Назва обов'язкова",
+        "categoryRequired": "Категорія обов'язкова",
+        "authorRequired": "Автор обов'язковий"
+      }
     }
   },
   "library": {
@@ -152,6 +177,7 @@
       "editDetails": "Редагувати деталі",
       "addToCollection": "Додати до колекції",
       "addToLibrary": "Додати до бібліотеки",
+      "createManual": "Створити книгу вручну",
       "changeStatus": "Змінити статус",
       "rate": "Оцінити",
       "removeFromAllCollections": "Видалити з усіх колекцій",
@@ -278,7 +304,6 @@
     "fullName": "Повне ім'я",
     "email": "Email",
     "role": "Роль",
-    "provider": "Провайдер",
     "loadError": "Помилка завантаження профілю",
     "loading": "Завантаження профілю...",
     "edit": "Редагувати",
@@ -324,11 +349,9 @@
     }
   },
   "auth": {
-    "or": "АБО",
     "login": {
       "title": "Вхід",
       "submit": "Увійти",
-      "google": "Увійти через Google",
       "noAccount": "Ще не маєте акаунту?",
       "error": "Невірний email або пароль",
       "required": "Ви повинні увійти, щоб отримати доступ до цієї сторінки.",

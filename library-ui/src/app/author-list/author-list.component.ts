@@ -19,11 +19,14 @@ import {TextFilterComponent} from '../common/filters/text-filter/text-filter.com
 import {SelectFilterComponent, SelectOption} from '../common/filters/select-filter/select-filter.component';
 import {RangeFilterComponent} from '../common/filters/range-filter/range-filter.component';
 import {SortBarComponent} from '../common/sort-bar/sort-bar.component';
+import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {AuthorFilters} from '../interfaces/filters';
 import {EntityFilterStore} from '../services/entity-filter.store';
+import {SelectionStore} from '../services/selection.store';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {map} from 'rxjs';
 import {LibraryStore} from '../services/library.store';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
   name: '',
@@ -48,7 +51,9 @@ const EMPTY_AUTHOR_FILTERS: AuthorFilters = {
     SelectFilterComponent,
     RangeFilterComponent,
     SortBarComponent,
+    BulkActionBarComponent,
     TranslocoDirective,
+    MatCheckboxModule,
   ],
   templateUrl: './author-list.component.html',
   styleUrl: './author-list.component.scss'
@@ -60,6 +65,9 @@ export class AuthorListComponent implements OnInit {
   authorBooks = output<Author>();
   authorDeleted = output<Author>();
 
+  readonly selection = new SelectionStore();
+  readonly filters = new EntityFilterStore<AuthorFilters>(EMPTY_AUTHOR_FILTERS);
+
   authorsState = {
     items: [] as Author[],
     totalElements: 0,
@@ -70,8 +78,6 @@ export class AuthorListComponent implements OnInit {
   };
 
   countries = signal<CountryWithCount[]>([]);
-
-  readonly filters = new EntityFilterStore<AuthorFilters>(EMPTY_AUTHOR_FILTERS);
 
   readonly isFiltersExpanded = signal(false);
   readonly activeFiltersCount = computed(() => {
@@ -149,7 +155,7 @@ export class AuthorListComponent implements OnInit {
     this.filters.reset(EMPTY_AUTHOR_FILTERS);
   }
 
-  private loadAuthors(): void {
+  loadAuthors(): void {
     this.authorsState.loading = true;
     const f = this.filters.state();
     const options = {

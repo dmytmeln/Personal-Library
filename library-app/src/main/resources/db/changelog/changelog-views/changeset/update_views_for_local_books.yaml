@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: update_views_for_local_books
+      author: Dmytro Melnyk
+      changes:
+        - dropView:
+            viewName: books_display_view
+        - createView:
+            viewName: books_display_view
+            selectQuery: |
+              SELECT 
+                  b.book_id,
+                  b.category_id,
+                  b.publish_year,
+                  b.pages,
+                  b.cover_image_url,
+                  b.popularity_count,
+                  bt.language_code,
+                  bt.title,
+                  bt.description,
+                  bt.book_language,
+                  ct.name as category_name
+              FROM books b
+              JOIN book_translations bt ON b.book_id = bt.book_id
+              JOIN category_translations ct ON b.category_id = ct.category_id 
+                                           AND bt.language_code = ct.language_code
+              WHERE b.owner_user_id IS NULL
+        - dropView:
+            viewName: library_books_view
+        - createView:
+            viewName: library_books_view
+            selectQuery: |
+              SELECT 
+                  lb.library_book_id,
+                  lb.user_id,
+                  lb.book_id,
+                  lb.status,
+                  lb.added_at,
+                  lb.rating,
+                  COALESCE(lb.title, bt.title) as title,
+                  COALESCE(lb.description, bt.description) as description,
+                  COALESCE(lb.publish_year, b.publish_year) as publish_year,
+                  COALESCE(lb.pages, b.pages) as pages,
+                  bt.language_code,
+                  b.cover_image_url as cover_image_url,
+                  b.category_id,
+                  COALESCE(lb.language, bt.book_language) as book_language,
+                  COALESCE(lb.custom_category_name, ct.name) as category_name,
+                  lb.custom_author_name,
+                  b.owner_user_id
+              FROM library_books lb
+              JOIN books b ON lb.book_id = b.book_id
+              LEFT JOIN book_translations bt ON b.book_id = bt.book_id
+              LEFT JOIN category_translations ct ON b.category_id = ct.category_id 
+                                           AND bt.language_code = ct.language_code

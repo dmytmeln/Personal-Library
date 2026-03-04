@@ -33,32 +33,6 @@ mat-card-title {
   text-align: center;
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 20px 0;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #ddd;
-  }
-
-  span {
-    padding: 0 10px;
-    color: #666;
-    font-size: 14px;
-  }
-}
-
-.google-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
 .register-link {
   text-align: center;
   margin-top: 20px;

@@ -21,15 +21,19 @@ public interface BookMapper {
     List<BookDto> toDto(List<Book> books);
 
     @Mapping(target = "categoryName", source = "book", qualifiedByName = "getLocalizedCategoryName")
-    @Mapping(target = "categoryId", source = "book.category.id")
-    @Mapping(target = "authors", source = "book.authors", qualifiedByName = "authorsToMap")
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "authors", source = "authors", qualifiedByName = "authorsToMap")
     @Mapping(target = "title", source = "book", qualifiedByName = "getLocalizedTitle")
     @Mapping(target = "description", source = "book", qualifiedByName = "getLocalizedDescription")
     @Mapping(target = "language", source = "book", qualifiedByName = "getLocalizedLanguage")
+    @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "customAuthorName", ignore = true)
     BookDto toBookDto(Book book);
 
     @Mapping(target = "authors", source = "view.authors", qualifiedByName = "authorsToMap")
     @Mapping(target = "language", source = "bookLanguage")
+    @Mapping(target = "customAuthorName", ignore = true)
+    @Mapping(target = "ownerId", ignore = true)
     BookDto toBookDto(BookDisplayView view);
 
     List<BookDto> toBookDtos(List<BookDisplayView> views);
@@ -66,6 +70,9 @@ public interface BookMapper {
 
     @Named("getLocalizedCategoryName")
     default String getLocalizedCategoryName(Book book) {
+        if (book.getCategory() == null)
+            return null;
+
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = book.getCategory().getTranslations().get(lang);
         if (translation == null)

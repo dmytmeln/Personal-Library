@@ -62,8 +62,4 @@ export class LoginComponent {
       });
     }
   }
-
-  loginWithGoogle(): void {
-    this.authService.loginWithGoogle();
-  }
 }

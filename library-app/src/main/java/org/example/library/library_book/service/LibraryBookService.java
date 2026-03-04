@@ -3,6 +3,8 @@ package org.example.library.library_book.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.library.author.repository.AuthorRepository;
+import org.example.library.book.domain.Book;
+import org.example.library.book.domain.BookStatus;
 import org.example.library.book.dto.LanguageWithCount;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.category.repository.CategoryRepository;
@@ -12,6 +14,8 @@ import org.example.library.exception.NotFoundException;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.domain.LibraryBookView;
+import org.example.library.library_book.dto.CreateLocalBookDto;
+import org.example.library.library_book.dto.UpdateLocalBookDto;
 import org.example.library.library_book.dto.LibraryBookDto;
 import org.example.library.library_book.dto.LibraryBookSearchCriteria;
 import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
@@ -31,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -70,16 +75,53 @@ public class LibraryBookService {
     }
 
     @Transactional
+    public void createLocalBook(CreateLocalBookDto dto, User user) {
+        var book = new Book();
+        book.setOwner(user);
+        book.setStatus(BookStatus.NEW);
+        book.setPopularityCount(0);
+
+        if (dto.getCategoryId() != null) {
+            book.setCategory(categoryRepository.getReferenceById(dto.getCategoryId()));
+        }
+
+        if (dto.getAuthorIds() != null && !dto.getAuthorIds().isEmpty()) {
+            book.setAuthors(new HashSet<>(authorRepository.findAllById(dto.getAuthorIds())));
+        }
+
+        var savedBook = bookRepository.save(book);
+
+        var libraryBook = LibraryBook.of(savedBook, user);
+        libraryBook.setStatus(dto.getStatus());
+        libraryBook.setTitle(dto.getTitle());
+        libraryBook.setDescription(dto.getDescription());
+        libraryBook.setPublishYear(dto.getPublishYear());
+        libraryBook.setPages(dto.getPages());
+        libraryBook.setLanguage(dto.getBookLanguage());
+        libraryBook.setCustomCategoryName(dto.getCustomCategoryName());
+        libraryBook.setCustomAuthorName(dto.getCustomAuthorName());
+
+        repository.save(libraryBook);
+        log.info("[LIBRARY_BOOK_LOCAL_CREATE] User ID: {}, Book ID: {}", user.getId(), savedBook.getId());
+    }
+
+    @Transactional
     public void create(Integer bookId, User user) {
         if (repository.existsByBookIdAndUserId(bookId, user.getId()))
             throw new BadRequestException("error.library_book.already_added");
 
-        if (!bookRepository.existsById(bookId))
-            throw new NotFoundException("error.book.not_found");
+        var book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
 
-        repository.save(LibraryBook.of(bookRepository.getReferenceById(bookId), user));
-        incrementPopularity(List.of(bookId));
-        eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
+        if (book.getOwner() != null && !book.getOwner().getId().equals(user.getId()))
+            throw new BadRequestException("error.library_book.access_denied");
+
+        repository.save(LibraryBook.of(book, user));
+
+        if (book.getOwner() == null) {
+            incrementPopularity(List.of(bookId));
+            eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
+        }
         log.info("[LIBRARY_BOOK_ADD] User ID: {}, Book ID: {}", user.getId(), bookId);
     }
 
@@ -97,14 +139,28 @@ public class LibraryBookService {
         if (books.isEmpty())
             throw new NotFoundException("error.book.none_found");
 
-        var libraryBooks = books.stream()
+        var accessibleBooks = books.stream()
+                .filter(b -> b.getOwner() == null || b.getOwner().getId().equals(user.getId()))
+                .toList();
+
+        if (accessibleBooks.isEmpty()) return;
+
+        var libraryBooks = accessibleBooks.stream()
                 .map(book -> LibraryBook.of(book, user))
                 .toList();
 
         repository.saveAll(libraryBooks);
-        incrementPopularity(newBookIds);
-        eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
-        log.info("[LIBRARY_BOOK_BULK_ADD] User ID: {}, Book IDs: {}", user.getId(), newBookIds);
+
+        var globalBookIds = accessibleBooks.stream()
+                .filter(b -> b.getOwner() == null)
+                .map(Book::getId)
+                .toList();
+
+        if (!globalBookIds.isEmpty()) {
+            incrementPopularity(globalBookIds);
+            eventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
+        }
+        log.info("[LIBRARY_BOOK_BULK_ADD] User ID: {}, Accessible Book IDs: {}", user.getId(), accessibleBooks.stream().map(Book::getId).toList());
     }
 
     @Transactional
@@ -159,6 +215,47 @@ public class LibraryBookService {
     }
 
     @Transactional
+    public LibraryBookDto updateLocalBook(Integer libraryBookId, UpdateLocalBookDto dto, Integer userId) {
+        var libraryBook = repository.findByIdAndUserIdWithBook(libraryBookId, userId)
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+
+        var book = libraryBook.getBook();
+        
+        if (book.getOwner() == null || !book.getOwner().getId().equals(userId))
+             throw new BadRequestException("error.library_book.access_denied");
+
+        book.setPublishYear(dto.getPublishYear());
+        book.setPages(dto.getPages());
+
+        if (dto.getCategoryId() != null) {
+            book.setCategory(categoryRepository.getReferenceById(dto.getCategoryId()));
+        } else {
+            book.setCategory(null);
+        }
+
+        if (dto.getAuthorIds() != null && !dto.getAuthorIds().isEmpty()) {
+            book.setAuthors(new HashSet<>(authorRepository.findAllById(dto.getAuthorIds())));
+        } else {
+            book.getAuthors().clear();
+        }
+        
+        bookRepository.save(book);
+
+        libraryBook.setTitle(dto.getTitle());
+        libraryBook.setDescription(dto.getDescription());
+        libraryBook.setPublishYear(dto.getPublishYear());
+        libraryBook.setPages(dto.getPages());
+        libraryBook.setLanguage(dto.getBookLanguage());
+        libraryBook.setCustomCategoryName(dto.getCustomCategoryName());
+        libraryBook.setCustomAuthorName(dto.getCustomAuthorName());
+
+        repository.saveAndFlush(libraryBook);
+        var updatedView = getViewById(libraryBookId);
+        log.info("[LIBRARY_BOOK_LOCAL_UPDATE] User ID: {}, Library Book ID: {}", userId, libraryBookId);
+        return mapper.toDto(updatedView);
+    }
+
+    @Transactional
     public LibraryBookDto updateDetails(Integer libraryBookId, Integer userId, UpdateLibraryBookDetailsDto dto) {
         var libraryBook = getExistingById(libraryBookId, userId);
         mapper.update(libraryBook, dto);
@@ -184,11 +281,14 @@ public class LibraryBookService {
     public void delete(Integer libraryBookId, Integer userId) {
         var libraryBook = repository.findByIdAndUserIdWithBook(libraryBookId, userId)
                 .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
-        var bookId = libraryBook.getBook().getId();
+        var book = libraryBook.getBook();
         collectionBookRepository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
         repository.delete(libraryBook);
-        decrementPopularity(List.of(bookId));
-        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
+
+        if (book.getOwner() == null) {
+            decrementPopularity(List.of(book.getId()));
+            eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
+        }
         log.info("[LIBRARY_BOOK_DELETE] User ID: {}, Library Book ID: {}", userId, libraryBookId);
     }
 
@@ -197,12 +297,19 @@ public class LibraryBookService {
         var libraryBooks = repository.findAllByIdInAndUserIdWithBook(libraryBookIds, userId);
         if (libraryBooks.isEmpty()) return;
 
-        var bookIds = libraryBooks.stream().map(lb -> lb.getBook().getId()).toList();
+        var globalBookIds = libraryBooks.stream()
+                .filter(lb -> lb.getBook().getOwner() == null)
+                .map(lb -> lb.getBook().getId())
+                .toList();
+
         collectionBookRepository.deleteAllByLibraryBookIdInAndUserId(libraryBookIds, userId);
         repository.deleteAll(libraryBooks);
-        decrementPopularity(bookIds);
-        eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
-        log.info("[LIBRARY_BOOK_BULK_DELETE] User ID: {}, Library Book IDs: {}", userId, libraryBookIds);
+
+        if (!globalBookIds.isEmpty()) {
+            decrementPopularity(globalBookIds);
+            eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
+        }
+        log.info("[LIBRARY_BOOK_BULK_DELETE] User ID: {}, Library Book IDs: {}, Status: SUCCESS", userId, libraryBookIds);
     }
 
     private void incrementPopularity(List<Integer> bookIds) {

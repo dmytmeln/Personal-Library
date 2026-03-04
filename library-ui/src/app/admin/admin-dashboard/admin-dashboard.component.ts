@@ -1,22 +1,22 @@
-import { Component, signal, viewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { BookListComponent } from '../../book-list/book-list.component';
-import { AuthorListComponent } from '../../author-list/author-list.component';
-import { CategoryListComponent } from '../../category-list/category-list.component';
-import { Router } from '@angular/router';
-import { TranslocoDirective, TranslocoService, TranslocoPipe } from '@jsverse/transloco';
-import { AdminService } from '../../services/admin.service';
-import { Author } from '../../interfaces/author';
-import { Category } from '../../interfaces/category';
-import { Book } from '../../interfaces/book';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSnackCommon } from '../../common/mat-snack-common';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from '../../dialogs/confirmation-dialog/confirmation-dialog.component';
-import { MatMenuModule } from '@angular/material/menu';
+import {Component, viewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {BookListComponent} from '../../book-list/book-list.component';
+import {AuthorListComponent} from '../../author-list/author-list.component';
+import {CategoryListComponent} from '../../category-list/category-list.component';
+import {Router} from '@angular/router';
+import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+import {AdminService} from '../../services/admin.service';
+import {Author} from '../../interfaces/author';
+import {Category} from '../../interfaces/category';
+import {Book} from '../../interfaces/book';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackCommon} from '../../common/mat-snack-common';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {ConfirmationDialogComponent} from '../../dialogs/confirmation-dialog/confirmation-dialog.component';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -68,7 +68,7 @@ export class AdminDashboardComponent {
 
   onBookDeleted(book: Book): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { message: this.translocoService.translate('common.confirmDelete') }
+      data: {message: this.translocoService.translate('common.confirmDelete')}
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
@@ -87,7 +87,7 @@ export class AdminDashboardComponent {
 
   onAuthorDeleted(author: Author): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { message: this.translocoService.translate('common.confirmDelete') }
+      data: {message: this.translocoService.translate('common.confirmDelete')}
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
@@ -96,7 +96,7 @@ export class AdminDashboardComponent {
           next: () => {
             this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
             const list = this.authorList();
-            if (list) (list as any).loadAuthors();
+            if (list) list.loadAuthors();
           },
           error: (err) => this.snackCommon.showError(err)
         });
@@ -106,7 +106,7 @@ export class AdminDashboardComponent {
 
   onCategoryDeleted(category: Category): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { message: this.translocoService.translate('common.confirmDelete') }
+      data: {message: this.translocoService.translate('common.confirmDelete')}
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
@@ -115,7 +115,76 @@ export class AdminDashboardComponent {
           next: () => {
             this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
             const list = this.categoryList();
-            if (list) (list as any).loadCategories();
+            if (list) list.loadCategories();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  bulkDeleteBooks(): void {
+    const list = this.bookList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {message: this.translocoService.translate('common.confirmDeleteBulk', {count: ids.length})}
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteBooks(ids).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            list.selection.clear();
+            list.loadBooks();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  bulkDeleteAuthors(): void {
+    const list = this.authorList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {message: this.translocoService.translate('common.confirmDeleteBulk', {count: ids.length})}
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteAuthors(ids).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            list.selection.clear();
+            list.loadAuthors();
+          },
+          error: (err) => this.snackCommon.showError(err)
+        });
+      }
+    });
+  }
+
+  bulkDeleteCategories(): void {
+    const list = this.categoryList();
+    if (!list) return;
+    const ids = list.selection.selectedIds();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {message: this.translocoService.translate('common.confirmDeleteBulk', {count: ids.length})}
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.adminService.deleteCategories(ids).subscribe({
+          next: () => {
+            this.snackCommon.showSuccess(this.translocoService.translate('common.success.deleted'));
+            list.selection.clear();
+            list.loadCategories();
           },
           error: (err) => this.snackCommon.showError(err)
         });

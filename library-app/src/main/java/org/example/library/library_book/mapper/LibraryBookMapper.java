@@ -26,14 +26,26 @@ public interface LibraryBookMapper {
     @Mapping(target = "id", source = "bookId")
     @Mapping(target = "title", source = "title")
     @Mapping(target = "categoryId", source = "categoryId")
-    @Mapping(target = "categoryName", source = "categoryName")
+    @Mapping(target = "categoryName", source = "view", qualifiedByName = "getLocalizedCategoryNameFromView")
     @Mapping(target = "publishYear", source = "publishYear")
     @Mapping(target = "language", source = "bookLanguage")
     @Mapping(target = "pages", source = "pages")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "coverImageUrl", source = "coverImageUrl")
     @Mapping(target = "authors", source = "authors", qualifiedByName = "authorsToMap")
+    @Mapping(target = "customAuthorName", source = "customAuthorName")
+    @Mapping(target = "ownerId", source = "ownerUserId")
     BookDto toBookDto(LibraryBookView view);
+
+    @Named("getLocalizedCategoryNameFromView")
+    default String getLocalizedCategoryNameFromView(LibraryBookView view) {
+        if (view.getCategoryName() != null && !view.getCategoryName().isBlank())
+            return view.getCategoryName();
+
+        var lang = LocaleContextHolder.getLocale().getLanguage();
+        var translation = view.getCategory().getTranslations().get(lang);
+        return translation != null ? translation.getName() : null;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -41,6 +53,8 @@ public interface LibraryBookMapper {
     @Mapping(target = "rating", ignore = true)
     @Mapping(target = "book", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "customAuthorName", ignore = true)
+    @Mapping(target = "customCategoryName", ignore = true)
     @Mapping(target = "finishedAt", ignore = true)
     void update(@MappingTarget LibraryBook libraryBook, UpdateLibraryBookDetailsDto dto);
 
