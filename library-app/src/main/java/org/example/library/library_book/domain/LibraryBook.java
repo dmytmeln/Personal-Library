@@ -58,6 +58,12 @@ public class LibraryBook {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    @Column(name = "custom_author_name")
+    private String customAuthorName;
+
+    @Column(name = "custom_category_name")
+    private String customCategoryName;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;

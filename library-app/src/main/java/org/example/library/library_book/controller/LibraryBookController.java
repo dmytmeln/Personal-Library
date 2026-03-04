@@ -22,6 +22,7 @@ public class LibraryBookController {
 
     private final LibraryBookService service;
 
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<LibraryBookDto> getAll(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -41,6 +42,12 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Integer bookId) {
         service.create(bookId, userDetails.user());
+    }
+
+    @PostMapping("/local")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createLocalBook(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody CreateLocalBookDto dto) {
+        service.createLocalBook(dto, userDetails.user());
     }
 
     @PostMapping("/bulk")

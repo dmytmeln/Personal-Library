@@ -23,13 +23,35 @@ mat-card {
 }
 
 .cover {
+  width: 150px;
+  height: 225px;
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-shrink: 0;
 
   img {
     border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--mat-sys-level1);
+  }
+
+  .no-cover {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--mat-sys-surface-container-highest);
+    border-radius: 4px;
+    box-shadow: var(--mat-sys-level1);
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.5;
+    }
   }
 }
 

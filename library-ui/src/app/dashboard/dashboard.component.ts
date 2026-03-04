@@ -110,11 +110,11 @@ export class DashboardComponent implements OnInit {
   }
 
   goToAuthorDetails(id: number): void {
-    this.router.navigate(['/author-details'], {state: {id}});
+    this.router.navigate(['/author-details', id]);
   }
 
   goToCategoryDetails(id: number): void {
-    this.router.navigate(['/category-details'], {state: {id}});
+    this.router.navigate(['/category-details', id]);
   }
 
 }

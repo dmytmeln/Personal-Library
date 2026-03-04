@@ -12,6 +12,39 @@
   align-items: center;
 }
 
+.card-image {
+  width: 200px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+
+  img {
+    border-radius: 4px;
+    box-shadow: var(--mat-sys-level1);
+  }
+
+  .no-cover {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--mat-sys-surface-container-highest);
+    border-radius: 4px;
+    box-shadow: var(--mat-sys-level1);
+
+    mat-icon {
+      font-size: 80px;
+      width: 80px;
+      height: 80px;
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.5;
+    }
+  }
+}
+
 .book-title {
   display: flex;
   align-items: center;

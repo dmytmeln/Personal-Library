@@ -10,6 +10,10 @@
           <mat-icon>view_list</mat-icon>
         </mat-button-toggle>
       </mat-button-toggle-group>
+      <button mat-stroked-button color="primary" (click)="openCreateLocalBookDialog()">
+        <mat-icon>add_box</mat-icon>
+        {{ t('menu.createManual') }}
+      </button>
       <button mat-flat-button color="primary" (click)="openViewBookListDialog()">
         <mat-icon>add</mat-icon>
         {{ t('menu.addToLibrary') }}
@@ -69,7 +73,7 @@
         <mat-icon>note_alt</mat-icon>
         <span>{{ m('myNotes') }}</span>
       </button>
-      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
+      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)" [disabled]="!!libraryBook.book.ownerId">
         <mat-icon>edit</mat-icon>
         <span>{{ m('editDetails') }}</span>
       </button>

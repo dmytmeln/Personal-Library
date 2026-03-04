@@ -61,6 +61,12 @@ public class LibraryBookView {
     @Column(name = "category_name")
     private String categoryName;
 
+    @Column(name = "custom_author_name")
+    private String customAuthorName;
+
+    @Column(name = "owner_user_id")
+    private Integer ownerUserId;
+
     @ManyToMany
     @JoinTable(
             name = "book_authors",

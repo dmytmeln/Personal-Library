@@ -158,7 +158,7 @@
         <mat-icon>note_alt</mat-icon>
         <span>{{ t('myNotes') }}</span>
       </button>
-      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
+      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)" [disabled]="!!libraryBook.book.ownerId">
         <mat-icon>edit</mat-icon>
         <span>{{ t('editDetails') }}</span>
       </button>

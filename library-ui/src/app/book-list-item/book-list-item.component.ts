@@ -37,11 +37,11 @@ export class BookListItemComponent {
   constructor(private router: Router) {}
 
   goToAuthorDetails(authorId: string | number): void {
-    this.router.navigate(['/author-details'], {state: {id: Number(authorId)}});
+    this.router.navigate(['/author-details', Number(authorId)]);
   }
 
   goToCategoryDetails(): void {
-    this.router.navigate(['/category-details'], {state: {id: this.book().categoryId}});
+    this.router.navigate(['/category-details', this.book().categoryId]);
   }
 
   goToBookDetails(): void {

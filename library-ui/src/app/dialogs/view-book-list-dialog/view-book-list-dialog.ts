@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, DestroyRef, inject, Inject, OnDestroy, OnInit, viewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogModule,} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {LibraryBook} from '../../interfaces/library-book';
 import {Book} from '../../interfaces/book';
 import {MatButton} from '@angular/material/button';
@@ -15,6 +15,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-view-book-list-dialog',
@@ -31,6 +32,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     MatTooltipModule,
     MatDialogModule,
     TranslocoDirective,
+    MatIconModule,
   ],
   templateUrl: './view-book-list-dialog.html',
   styleUrl: './view-book-list-dialog.scss'
@@ -48,6 +50,7 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
 
   private translocoService = inject(TranslocoService);
   private destroyRef = inject(DestroyRef);
+  private dialogRef = inject(MatDialogRef<ViewBookListDialog>);
 
   sort = viewChild.required<MatSort>(MatSort);
   paginator = viewChild.required<MatPaginator>(MatPaginator);
@@ -143,6 +146,10 @@ export class ViewBookListDialog implements AfterViewInit, OnInit, OnDestroy {
   goToBookDetails(book: Book) {
     this.router.navigate(['/book-details', book.id]).then(() => {
     });
+  }
+
+  onCreateLocalBook() {
+    this.dialogRef.close('create-local');
   }
 
   private getBooks() {

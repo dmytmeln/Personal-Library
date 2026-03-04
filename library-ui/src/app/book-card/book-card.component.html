@@ -2,6 +2,8 @@
   <div class="cover">
     @if (book().coverImageUrl) {
       <img ngSrc="{{book().coverImageUrl}}" priority width="150" height="225" alt="Book cover"/>
+    } @else {
+      <div class="no-cover"><mat-icon>book</mat-icon></div>
     }
   </div>
   <div class="content">
@@ -10,13 +12,21 @@
        [matTooltip]="book().title"
        [matTooltipDisabled]="!shouldShowTooltip(book().title)">{{ truncateTitle(book().title) }}</p>
     <p class="authors">
-      @for (author of book().authors | keyvalue; track author.key; let last = $last) {
-        <a class="link"
-           (click)="$event.stopPropagation(); goToAuthorDetails(author.key)">{{ author.value }}</a>{{ last ? '' : ', ' }}
+      @if (book().customAuthorName) {
+        <span>{{ book().customAuthorName }}</span>
+      } @else {
+        @for (author of book().authors | keyvalue; track author.key; let last = $last) {
+          <a class="link"
+             (click)="$event.stopPropagation(); goToAuthorDetails(author.key)">{{ author.value }}</a>{{ last ? '' : ', ' }}
+        }
       }
     </p>
     <p class="category">
-      <a class="link" (click)="$event.stopPropagation(); goToCategoryDetails()">{{ book().categoryName }}</a>
+      @if (book().categoryId) {
+        <a class="link" (click)="$event.stopPropagation(); goToCategoryDetails()">{{ book().categoryName }}</a>
+      } @else {
+        <span>{{ book().categoryName }}</span>
+      }
     </p>
     <div class="metadata" *transloco="let c; prefix: 'common'">
       <span class="chip">{{ book().publishYear }}</span>

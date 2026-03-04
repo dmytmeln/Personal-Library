@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -18,7 +19,14 @@ public interface LibraryBookViewRepository extends JpaRepository<LibraryBookView
     @EntityGraph(attributePaths = {"authors"})
     Optional<LibraryBookView> findByIdAndLanguageCode(Integer id, String languageCode);
 
-    @EntityGraph(attributePaths = {"authors"})
+    @Query("""
+            SELECT v
+            FROM LibraryBookView v
+            LEFT JOIN FETCH v.authors
+            WHERE v.bookId = :bookId
+                AND v.userId = :userId
+                AND (v.languageCode = :languageCode OR v.languageCode IS NULL)
+            """)
     Optional<LibraryBookView> findByBookIdAndUserIdAndLanguageCode(Integer bookId, Integer userId, String languageCode);
 
 }

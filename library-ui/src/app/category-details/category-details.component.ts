@@ -1,6 +1,6 @@
 import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Category} from '../interfaces/category';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {BookService} from '../services/book.service';
 import {CategoryService} from '../services/category.service';
 import {Book} from '../interfaces/book';
@@ -19,7 +19,7 @@ import {SelectionStore} from '../services/selection.store';
 import {BulkActionBarComponent} from '../common/bulk-action-bar/bulk-action-bar.component';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
-import {map} from 'rxjs';
+import {map, skip} from 'rxjs';
 
 @Component({
   selector: 'app-category-details',
@@ -55,7 +55,7 @@ export class CategoryDetailsComponent implements OnInit {
     {initialValue: []}
   );
 
-  private categoryId: number;
+  private categoryId!: number;
   private libraryBookIds: Set<number> = new Set<number>();
   private snackCommon: MatSnackCommon;
   private currentSort: string[] | undefined;
@@ -70,25 +70,33 @@ export class CategoryDetailsComponent implements OnInit {
   readonly selection = new SelectionStore();
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private bookService: BookService,
     private categoryService: CategoryService,
     private libraryBookService: LibraryBookService,
     matSnackBar: MatSnackBar,
   ) {
-    this.categoryId = this.router.getCurrentNavigation()?.extras?.state?.['id'] as number;
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
 
   ngOnInit() {
-    if (!this.categoryId) {
-      this.router.navigate(['/']);
-      return;
-    }
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.categoryId = +id;
+        this.initCategory();
+        this.loadBooks();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
 
-    this.translocoService.langChanges$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.initCategory();
-      this.loadBooks();
+    this.translocoService.langChanges$.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.categoryId) {
+        this.initCategory();
+        this.loadBooks();
+      }
     });
   }
 

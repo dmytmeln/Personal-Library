@@ -53,6 +53,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {LIBRARY_BOOK_STATUSES} from '../interfaces/library-book';
+import {CreateLocalBookDialogComponent} from '../dialogs/create-local-book-dialog/create-local-book-dialog.component';
 
 const EMPTY_SEARCH_PARAMS: CollectionBookSearchParams = {
   title: '',
@@ -335,16 +336,35 @@ export class CollectionComponent implements OnInit {
       fetchBooksFn: (options) => this.libraryBookService.getAll(options),
     };
     const dialogRef = this.dialog.open(ViewBookListDialog, {data});
-    dialogRef.afterClosed().subscribe((libraryBookId: number | undefined) => {
-      if (libraryBookId) {
-        this.collectionBookService.addBookToCollection(this.collection.id, libraryBookId).subscribe({
+    dialogRef.afterClosed().subscribe((result: number | string | undefined) => {
+      if (typeof result === 'number') {
+        this.collectionBookService.addBookToCollection(this.collection.id, result).subscribe({
           next: () => {
             this.loadBooks();
             this.snackCommon.showSuccess(this.translocoService.translate('collections.success.bookAdded'));
           },
           error: (err) => this.snackCommon.showError(err)
         });
+      } else if (result === 'create-local') {
+        this.openCreateLocalBookDialog();
       }
+    });
+  }
+
+  private openCreateLocalBookDialog(): void {
+    const dialogRef = this.dialog.open(CreateLocalBookDialogComponent, {
+      width: '600px',
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((dto) => {
+      this.libraryBookService.createLocalBook(dto).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
     });
   }
 

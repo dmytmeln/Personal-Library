@@ -112,6 +112,32 @@
         "languageRequired": "Language is required"
       },
       "resetButton": "Reset to Defaults"
+    },
+    "createLocalBook": {
+      "title": "Create Manual Book",
+      "fields": {
+        "title": "Title",
+        "description": "Description",
+        "bookLanguage": "Book Language",
+        "status": "Library Status",
+        "publishYear": "Publish Year",
+        "pages": "Pages",
+        "category": "Category",
+        "authors": "Authors",
+        "useGlobalCategory": "Select from global categories",
+        "useCustomCategory": "Type custom category name",
+        "useGlobalAuthors": "Select from global authors",
+        "useCustomAuthor": "Type custom author name",
+        "customCategoryName": "Custom Category Name",
+        "customAuthorName": "Custom Author Name",
+        "customCategoryPlaceholder": "e.g. My Private Category",
+        "customAuthorPlaceholder": "e.g. Me, My Friend"
+      },
+      "errors": {
+        "titleRequired": "Title is required",
+        "categoryRequired": "Category is required",
+        "authorRequired": "Author is required"
+      }
     }
   },
   "library": {
@@ -153,6 +179,7 @@
       "editDetails": "Edit Details",
       "addToCollection": "Add to Collection",
       "addToLibrary": "Add to Library",
+      "createManual": "Create Manual Book",
       "changeStatus": "Change Status",
       "rate": "Rate",
       "removeFromAllCollections": "Remove from all collections",

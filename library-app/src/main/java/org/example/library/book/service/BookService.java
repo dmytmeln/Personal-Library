@@ -8,7 +8,6 @@ import org.example.library.book.mapper.BookMapper;
 import org.example.library.book.repository.BookDisplayViewRepository;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.book.repository.BookSpecification;
-import org.example.library.exception.NotFoundException;
 import org.example.library.pagination.PageRequestBuilder;
 import org.example.library.pagination.PaginationParams;
 import org.example.library.pagination.SortableFields;
@@ -35,19 +34,6 @@ public class BookService {
 
         return displayViewRepository.findAll(spec, pageable)
                 .map(mapper::toBookDto);
-    }
-
-    public void verifyExistsById(Integer bookId) {
-        if (!repository.existsById(bookId)) {
-            throw new NotFoundException("error.book.not_found");
-        }
-    }
-
-    public BookDto getById(Integer id) {
-        var lang = LocaleContextHolder.getLocale().getLanguage();
-        return displayViewRepository.findByIdAndLanguageCode(id, lang)
-                .map(mapper::toBookDto)
-                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
     }
 
     public List<LanguageWithCount> getAllLanguages() {

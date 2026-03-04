@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: update_books_for_local
+      author: Dmytro Melnyk
+      changes:
+        - addColumn:
+            tableName: books
+            columns:
+              - column:
+                  name: owner_user_id
+                  type: integer
+                  constraints:
+                    nullable: true
+                    foreignKeyName: books_users_owner_fk
+                    referencedTableName: users
+                    referencedColumnNames: user_id
+        - dropNotNullConstraint:
+            tableName: books
+            columnName: category_id
+            columnDataType: integer
+        - dropNotNullConstraint:
+            tableName: books
+            columnName: publish_year
+            columnDataType: smallint
+        - dropNotNullConstraint:
+            tableName: books
+            columnName: pages
+            columnDataType: smallint
+        - dropNotNullConstraint:
+            tableName: books
+            columnName: cover_image_url
+            columnDataType: varchar(255)
+        - addColumn:
+            tableName: library_books
+            columns:
+              - column:
+                  name: custom_author_name
+                  type: varchar(255)
+              - column:
+                  name: custom_category_name
+                  type: varchar(255)

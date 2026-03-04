@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.library.author.domain.Author;
 import org.example.library.category.domain.Category;
+import org.example.library.user.domain.User;
 import org.hibernate.annotations.Array;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -27,17 +28,21 @@ public class Book {
     @Column(name = "book_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_user_id")
+    private User owner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(name = "publish_year", nullable = false)
+    @Column(name = "publish_year")
     private Short publishYear;
 
-    @Column(name = "pages", nullable = false)
+    @Column(name = "pages")
     private Short pages;
 
-    @Column(name = "cover_image_url", nullable = false)
+    @Column(name = "cover_image_url")
     private String coverImageUrl;
 
     @Column(name = "description_vector", columnDefinition = "vector(1100)")

@@ -33,6 +33,8 @@ public interface LibraryBookMapper {
     @Mapping(target = "description", source = "description")
     @Mapping(target = "coverImageUrl", source = "coverImageUrl")
     @Mapping(target = "authors", source = "authors", qualifiedByName = "authorsToMap")
+    @Mapping(target = "customAuthorName", source = "customAuthorName")
+    @Mapping(target = "ownerId", source = "ownerUserId")
     BookDto toBookDto(LibraryBookView view);
 
     @Mapping(target = "id", ignore = true)
@@ -41,6 +43,8 @@ public interface LibraryBookMapper {
     @Mapping(target = "rating", ignore = true)
     @Mapping(target = "book", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "customAuthorName", ignore = true)
+    @Mapping(target = "customCategoryName", ignore = true)
     @Mapping(target = "finishedAt", ignore = true)
     void update(@MappingTarget LibraryBook libraryBook, UpdateLibraryBookDetailsDto dto);
 

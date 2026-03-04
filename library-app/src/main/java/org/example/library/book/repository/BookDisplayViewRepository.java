@@ -26,6 +26,7 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
                                           AND bt.language_code = ct.language_code
             LEFT JOIN library_books lb ON b.book_id = lb.book_id AND lb.user_id = :userId
             WHERE bt.language_code = :languageCode
+              AND b.owner_user_id IS NULL
               AND b.description_vector IS NOT NULL
               AND lb.library_book_id IS NULL
             ORDER BY
@@ -52,6 +53,7 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
                                           AND bt.language_code = ct.language_code
             LEFT JOIN library_books lb ON b.book_id = lb.book_id AND lb.user_id = :userId
             WHERE bt.language_code = :languageCode
+              AND b.owner_user_id IS NULL
               AND b.description_vector IS NOT NULL
               AND lb.library_book_id IS NULL
               AND b.book_id <> :excludeBookId

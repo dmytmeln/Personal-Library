@@ -10,4 +10,6 @@ export interface Book {
   coverImageUrl?: string,
   authors: Record<number, string>,
   popularityCount?: number;
+  ownerId?: number;
+  customAuthorName?: string;
 }

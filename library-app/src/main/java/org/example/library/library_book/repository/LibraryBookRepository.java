@@ -18,7 +18,7 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
                 COUNT(lb) AS count
             FROM LibraryBook lb
             JOIN lb.book b
-            JOIN b.translations tr ON tr.languageCode = :lang
+            LEFT JOIN b.translations tr ON tr.languageCode = :lang
             WHERE lb.user.id = :userId
             GROUP BY COALESCE(lb.language, tr.bookLanguage)
             ORDER BY COUNT(lb) DESC
@@ -56,7 +56,7 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
 
     Optional<LibraryBook> findByIdAndUserId(Integer libraryBookId, Integer userId);
 
-    @Query("SELECT lb FROM LibraryBook lb JOIN FETCH lb.book WHERE lb.id = :libraryBookId AND lb.user.id = :userId")
+    @Query("SELECT lb FROM LibraryBook lb JOIN FETCH lb.book LEFT JOIN FETCH lb.book.owner WHERE lb.id = :libraryBookId AND lb.user.id = :userId")
     Optional<LibraryBook> findByIdAndUserIdWithBook(Integer libraryBookId, Integer userId);
 
     boolean existsByIdAndUserId(Integer libraryBookId, Integer userId);
