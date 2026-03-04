@@ -4,5 +4,4 @@ export interface UpdateLibraryBookDetails {
   pages: number | null;
   language: string | null;
   description: string | null;
-  coverImageUrl: string | null;
 }

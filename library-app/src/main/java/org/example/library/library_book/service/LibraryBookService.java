@@ -15,6 +15,7 @@ import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.domain.LibraryBookView;
 import org.example.library.library_book.dto.CreateLocalBookDto;
+import org.example.library.library_book.dto.UpdateLocalBookDto;
 import org.example.library.library_book.dto.LibraryBookDto;
 import org.example.library.library_book.dto.LibraryBookSearchCriteria;
 import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
@@ -211,6 +212,47 @@ public class LibraryBookService {
         }
 
         libraryBook.setStatus(status);
+    }
+
+    @Transactional
+    public LibraryBookDto updateLocalBook(Integer libraryBookId, UpdateLocalBookDto dto, Integer userId) {
+        var libraryBook = repository.findByIdAndUserIdWithBook(libraryBookId, userId)
+                .orElseThrow(() -> new NotFoundException("error.library_book.not_found"));
+
+        var book = libraryBook.getBook();
+        
+        if (book.getOwner() == null || !book.getOwner().getId().equals(userId))
+             throw new BadRequestException("error.library_book.access_denied");
+
+        book.setPublishYear(dto.getPublishYear());
+        book.setPages(dto.getPages());
+
+        if (dto.getCategoryId() != null) {
+            book.setCategory(categoryRepository.getReferenceById(dto.getCategoryId()));
+        } else {
+            book.setCategory(null);
+        }
+
+        if (dto.getAuthorIds() != null && !dto.getAuthorIds().isEmpty()) {
+            book.setAuthors(new HashSet<>(authorRepository.findAllById(dto.getAuthorIds())));
+        } else {
+            book.getAuthors().clear();
+        }
+        
+        bookRepository.save(book);
+
+        libraryBook.setTitle(dto.getTitle());
+        libraryBook.setDescription(dto.getDescription());
+        libraryBook.setPublishYear(dto.getPublishYear());
+        libraryBook.setPages(dto.getPages());
+        libraryBook.setLanguage(dto.getBookLanguage());
+        libraryBook.setCustomCategoryName(dto.getCustomCategoryName());
+        libraryBook.setCustomAuthorName(dto.getCustomAuthorName());
+
+        repository.saveAndFlush(libraryBook);
+        var updatedView = getViewById(libraryBookId);
+        log.info("[LIBRARY_BOOK_LOCAL_UPDATE] User ID: {}, Library Book ID: {}", userId, libraryBookId);
+        return mapper.toDto(updatedView);
     }
 
     @Transactional

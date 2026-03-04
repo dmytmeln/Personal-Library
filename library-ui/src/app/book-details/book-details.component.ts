@@ -156,10 +156,6 @@ export class BookDetailsComponent implements OnInit {
     this.router.navigate(['/author-details', Number(id)]);
   }
 
-  goToBookDetails(id: number): void {
-    this.router.navigate(['/book-details', id]);
-  }
-
   changeRating(rating: number): void {
     const libraryBookId = this.bookDetails?.libraryBook?.id;
     if (!libraryBookId) return;

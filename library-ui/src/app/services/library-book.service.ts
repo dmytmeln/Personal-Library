@@ -51,6 +51,10 @@ export class LibraryBookService {
     return this.apiService.post('/users/me/library-books/local', {body: dto});
   }
 
+  updateLocalBook(libraryBookId: number, dto: CreateLocalBook): Observable<void> {
+    return this.apiService.put(`/users/me/library-books/local/${libraryBookId}`, {body: dto});
+  }
+
   bulkAdd(ids: number[]): Observable<void> {
     const body: BulkLibraryBookRequest = {ids};
     return this.apiService.post('/users/me/library-books/bulk', {body});

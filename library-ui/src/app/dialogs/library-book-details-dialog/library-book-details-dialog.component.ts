@@ -50,8 +50,7 @@ export class LibraryBookDetailsDialogComponent {
       publishYear: [book.publishYear, [Validators.required, Validators.min(0)]],
       pages: [book.pages, [Validators.required, Validators.min(1)]],
       language: [book.language, Validators.required],
-      description: [book.description],
-      coverImageUrl: [book.coverImageUrl]
+      description: [book.description]
     });
   }
 

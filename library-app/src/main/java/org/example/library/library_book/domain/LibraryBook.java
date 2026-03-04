@@ -55,9 +55,6 @@ public class LibraryBook {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "cover_image_url")
-    private String coverImageUrl;
-
     @Column(name = "custom_author_name")
     private String customAuthorName;
 

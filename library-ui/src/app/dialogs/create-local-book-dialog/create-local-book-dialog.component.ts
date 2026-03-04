@@ -1,7 +1,7 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, Inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
@@ -9,7 +9,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import {TranslocoDirective, TranslocoPipe} from '@jsverse/transloco';
-import {LibraryBookStatus, LIBRARY_BOOK_STATUSES} from '../../interfaces/library-book';
+import {LIBRARY_BOOK_STATUSES, LibraryBook, LibraryBookStatus} from '../../interfaces/library-book';
 import {CategoryService} from '../../services/category.service';
 import {AuthorService} from '../../services/author.service';
 import {Category} from '../../interfaces/category';
@@ -17,6 +17,10 @@ import {Author} from '../../interfaces/author';
 import {CreateLocalBook} from '../../interfaces/create-local-book';
 import {AutocompleteSearchStore} from '../../services/autocomplete-search.store';
 import {AutocompleteFilterComponent} from '../../common/filters/autocomplete-filter/autocomplete-filter.component';
+
+export interface CreateLocalBookDialogData {
+  libraryBook?: LibraryBook;
+}
 
 @Component({
   selector: 'app-create-local-book-dialog',
@@ -54,6 +58,7 @@ export class CreateLocalBookDialogComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<CreateLocalBookDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: CreateLocalBookDialogData | undefined,
     private readonly categoryService: CategoryService,
     private readonly authorService: AuthorService,
   ) {
@@ -64,18 +69,42 @@ export class CreateLocalBookDialogComponent implements OnInit {
       (query, page, size) => this.authorService.search({name: query, page, size})
     );
 
+    const lb = data?.libraryBook;
+    const book = lb?.book;
+
+    this.useCustomCategory.set(book ? !book.categoryId : false);
+    this.useCustomAuthor.set(book ? (!book.authors || Object.keys(book.authors).length === 0) : false);
+
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(255)]],
-      description: ['', [Validators.maxLength(2000)]],
-      bookLanguage: ['', [Validators.maxLength(50)]],
-      status: [LibraryBookStatus.NO_TAG, [Validators.required]],
-      publishYear: [null, [Validators.min(0)]],
-      pages: [null, [Validators.min(1)]],
-      categoryId: [null],
-      customCategoryName: ['', [Validators.maxLength(255)]],
-      customAuthorName: ['', [Validators.maxLength(255)]],
-      authorIds: [[]]
+      title: [book?.title || '', [Validators.required, Validators.maxLength(255)]],
+      description: [book?.description || '', [Validators.maxLength(2000)]],
+      bookLanguage: [book?.language || '', [Validators.maxLength(50)]],
+      status: [lb?.status || LibraryBookStatus.NO_TAG, [Validators.required]],
+      publishYear: [book?.publishYear || null, [Validators.min(0)]],
+      pages: [book?.pages || null, [Validators.min(1)]],
+      categoryId: [book?.categoryId || null],
+      customCategoryName: [!book?.categoryId ? book?.categoryName || '' : '', [Validators.maxLength(255)]],
+      customAuthorName: [book?.customAuthorName || '', [Validators.maxLength(255)]],
+      authorIds: [book?.authors ? Object.keys(book.authors).map(Number) : []]
     });
+
+    if (book?.categoryId && book?.categoryName) {
+      this.selectedCategory.set({id: book.categoryId, name: book.categoryName} as Category);
+    }
+
+    if (book?.authors) {
+      const authorsList = Object.entries(book.authors).map(([id, name]) => ({
+        id: Number(id),
+        fullName: name,
+        bio: '',
+        country: '',
+        birthYear: null,
+        deathYear: null,
+        countryName: '',
+        booksCount: 0
+      } as unknown as Author));
+      this.selectedAuthors.set(authorsList);
+    }
   }
 
   ngOnInit(): void {

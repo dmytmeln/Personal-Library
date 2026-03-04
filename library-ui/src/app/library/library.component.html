@@ -73,10 +73,17 @@
         <mat-icon>note_alt</mat-icon>
         <span>{{ m('myNotes') }}</span>
       </button>
-      <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)" [disabled]="!!libraryBook.book.ownerId">
-        <mat-icon>edit</mat-icon>
-        <span>{{ m('editDetails') }}</span>
-      </button>
+      @if (libraryBook.book.ownerId) {
+        <button mat-menu-item (click)="openUpdateLocalBookDialog(libraryBook)">
+          <mat-icon>edit</mat-icon>
+          <span>{{ m('editDetails') }}</span>
+        </button>
+      } @else {
+        <button mat-menu-item (click)="openEditDetailsDialog(libraryBook)">
+          <mat-icon>edit</mat-icon>
+          <span>{{ m('editDetails') }}</span>
+        </button>
+      }
       <button mat-menu-item (click)="addToCollection(libraryBook)">
         <mat-icon>playlist_add</mat-icon>
         <span>{{ m('addToCollection') }}</span>

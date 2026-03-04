@@ -50,6 +50,15 @@ public class LibraryBookController {
         service.createLocalBook(dto, userDetails.user());
     }
 
+    @PutMapping("/local/{libraryBookId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LibraryBookDto updateLocalBook(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                          @PathVariable Integer libraryBookId,
+                                          @Valid @RequestBody org.example.library.library_book.dto.UpdateLocalBookDto dto
+    ) {
+        return service.updateLocalBook(libraryBookId, dto, userDetails.getId());
+    }
+
     @PostMapping("/bulk")
     @ResponseStatus(HttpStatus.CREATED)
     public void bulkAdd(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody BulkRequest request) {

@@ -299,6 +299,25 @@ export class LibraryComponent implements OnInit {
     });
   }
 
+  openUpdateLocalBookDialog(libraryBook: LibraryBook): void {
+    const dialogRef = this.dialog.open(CreateLocalBookDialogComponent, {
+      width: '600px',
+      autoFocus: false,
+      data: { libraryBook }
+    });
+
+    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe((dto) => {
+      this.libraryBookService.updateLocalBook(libraryBook.id, dto).subscribe({
+        next: () => {
+          this.loadBooks();
+          this.libraryStore.triggerRefresh();
+          this.snackCommon.showSuccess(this.translocoService.translate('library.success.detailsUpdated'));
+        },
+        error: (err) => this.snackCommon.showError(err)
+      });
+    });
+  }
+
   openNoteDialog(libraryBook: LibraryBook): void {
     this.dialog.open(NoteDialogComponent, {
       data: {

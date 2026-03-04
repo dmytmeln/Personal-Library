@@ -42,7 +42,7 @@ databaseChangeLog:
                   COALESCE(lb.publish_year, b.publish_year) as publish_year,
                   COALESCE(lb.pages, b.pages) as pages,
                   bt.language_code,
-                  COALESCE(lb.cover_image_url, b.cover_image_url) as cover_image_url,
+                  b.cover_image_url as cover_image_url,
                   b.category_id,
                   COALESCE(lb.language, bt.book_language) as book_language,
                   COALESCE(lb.custom_category_name, ct.name) as category_name,

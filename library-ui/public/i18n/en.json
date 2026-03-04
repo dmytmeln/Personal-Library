@@ -100,8 +100,6 @@
         "pagesPlaceholder": "300",
         "language": "Language",
         "languagePlaceholder": "English",
-        "coverUrl": "Cover URL",
-        "coverUrlPlaceholder": "https://example.com/cover.jpg",
         "description": "Description",
         "descriptionPlaceholder": "Book description..."
       },

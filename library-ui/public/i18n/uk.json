@@ -100,8 +100,6 @@
         "pagesPlaceholder": "300",
         "language": "Мова",
         "languagePlaceholder": "Українська",
-        "coverUrl": "URL обкладинки",
-        "coverUrlPlaceholder": "https://example.com/cover.jpg",
         "description": "Опис",
         "descriptionPlaceholder": "Опис книги..."
       },

@@ -48,9 +48,8 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
                 lb.publishYear = NULL,
                 lb.pages = NULL,
                 lb.language = NULL,
-                lb.description = NULL,
-                lb.coverImageUrl = NULL
-            WHERE lb.id = :id AND lb.user.id = :userId
+                lb.description = NULL
+            WHERE lb.id = :id
             """)
     int resetOverriddenFields(Integer id, Integer userId);
 

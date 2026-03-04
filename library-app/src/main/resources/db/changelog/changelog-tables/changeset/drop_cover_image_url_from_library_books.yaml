@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: drop_cover_image_url_from_library_books
+      author: Dmytro Melnyk
+      changes:
+        - dropColumn:
+            tableName: library_books
+            columnName: cover_image_url
