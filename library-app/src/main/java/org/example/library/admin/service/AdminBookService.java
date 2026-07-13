@@ -71,10 +71,10 @@ public class AdminBookService {
 
     @Transactional
     public void deleteBook(Integer id) {
-        if (!bookRepository.existsById(id))
-            throw new NotFoundException("error.book.not_found");
+        var book = bookRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
 
-        bookRepository.deleteById(id);
+        bookRepository.delete(book);
         log.info("[ADMIN_BOOK_DELETE] Book ID: {}", id);
     }
 
@@ -102,31 +102,28 @@ public class AdminBookService {
             book.setAuthors(new HashSet<>());
         }
 
-        if (dto.getTranslations() != null) {
-            if (book.getTranslations() == null) {
-                book.setTranslations(new HashMap<>());
-            }
+        updateTranslations(book, dto);
+    }
 
-            var existingTranslations = book.getTranslations();
-            for (var entry : dto.getTranslations().entrySet()) {
-                var lang = entry.getKey();
-                var transDto = entry.getValue();
-
-                var translation = existingTranslations.get(lang);
-                if (translation == null) {
-                    translation = BookTranslation.builder()
-                            .languageCode(lang)
-                            .book(book)
-                            .build();
-                    existingTranslations.put(lang, translation);
-                }
-
-                translation.setBook(book);
-                translation.setTitle(transDto.getTitle());
-                translation.setBookLanguage(transDto.getBookLanguage());
-                translation.setDescription(transDto.getDescription());
-            }
+    private void updateTranslations(Book book, AdminBookDto dto) {
+        if (dto.getTranslations() == null) {
+            return;
         }
+
+        if (book.getTranslations() == null) {
+            book.setTranslations(new HashMap<>());
+        }
+
+        var existing = book.getTranslations();
+        dto.getTranslations().forEach((lang, transDto) -> {
+            var translation = existing.computeIfAbsent(lang, l -> BookTranslation.builder()
+                    .languageCode(l)
+                    .book(book)
+                    .build());
+            translation.setTitle(transDto.getTitle());
+            translation.setBookLanguage(transDto.getBookLanguage());
+            translation.setDescription(transDto.getDescription());
+        });
     }
 
 }

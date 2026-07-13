@@ -62,22 +62,20 @@ public class AdminCategoryService {
 
     @Transactional
     public void deleteCategory(Integer id) {
-        if (!categoryRepository.existsById(id))
-            throw new NotFoundException("error.category.not_found");
+        var category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("error.category.not_found"));
 
         if (bookRepository.existsByCategoryId(id))
             throw new BadRequestException("error.category.has_books");
 
-        categoryRepository.deleteById(id);
+        categoryRepository.delete(category);
         log.info("[ADMIN_CATEGORY_DELETE] Category ID: {}", id);
     }
 
     @Transactional
     public void deleteCategories(List<Integer> ids) {
-        for (var id : ids) {
-            if (bookRepository.existsByCategoryId(id)) {
-                throw new BadRequestException("error.category.has_books");
-            }
+        if (bookRepository.existsByCategoryIdIn(ids)) {
+            throw new BadRequestException("error.category.has_books");
         }
 
         categoryRepository.deleteAllById(ids);
@@ -85,30 +83,27 @@ public class AdminCategoryService {
     }
 
     private void updateCategoryFields(Category category, AdminCategoryDto dto) {
-        if (dto.getTranslations() != null) {
-            if (category.getTranslations() == null) {
-                category.setTranslations(new HashMap<>());
-            }
+        updateTranslations(category, dto);
+    }
 
-            var existingTranslations = category.getTranslations();
-            for (var entry : dto.getTranslations().entrySet()) {
-                var lang = entry.getKey();
-                var transDto = entry.getValue();
-
-                var translation = existingTranslations.get(lang);
-                if (translation == null) {
-                    translation = CategoryTranslation.builder()
-                            .languageCode(lang)
-                            .category(category)
-                            .build();
-                    existingTranslations.put(lang, translation);
-                }
-
-                translation.setCategory(category);
-                translation.setName(transDto.getName());
-                translation.setDescription(transDto.getDescription());
-            }
+    private void updateTranslations(Category category, AdminCategoryDto dto) {
+        if (dto.getTranslations() == null) {
+            return;
         }
+
+        if (category.getTranslations() == null) {
+            category.setTranslations(new HashMap<>());
+        }
+
+        var existing = category.getTranslations();
+        dto.getTranslations().forEach((lang, transDto) -> {
+            var translation = existing.computeIfAbsent(lang, l -> CategoryTranslation.builder()
+                    .languageCode(l)
+                    .category(category)
+                    .build());
+            translation.setName(transDto.getName());
+            translation.setDescription(transDto.getDescription());
+        });
     }
 
 }

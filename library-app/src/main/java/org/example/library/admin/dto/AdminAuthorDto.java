@@ -10,6 +10,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class AdminAuthorDto {
+
     private Integer id;
     private Short birthYear;
     private Short deathYear;
@@ -25,4 +26,5 @@ public class AdminAuthorDto {
         private String country;
         private String biography;
     }
+
 }

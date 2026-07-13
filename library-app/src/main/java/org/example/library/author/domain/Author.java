@@ -32,7 +32,8 @@ public class Author {
     private Short deathYear;
 
     @Column(name = "popularity_count", nullable = false)
-    private Integer popularityCount;
+    @Builder.Default
+    private Integer popularityCount = 0;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(name = "languageCode")

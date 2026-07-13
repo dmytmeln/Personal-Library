@@ -53,6 +53,10 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
 
     boolean existsByAuthorsId(Integer authorId);
 
+    boolean existsByAuthorsIdIn(List<Integer> authorIds);
+
     boolean existsByCategoryId(Integer categoryId);
+
+    boolean existsByCategoryIdIn(List<Integer> categoryIds);
 
 }
