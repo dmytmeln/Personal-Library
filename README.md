@@ -1,58 +1,78 @@
-# Personal-Library
+# Personal Library
 
 ![Backend Build](https://github.com/dmytmeln/personal-library/actions/workflows/spring-boot_deploy.yml/badge.svg)
 ![Frontend Build](https://github.com/dmytmeln/personal-library/actions/workflows/angular_deploy.yml/badge.svg)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=dmytmeln_personal-library&metric=coverage)](https://sonarcloud.io/summary/overall?id=dmytmeln_personal-library)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=dmytmeln_personal-library&metric=alert_status)](https://sonarcloud.io/summary/overall?id=dmytmeln_personal-library)
 
+Personal library application for organizing books, authors, categories, collections, notes, quotes, reading goals, and recommendations.
 
-## Requirements
+## Applications
 
-#### Application
-* Java 17
-* Maven 3.9.x (optionally, you can use the included Maven Wrapper)
+* **[Library API](library-app/README.md)**: Spring Boot backend, authentication, persistence, and recommendations.
+* **[Library UI](library-ui/README.md)**: Angular web application.
 
-#### Database
-* Postgres
+## Prerequisites
 
+* Git
+* JDK 17
+* Node.js and npm
+* Docker
 
-## Setting up a project
+The backend includes Maven Wrapper; a system Maven installation is optional.
 
-#### 1) Clone the repository
-```  
+## Quick Start
+
+### 1. Clone
+
+```bash
 git clone https://github.com/dmytmeln/Personal-Library.git
 cd Personal-Library
 ```
 
-#### 2) Build the project
+### 2. Start PostgreSQL
+
+```bash
+docker compose up -d
 ```
+
+### 3. Start the Backend
+
+Set a JWT signing secret, then run:
+
+```bash
 cd library-app
-./mvnw clean package
+JWT_SECRET_KEY=replace-with-a-secure-secret ./mvnw spring-boot:run
 ```
 
-#### 3) Set Up the Database with Docker Compose (Optional)
-The project includes a docker-compose.yml file to run PostgreSQL in a container. To start the database:
-```
-docker-compose up -d
-```
-This will create a PostgreSQL container with the following default settings:
-```
-Database: postgres
-Username: postgres
-Password: postgres
-Port: 5432
+On Windows PowerShell:
+
+```powershell
+$env:JWT_SECRET_KEY = "replace-with-a-secure-secret"
+.\mvnw.cmd spring-boot:run
 ```
 
+Backend: `http://localhost:8080`
 
-#### 4) Run the project
+### 4. Start the Frontend
+
+In another terminal:
+
+```bash
+cd library-ui
+npm install
+npm start
 ```
-cd library-app
-./mvnw spring-boot:run
-```
 
+Frontend: `http://localhost:4200`
 
-## Environment variables:
-- `DB_URL` (_default_: jdbc:postgresql://localhost:5432/postgres) - PostgreSQL URL
-- `DB_USERNAME` (_default_: postgres) -  username used to access to the database
-- `DB_PASSWORD` (_default_: postgres) -  password associated with the database username
-- `SERVER_PORT` (_default_: 8080) -  The port on which the application server runs.
+## Default Local Infrastructure
+
+PostgreSQL configuration from `docker-compose.yml`:
+
+* Database: `postgres`
+* Username: `postgres`
+* Password: `postgres`
+* Port: `5432`
+
+Component-specific configuration, build commands, and tests are documented in each application README.

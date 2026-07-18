@@ -1,59 +1,62 @@
-# LibraryUi
+# Library UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.1.
+Angular web application for Personal Library.
 
-## Development server
+## Prerequisites
 
-To start a local development server, run:
+* Node.js
+* npm
+* Library API running on `http://localhost:8080`
 
-```bash
-ng serve
-```
+## Install
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+From `library-ui`:
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Run Locally
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+The application starts at `http://localhost:4200`. The development server proxies `/api` requests to `http://localhost:8080` using `proxy.conf.json`.
 
-To build the project run:
+## Build
+
+Development build:
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Production build:
 
 ```bash
-ng test
+npm run prod
 ```
 
-## Running end-to-end tests
+Build artifacts are written to `dist/`.
 
-For end-to-end (e2e) testing, run:
+## Run Tests
+
+Unit tests:
 
 ```bash
-ng e2e
+npm test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Playwright end-to-end tests:
 
-## Additional Resources
+```bash
+npx playwright install
+npx playwright test
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Playwright starts the frontend development server automatically. Start the backend and PostgreSQL separately before tests requiring API access.
+
+## Source Structure
+
+Application code lives under `src/app` and is organized by feature. Shared UI and infrastructure code belongs in focused folders such as `common`, `services`, `guards`, and `interfaces`.
