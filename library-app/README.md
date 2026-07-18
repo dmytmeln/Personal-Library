@@ -60,6 +60,33 @@ Docker must be running for Testcontainers-based tests.
 ./mvnw test
 ```
 
+## Code Style
+
+Apply deterministic Java formatting:
+
+```bash
+./mvnw spotless:apply
+```
+
+Check formatting and structural style without changing files:
+
+```bash
+./mvnw spotless:check checkstyle:check
+```
+
+Check one file (path relative to `library-app`):
+
+```bash
+./mvnw spotless:check -DspotlessFiles=src/main/java/org/example/library/user/service/UserService.java
+./mvnw checkstyle:check -Dcheckstyle.includes=**/UserService.java
+```
+
+Use `spotless:apply` instead of `spotless:check` to format that file. Spotless accepts a relative path; Checkstyle's
+`includes` value is an Ant-style path pattern.
+
+Both checks also run during `./mvnw verify`. Formatter settings live in `config/java-formatter.xml`; Checkstyle rules
+live in `config/checkstyle/checkstyle.xml`.
+
 ## Package Structure
 
 Backend code follows package-by-feature under `src/main/java/org/example/library`. Cross-cutting code belongs in focused
