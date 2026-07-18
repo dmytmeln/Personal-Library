@@ -1,17 +1,21 @@
 package org.example.library.book.dto;
 
-import lombok.Builder;
-import org.example.library.collection.dto.BasicCollectionDto;
-import org.example.library.library_book.dto.LibraryBookDto;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Builder
-public record BookDetails(
-        BookDto book,
-        LibraryBookDto libraryBook,
-        double averageRating,
-        long ratingsNumber,
-        List<BasicCollectionDto> collections
-) {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = GlobalBookDetails.class, name = "GLOBAL"),
+        @JsonSubTypes.Type(value = LibraryBookDetails.class, name = "LIBRARY")
+})
+@Getter
+@RequiredArgsConstructor
+public abstract class BookDetails {
+
+    private final double averageRating;
+    private final long ratingsNumber;
+
 }

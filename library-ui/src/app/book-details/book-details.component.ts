@@ -3,9 +3,10 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Book} from '../interfaces/book';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {BookRatingComponent} from '../book-rating/book-rating.component';
-import {BookDetails} from '../interfaces/book-details';
+import {BOOK_DETAIL_TYPES, BookDetails} from '../interfaces/book-details';
+import {LibraryBook} from '../interfaces/library-book';
 import {BookService} from '../services/book.service';
-import {MatAnchor, MatButton} from '@angular/material/button';
+import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
 import {LibraryBookService} from '../services/library-book.service';
 import {BasicCollection} from '../interfaces/basic-collection';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
@@ -44,14 +45,15 @@ import {ConfirmationDialogComponent} from '../dialogs/confirmation-dialog/confir
     BulkActionBarComponent,
     MatButtonToggleModule,
     MatMenuModule,
+    MatIconButton,
   ],
   templateUrl: './book-details.component.html',
   styleUrl: './book-details.component.scss'
 })
 export class BookDetailsComponent implements OnInit {
 
-  private snackCommon: MatSnackCommon;
-  private destroyRef = inject(DestroyRef);
+  private readonly snackCommon: MatSnackCommon;
+  private readonly destroyRef = inject(DestroyRef);
 
   bookId!: number;
   bookDetails?: BookDetails;
@@ -59,18 +61,18 @@ export class BookDetailsComponent implements OnInit {
   quotes = signal<Quote[]>([]);
   viewMode = signal<'grid' | 'list'>('grid');
   readonly selection = new SelectionStore();
-  private libraryBookIds: Set<number> = new Set<number>();
+  private readonly libraryBookIds: Set<number> = new Set<number>();
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private bookService: BookService,
-    private libraryBookService: LibraryBookService,
-    private recommendationService: RecommendationService,
-    private quoteService: QuoteService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly bookService: BookService,
+    private readonly libraryBookService: LibraryBookService,
+    private readonly recommendationService: RecommendationService,
+    private readonly quoteService: QuoteService,
     matSnackBar: MatSnackBar,
-    private translocoService: TranslocoService,
-    private dialog: MatDialog,
+    private readonly translocoService: TranslocoService,
+    private readonly dialog: MatDialog,
   ) {
     this.snackCommon = new MatSnackCommon(matSnackBar);
   }
@@ -82,7 +84,7 @@ export class BookDetailsComponent implements OnInit {
         this.bookId = Number(id);
         this.loadAll();
       } else {
-        this.router.navigate(['/']);
+        void this.router.navigate(['/']);
       }
     });
 
@@ -93,8 +95,17 @@ export class BookDetailsComponent implements OnInit {
     });
   }
 
+  get libraryBook(): LibraryBook | undefined {
+    return this.bookDetails?.type === BOOK_DETAIL_TYPES.LIBRARY ? this.bookDetails.libraryBook : undefined;
+  }
+
+  get collections(): BasicCollection[] {
+    return this.bookDetails?.type === BOOK_DETAIL_TYPES.LIBRARY ? this.bookDetails.collections : [];
+  }
+
   get displayBook(): Book | undefined {
-    return this.bookDetails?.libraryBook?.book ?? this.bookDetails?.book;
+    if (!this.bookDetails) return undefined;
+    return this.bookDetails.type === BOOK_DETAIL_TYPES.LIBRARY ? this.bookDetails.libraryBook.book : this.bookDetails.book;
   }
 
   get authors(): Array<[number, string]> {
@@ -102,15 +113,20 @@ export class BookDetailsComponent implements OnInit {
   }
 
   get myRating(): number {
-    return this.bookDetails?.libraryBook?.rating ?? 0;
+    return this.libraryBook?.rating ?? 0;
   }
 
   addBookToLibrary(): void {
     this.libraryBookService.addBook(this.bookId).subscribe({
       next: (libraryBook) => {
         if (this.bookDetails) {
-          this.bookDetails.libraryBook = libraryBook;
-          this.bookDetails.book = undefined;
+          this.bookDetails = {
+            type: BOOK_DETAIL_TYPES.LIBRARY,
+            libraryBook: libraryBook,
+            collections: [],
+            averageRating: this.bookDetails.averageRating,
+            ratingsNumber: this.bookDetails.ratingsNumber
+          };
         }
         this.snackCommon.showSuccess(this.translocoService.translate('library.success.bookAdded'));
       },
@@ -150,26 +166,26 @@ export class BookDetailsComponent implements OnInit {
   }
 
   goToCollection(collection: BasicCollection): void {
-    this.router.navigate(['/collections', collection.id]);
+    void this.router.navigate(['/collections', collection.id]);
   }
 
   goToCategoryDetails(): void {
     if (this.displayBook?.categoryId) {
-      this.router.navigate(['/category-details', this.displayBook.categoryId]);
+      void this.router.navigate(['/category-details', this.displayBook.categoryId]);
     }
   }
 
   goToAuthorDetails(id: string | number): void {
-    this.router.navigate(['/author-details', Number(id)]);
+    void this.router.navigate(['/author-details', Number(id)]);
   }
 
   changeRating(rating: number): void {
-    const libraryBookId = this.bookDetails?.libraryBook?.id;
+    const libraryBookId = this.libraryBook?.id;
     if (!libraryBookId) return;
 
     this.libraryBookService.changeRating(libraryBookId, rating).subscribe({
       next: (libraryBook) => {
-        if (this.bookDetails) {
+        if (this.bookDetails?.type === BOOK_DETAIL_TYPES.LIBRARY) {
           this.bookDetails.libraryBook = libraryBook;
         }
         this.snackCommon.showSuccess(this.translocoService.translate('library.success.ratingChanged'));
@@ -192,7 +208,7 @@ export class BookDetailsComponent implements OnInit {
   }
 
   private loadQuotes(): void {
-    const libraryBookId = this.bookDetails?.libraryBook?.id;
+    const libraryBookId = this.libraryBook?.id;
     if (libraryBookId) {
       this.quoteService.getByLibraryBookId(libraryBookId).subscribe(quotes => {
         this.quotes.set(quotes);
@@ -203,26 +219,19 @@ export class BookDetailsComponent implements OnInit {
   }
 
   openAddQuoteDialog(): void {
-    const libraryBookId = this.bookDetails?.libraryBook?.id;
-    if (!libraryBookId) return;
-
-    const dialogRef = this.dialog.open(QuoteFormDialogComponent, {
-      data: { libraryBookId },
-      width: '500px'
-    });
-
-    dialogRef.afterClosed().pipe(filter(Boolean)).subscribe(() => {
-      this.loadQuotes();
-      this.snackCommon.showSuccess(this.translocoService.translate('library.success.quoteSaved'));
-    });
+    this.openQuoteDialog();
   }
 
   editQuote(quote: Quote): void {
-    const libraryBookId = this.bookDetails?.libraryBook?.id;
+    this.openQuoteDialog(quote);
+  }
+
+  private openQuoteDialog(quote?: Quote): void {
+    const libraryBookId = this.libraryBook?.id;
     if (!libraryBookId) return;
 
     const dialogRef = this.dialog.open(QuoteFormDialogComponent, {
-      data: { libraryBookId, quote },
+      data: quote ? {libraryBookId, quote} : {libraryBookId},
       width: '500px'
     });
 

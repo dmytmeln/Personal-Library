@@ -7,12 +7,14 @@ import org.example.library.author.domain.AuthorTranslation;
 import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookTranslation;
+import org.example.library.book.dto.GlobalBookDetails;
+import org.example.library.book.dto.LibraryBookDetails;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.domain.User;
@@ -54,12 +56,10 @@ class BookDetailsServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @Test
     void shouldReturnDetailsWithLibraryBookWhenInUserLibrary() {
@@ -73,11 +73,12 @@ class BookDetailsServiceIntegrationTest extends BaseIntegrationTest {
 
         var details = service.getDetails(book.getId(), user.getId());
 
-        assertThat(details.libraryBook()).isNotNull();
-        assertThat(details.libraryBook().getBook().getTitle()).isEqualTo("User Title");
-        assertThat(details.book()).isNull();
-        assertThat(details.averageRating()).isEqualTo(0.0);
-        assertThat(details.ratingsNumber()).isEqualTo(0L);
+        assertThat(details).isInstanceOf(LibraryBookDetails.class);
+        var libraryDetails = (LibraryBookDetails) details;
+        assertThat(libraryDetails.getLibraryBook()).isNotNull();
+        assertThat(libraryDetails.getLibraryBook().getBook().getTitle()).isEqualTo("User Title");
+        assertThat(libraryDetails.getAverageRating()).isZero();
+        assertThat(libraryDetails.getRatingsNumber()).isZero();
     }
 
     @Test
@@ -91,9 +92,10 @@ class BookDetailsServiceIntegrationTest extends BaseIntegrationTest {
 
         var details = service.getDetails(book.getId(), user.getId());
 
-        assertThat(details.book()).isNotNull();
-        assertThat(details.book().getTitle()).isEqualTo("Book Title");
-        assertThat(details.libraryBook()).isNull();
+        assertThat(details).isInstanceOf(GlobalBookDetails.class);
+        var globalDetails = (GlobalBookDetails) details;
+        assertThat(globalDetails.getBook()).isNotNull();
+        assertThat(globalDetails.getBook().getTitle()).isEqualTo("Book Title");
     }
 
     @Test
@@ -114,15 +116,16 @@ class BookDetailsServiceIntegrationTest extends BaseIntegrationTest {
 
         var details = service.getDetails(book.getId(), user1.getId());
 
-        assertThat(details.averageRating()).isEqualTo(4.0);
-        assertThat(details.ratingsNumber()).isEqualTo(2L);
+        assertThat(details.getAverageRating()).isEqualTo(4.0);
+        assertThat(details.getRatingsNumber()).isEqualTo(2L);
     }
 
     @Test
     void shouldThrowNotFoundWhenBookDoesNotExist() {
         var user = saveUser("test@example.com");
+        var userId = user.getId();
 
-        assertThatThrownBy(() -> service.getDetails(-999, user.getId()))
+        assertThatThrownBy(() -> service.getDetails(-999, userId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("error.book.not_found");
     }

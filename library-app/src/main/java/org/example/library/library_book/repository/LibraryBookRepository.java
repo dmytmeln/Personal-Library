@@ -27,7 +27,7 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
 
     @Query("""
             SELECT
-                AVG(lb.rating) AS averageRating,
+                COALESCE(AVG(lb.rating), 0.0) AS averageRating,
                 COUNT(lb) AS ratingsCount
             FROM LibraryBook lb
             WHERE lb.book.id = :bookId AND lb.rating IS NOT NULL
@@ -63,6 +63,7 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
     boolean existsByBookIdAndUserId(Integer bookId, Integer userId);
 
     @Query("SELECT lb FROM LibraryBook lb JOIN FETCH lb.book b WHERE lb.user.id = :userId AND b.embedding IS NOT NULL")
+    @SuppressWarnings("JpaQlInspection")
     List<LibraryBook> findAllWithVectorsByUserId(Integer userId);
 
     List<LibraryBook> findAllByIdInAndUserId(List<Integer> ids, Integer userId);
