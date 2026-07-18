@@ -3,6 +3,7 @@ package org.example.library.admin.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.library.admin.dto.AdminBookDto;
+import org.example.library.admin.dto.AdminBookDto.AdminBookTranslationDto;
 import org.example.library.author.domain.Author;
 import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.domain.Book;
@@ -14,16 +15,18 @@ import org.example.library.common.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AdminBookService {
+
+    private static final String BOOK_NOT_FOUND_ERROR_MSG = "error.book.not_found";
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -32,21 +35,19 @@ public class AdminBookService {
     @Transactional(readOnly = true)
     public AdminBookDto getBook(Integer id) {
         var book = bookRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
+                .orElseThrow(() -> new NotFoundException(BOOK_NOT_FOUND_ERROR_MSG));
+        var bookTranslationsDto = toAdminBookTranslationDto(book.getTranslations());
 
         return AdminBookDto.builder()
                 .id(book.getId())
-                .categoryId(book.getCategory() != null ? book.getCategory().getId() : null)
+                .categoryId(book.getCategory() != null
+                        ? book.getCategory().getId()
+                        : null)
                 .publishYear(book.getPublishYear())
                 .pages(book.getPages())
                 .coverImageUrl(book.getCoverImageUrl())
                 .authorIds(book.getAuthors().stream().map(Author::getId).toList())
-                .translations(book.getTranslations().entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, e -> AdminBookDto.AdminBookTranslationDto.builder()
-                                .title(e.getValue().getTitle())
-                                .bookLanguage(e.getValue().getBookLanguage())
-                                .description(e.getValue().getDescription())
-                                .build())))
+                .translations(bookTranslationsDto)
                 .build();
     }
 
@@ -62,7 +63,7 @@ public class AdminBookService {
     @Transactional
     public void updateBook(Integer id, AdminBookDto dto) {
         var book = bookRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
+                .orElseThrow(() -> new NotFoundException(BOOK_NOT_FOUND_ERROR_MSG));
         updateBookFields(book, dto);
 
         bookRepository.save(book);
@@ -72,7 +73,7 @@ public class AdminBookService {
     @Transactional
     public void deleteBook(Integer id) {
         var book = bookRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.book.not_found"));
+                .orElseThrow(() -> new NotFoundException(BOOK_NOT_FOUND_ERROR_MSG));
 
         bookRepository.delete(book);
         log.info("[ADMIN_BOOK_DELETE] Book ID: {}", id);
@@ -82,6 +83,19 @@ public class AdminBookService {
     public void deleteBooks(List<Integer> ids) {
         bookRepository.deleteAllById(ids);
         log.info("[ADMIN_BOOKS_BULK_DELETE] Count: {}", ids.size());
+    }
+
+    private Map<String, AdminBookTranslationDto> toAdminBookTranslationDto(Map<String, BookTranslation> translations) {
+        return translations.entrySet().stream()
+                .collect(toMap(Map.Entry::getKey, entry -> toAdminBookTranslationDto(entry.getValue())));
+    }
+
+    private AdminBookTranslationDto toAdminBookTranslationDto(BookTranslation bookTranslation) {
+        return AdminBookTranslationDto.builder()
+                .title(bookTranslation.getTitle())
+                .bookLanguage(bookTranslation.getBookLanguage())
+                .description(bookTranslation.getDescription())
+                .build();
     }
 
     private void updateBookFields(Book book, AdminBookDto dto) {
@@ -110,19 +124,15 @@ public class AdminBookService {
             return;
         }
 
-        if (book.getTranslations() == null) {
-            book.setTranslations(new HashMap<>());
-        }
+        var translations = book.getTranslations();
+        dto.getTranslations().forEach((languageCode, translationDto) -> {
+            var translation = translations.computeIfAbsent(languageCode, ignored -> new BookTranslation());
 
-        var existing = book.getTranslations();
-        dto.getTranslations().forEach((lang, transDto) -> {
-            var translation = existing.computeIfAbsent(lang, l -> BookTranslation.builder()
-                    .languageCode(l)
-                    .book(book)
-                    .build());
-            translation.setTitle(transDto.getTitle());
-            translation.setBookLanguage(transDto.getBookLanguage());
-            translation.setDescription(transDto.getDescription());
+            translation.setLanguageCode(languageCode);
+            translation.setBook(book);
+            translation.setTitle(translationDto.getTitle());
+            translation.setBookLanguage(translationDto.getBookLanguage());
+            translation.setDescription(translationDto.getDescription());
         });
     }
 

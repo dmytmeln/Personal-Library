@@ -3,6 +3,7 @@ package org.example.library.admin.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.library.admin.dto.AdminCategoryDto;
+import org.example.library.admin.dto.AdminCategoryDto.AdminCategoryTranslationDto;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
@@ -12,15 +13,17 @@ import org.example.library.common.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AdminCategoryService {
+
+    private static final String CATEGORY_NOT_FOUND_ERROR_MSG = "error.category.not_found";
 
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
@@ -28,15 +31,12 @@ public class AdminCategoryService {
     @Transactional(readOnly = true)
     public AdminCategoryDto getCategory(Integer id) {
         var category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.category.not_found"));
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_ERROR_MSG));
+        var categoryTranslationsDto = toAdminCategoryTranslationDto(category.getTranslations());
 
         return AdminCategoryDto.builder()
                 .id(category.getId())
-                .translations(category.getTranslations().entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, e -> AdminCategoryDto.AdminCategoryTranslationDto.builder()
-                                .name(e.getValue().getName())
-                                .description(e.getValue().getDescription())
-                                .build())))
+                .translations(categoryTranslationsDto)
                 .build();
     }
 
@@ -53,7 +53,7 @@ public class AdminCategoryService {
     @Transactional
     public void updateCategory(Integer id, AdminCategoryDto dto) {
         var category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.category.not_found"));
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_ERROR_MSG));
         updateCategoryFields(category, dto);
 
         categoryRepository.save(category);
@@ -63,10 +63,11 @@ public class AdminCategoryService {
     @Transactional
     public void deleteCategory(Integer id) {
         var category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("error.category.not_found"));
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_ERROR_MSG));
 
-        if (bookRepository.existsByCategoryId(id))
+        if (bookRepository.existsByCategoryId(id)) {
             throw new BadRequestException("error.category.has_books");
+        }
 
         categoryRepository.delete(category);
         log.info("[ADMIN_CATEGORY_DELETE] Category ID: {}", id);
@@ -82,6 +83,18 @@ public class AdminCategoryService {
         log.info("[ADMIN_CATEGORIES_BULK_DELETE] Count: {}", ids.size());
     }
 
+    private Map<String, AdminCategoryTranslationDto> toAdminCategoryTranslationDto(Map<String, CategoryTranslation> translations) {
+        return translations.entrySet().stream()
+                .collect(toMap(Map.Entry::getKey, entry -> toAdminCategoryTranslationDto(entry.getValue())));
+    }
+
+    private AdminCategoryTranslationDto toAdminCategoryTranslationDto(CategoryTranslation categoryTranslation) {
+        return AdminCategoryTranslationDto.builder()
+                .name(categoryTranslation.getName())
+                .description(categoryTranslation.getDescription())
+                .build();
+    }
+
     private void updateCategoryFields(Category category, AdminCategoryDto dto) {
         updateTranslations(category, dto);
     }
@@ -91,18 +104,14 @@ public class AdminCategoryService {
             return;
         }
 
-        if (category.getTranslations() == null) {
-            category.setTranslations(new HashMap<>());
-        }
+        var translations = category.getTranslations();
+        dto.getTranslations().forEach((languageCode, translationDto) -> {
+            var translation = translations.computeIfAbsent(languageCode, ignored -> new CategoryTranslation());
 
-        var existing = category.getTranslations();
-        dto.getTranslations().forEach((lang, transDto) -> {
-            var translation = existing.computeIfAbsent(lang, l -> CategoryTranslation.builder()
-                    .languageCode(l)
-                    .category(category)
-                    .build());
-            translation.setName(transDto.getName());
-            translation.setDescription(transDto.getDescription());
+            translation.setLanguageCode(languageCode);
+            translation.setCategory(category);
+            translation.setName(translationDto.getName());
+            translation.setDescription(translationDto.getDescription());
         });
     }
 
