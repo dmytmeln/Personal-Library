@@ -55,7 +55,11 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Intege
 
     Optional<LibraryBook> findByIdAndUserId(Integer libraryBookId, Integer userId);
 
-    @Query("SELECT lb FROM LibraryBook lb JOIN FETCH lb.book LEFT JOIN FETCH lb.book.owner WHERE lb.id = :libraryBookId AND lb.user.id = :userId")
+    @Query("""
+            SELECT lb FROM LibraryBook lb
+            JOIN FETCH lb.book LEFT JOIN FETCH lb.book.owner
+            WHERE lb.id = :libraryBookId AND lb.user.id = :userId
+            """)
     Optional<LibraryBook> findByIdAndUserIdWithBook(Integer libraryBookId, Integer userId);
 
     boolean existsByIdAndUserId(Integer libraryBookId, Integer userId);

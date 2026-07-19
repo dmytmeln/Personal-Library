@@ -24,12 +24,11 @@ public class CategoryService {
     private final CategoryMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
-
     public Page<CategoryWithBooksCount> search(PaginationParams paginationParams, CategorySearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.CATEGORY_FIELDS);
         var lang = LocaleContextHolder.getLocale().getLanguage();
-        return repository.searchWithBooksCount(
-                searchParams.getName(),
+
+        return repository.searchWithBooksCount(searchParams.getName(),
                 searchParams.getBooksCountMin(),
                 searchParams.getBooksCountMax(),
                 lang,
@@ -43,7 +42,9 @@ public class CategoryService {
                 .orElseThrow(() -> new NotFoundException("error.category.not_found"));
     }
 
-    public Page<CategoryWithBooksCount> searchForUser(Integer userId, PaginationParams paginationParams, CategorySearchParams searchParams) {
+    public Page<CategoryWithBooksCount> searchForUser(Integer userId,
+                                                      PaginationParams paginationParams,
+                                                      CategorySearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.CATEGORY_FIELDS);
         var lang = LocaleContextHolder.getLocale().getLanguage();
         return repository.searchForUser(

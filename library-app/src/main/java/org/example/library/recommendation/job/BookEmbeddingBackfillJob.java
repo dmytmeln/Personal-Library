@@ -24,7 +24,6 @@ public class BookEmbeddingBackfillJob {
         this.self = self;
     }
 
-
     @EventListener(ApplicationReadyEvent.class)
     public void onStartup() {
         self.setBookEmbeddings();

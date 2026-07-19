@@ -5,8 +5,8 @@ import jakarta.persistence.PersistenceContext;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookStatus;
 import org.example.library.book.repository.BookRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.quote.domain.Quote;
@@ -81,7 +81,7 @@ class QuoteServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(result.text()).isEqualTo("New Quote Text");
         assertThat(result.page()).isEqualTo("42");
         assertThat(result.comment()).isEqualTo("Good one");
-        
+
         var savedQuotes = repository.findByLibraryBookIdAndLibraryBookUserIdOrderByCreatedAtDesc(libraryBook.getId(), user.getId());
         assertThat(savedQuotes).hasSize(1);
         assertThat(savedQuotes.get(0).getText()).isEqualTo("New Quote Text");
@@ -105,7 +105,7 @@ class QuoteServiceIntegrationTest extends BaseIntegrationTest {
 
         assertThat(result.id()).isEqualTo(quote.getId());
         assertThat(result.text()).isEqualTo("Updated Text");
-        
+
         var updatedQuote = repository.findById(quote.getId()).orElseThrow();
         assertThat(updatedQuote.getText()).isEqualTo("Updated Text");
         assertThat(updatedQuote.getPage()).isEqualTo("10");
@@ -142,7 +142,7 @@ class QuoteServiceIntegrationTest extends BaseIntegrationTest {
         repository.save(quote);
         em.flush();
         em.clear();
-        
+
         var request = new QuoteRequest("Hack", "1", "Hacked");
 
         assertThatThrownBy(() -> service.update(quote.getId(), request, user2.getId()))

@@ -13,14 +13,14 @@ public class JwtTokenProvider implements AuthenticationProvider {
 
     private final JwtService jwtService;
 
-
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         var jwtAuth = (JwtTokenAuthentication) authentication;
         var token = jwtAuth.getToken();
         jwtAuth.clearCredentials();
-        if (!jwtService.isTokenValid(token))
+        if (!jwtService.isTokenValid(token)) {
             throw new BadCredentialsException("error.auth.invalid_jwt_token");
+        }
 
         var userPrincipal = jwtService.extractUserPrincipal(token);
         return JwtTokenAuthentication.authenticated(userPrincipal);

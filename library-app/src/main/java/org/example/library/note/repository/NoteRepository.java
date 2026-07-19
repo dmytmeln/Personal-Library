@@ -16,5 +16,5 @@ public interface NoteRepository extends JpaRepository<Note, Integer> {
     @Modifying
     @Query("DELETE FROM Note n WHERE n.libraryBook.id = :libraryBookId AND n.libraryBook.user.id = :userId")
     void deleteByLibraryBookIdAndLibraryBookUserId(Integer libraryBookId, Integer userId);
-    
+
 }

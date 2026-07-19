@@ -1,6 +1,7 @@
 package org.example.library.book.repository;
 
-import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import lombok.NoArgsConstructor;
 import org.example.library.author.domain.Author_;
 import org.example.library.book.domain.BookDisplayView;
 import org.example.library.book.domain.BookDisplayView_;
@@ -9,7 +10,15 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
+import static jakarta.persistence.criteria.JoinType.INNER;
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public class BookSpecification {
+
+    private static final String LIKE_WILDCARD = "%";
+    private static final String SIMILARITY_FUNCTION = "similarity";
+    private static final double SIMILARITY_THRESHOLD = 0.3;
 
     public static Specification<BookDisplayView> fromSearchParams(String lang, BookSearchParams searchParams) {
         return Specification.where(hasLanguageCode(lang))
@@ -23,8 +32,9 @@ public class BookSpecification {
 
     public static Specification<BookDisplayView> hasLanguageCode(String lang) {
         return (root, query, cb) -> {
-            if (lang == null)
+            if (lang == null) {
                 return null;
+            }
 
             return cb.equal(root.get(BookDisplayView_.LANGUAGE_CODE), lang);
         };
@@ -32,8 +42,9 @@ public class BookSpecification {
 
     public static Specification<BookDisplayView> hasCategoryId(Integer categoryId) {
         return (root, query, cb) -> {
-            if (categoryId == null)
+            if (categoryId == null) {
                 return null;
+            }
 
             return cb.equal(root.get(BookDisplayView_.CATEGORY_ID), categoryId);
         };
@@ -41,36 +52,43 @@ public class BookSpecification {
 
     public static Specification<BookDisplayView> hasAuthorId(Integer authorId) {
         return (root, query, cb) -> {
-            if (authorId == null)
+            if (authorId == null) {
                 return null;
+            }
 
-            return cb.equal(root.join(BookDisplayView_.AUTHORS, JoinType.INNER).get(Author_.ID), authorId);
+            return cb.equal(root.join(BookDisplayView_.AUTHORS, INNER).get(Author_.ID), authorId);
         };
     }
 
     public static Specification<BookDisplayView> hasTitleLike(String title) {
         return (root, query, cb) -> {
-            if (title == null || title.isBlank())
+            if (title == null || title.isBlank()) {
                 return null;
+            }
 
-            var lowerTitle = title.toLowerCase();
-            return cb.or(
-                    cb.like(cb.lower(root.get(BookDisplayView_.TITLE)), "%" + lowerTitle + "%"),
-                    cb.greaterThan(cb.function("similarity", Double.class, root.get(BookDisplayView_.TITLE), cb.literal(title)), 0.3)
-            );
+            Path<String> titlePath = root.get(BookDisplayView_.TITLE);
+            var titlePattern = LIKE_WILDCARD + title.toLowerCase() + LIKE_WILDCARD;
+            var titleLikePredicate = cb.like(cb.lower(titlePath), titlePattern);
+            var similarityExpression = cb.function(SIMILARITY_FUNCTION, Double.class, titlePath, cb.literal(title));
+            var similarityPredicate = cb.greaterThan(similarityExpression, SIMILARITY_THRESHOLD);
+
+            return cb.or(titleLikePredicate, similarityPredicate);
         };
     }
 
     public static Specification<BookDisplayView> hasPublishYearBetween(Short minYear, Short maxYear) {
         return (root, query, cb) -> {
-            if (minYear == null && maxYear == null)
+            if (minYear == null && maxYear == null) {
                 return null;
+            }
 
-            if (minYear != null && maxYear != null)
+            if (minYear != null && maxYear != null) {
                 return cb.between(root.get(BookDisplayView_.PUBLISH_YEAR), minYear, maxYear);
+            }
 
-            if (minYear != null)
+            if (minYear != null) {
                 return cb.greaterThanOrEqualTo(root.get(BookDisplayView_.PUBLISH_YEAR), minYear);
+            }
 
             return cb.lessThanOrEqualTo(root.get(BookDisplayView_.PUBLISH_YEAR), maxYear);
         };
@@ -78,8 +96,9 @@ public class BookSpecification {
 
     public static Specification<BookDisplayView> hasLanguageIn(List<String> languages) {
         return (root, query, cb) -> {
-            if (languages == null || languages.isEmpty())
+            if (languages == null || languages.isEmpty()) {
                 return null;
+            }
 
             return root.get(BookDisplayView_.BOOK_LANGUAGE).in(languages);
         };
@@ -87,14 +106,17 @@ public class BookSpecification {
 
     public static Specification<BookDisplayView> hasPagesBetween(Short minPages, Short maxPages) {
         return (root, query, cb) -> {
-            if (minPages == null && maxPages == null)
+            if (minPages == null && maxPages == null) {
                 return null;
+            }
 
-            if (minPages != null && maxPages != null)
+            if (minPages != null && maxPages != null) {
                 return cb.between(root.get(BookDisplayView_.PAGES), minPages, maxPages);
+            }
 
-            if (minPages != null)
+            if (minPages != null) {
                 return cb.greaterThanOrEqualTo(root.get(BookDisplayView_.PAGES), minPages);
+            }
 
             return cb.lessThanOrEqualTo(root.get(BookDisplayView_.PAGES), maxPages);
         };

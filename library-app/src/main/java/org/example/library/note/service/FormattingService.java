@@ -22,10 +22,9 @@ public class FormattingService {
     @Getter
     private final String model;
 
-    public FormattingService(
-            @Value("${application.ai.gemini.api-key}") String apiKey,
-            @Value("${application.ai.gemini.model}") String model,
-            @Value("${application.ai.gemini.temperature}") double temperature) {
+    public FormattingService(@Value("${application.ai.gemini.api-key}") String apiKey,
+                             @Value("${application.ai.gemini.model}") String model,
+                             @Value("${application.ai.gemini.temperature}") double temperature) {
         this.chatModel = GoogleAiGeminiChatModel.builder()
                 .apiKey(apiKey)
                 .modelName(model)
@@ -63,7 +62,7 @@ public class FormattingService {
     private String buildPrompt(String rawTranscript, String bookTitle, String authorName, String bookDescription) {
         return String.format("""
                         You are an intelligent editor. Your job is to clean up voice transcriptions.
-                        
+
                         Rules:
                         - Preserve the original meaning
                         - Remove filler words (um, uh, like, you know)
@@ -72,11 +71,11 @@ public class FormattingService {
                         - Do NOT invent information
                         - Do NOT summarize
                         - Do NOT add your own thoughts
-                        
+
                         Book context: "%s" by %s. %s
-                        
+
                         Transcription: %s
-                        
+
                         Return only the polished note, no explanations.
                         """,
                 bookTitle,
@@ -87,7 +86,11 @@ public class FormattingService {
     }
 
     private String getBookAuthorNames(Book book) {
-        return book.getAuthors().stream().map(Author::getDefaultTranslation).map(AuthorTranslation::getFullName).collect(Collectors.joining(", "));
+        return book.getAuthors().stream()
+                .map(Author::getDefaultTranslation)
+                .map(AuthorTranslation::getFullName)
+                // todo constant
+                .collect(Collectors.joining(", "));
     }
 
 }

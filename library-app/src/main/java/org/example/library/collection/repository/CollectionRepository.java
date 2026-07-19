@@ -28,9 +28,9 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
                 SELECT *, 1 as depth
                 FROM collections
                 WHERE collection_id = (SELECT parent_id FROM collections WHERE collection_id = :id)
-            
+
                 UNION ALL
-            
+
                 SELECT c.*, cp.depth + 1
                 FROM collections c
                 JOIN collection_path cp ON c.collection_id = cp.parent_id

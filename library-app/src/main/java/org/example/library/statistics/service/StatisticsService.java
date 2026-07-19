@@ -13,7 +13,6 @@ public class StatisticsService {
 
     private final StatisticsRepository repository;
 
-
     @Transactional(readOnly = true)
     public DashboardStatsDto getDashboardStats(Integer userId, Integer year) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
@@ -28,5 +27,5 @@ public class StatisticsService {
                 .topAuthors(repository.getTopAuthors(userId, lang))
                 .build();
     }
-    
+
 }

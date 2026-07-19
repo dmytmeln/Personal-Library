@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.library.auth.dto.AuthenticationResponse;
 import org.example.library.auth.dto.TokenResponse;
 import org.example.library.auth.dto.UserRegisterRequest;
+import org.example.library.auth.service.RefreshTokenService;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
-import org.example.library.auth.service.RefreshTokenService;
 import org.example.library.user.dto.UpdateProfileRequest;
 import org.example.library.user.dto.UserResponse;
 import org.example.library.user.mapper.UserMapper;
@@ -26,10 +26,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper mapper;
 
-
     public UserResponse register(UserRegisterRequest request) {
-        if (repository.existsByEmail(request.getEmail()))
+        if (repository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("error.auth.email_already_registered");
+        }
 
         var user = mapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -46,8 +46,9 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("error.user.not_found"));
 
         var oldEmail = user.getEmail();
-        if (!oldEmail.equalsIgnoreCase(request.getEmail()) && repository.existsByEmail(request.getEmail()))
+        if (!oldEmail.equalsIgnoreCase(request.getEmail()) && repository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("error.auth.email_already_registered");
+        }
 
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());

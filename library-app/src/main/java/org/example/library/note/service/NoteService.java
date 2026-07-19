@@ -28,7 +28,6 @@ public class NoteService {
     private final TranscriptionService transcriptionService;
     private final FormattingService formattingService;
 
-
     @Transactional(readOnly = true)
     public NoteDto getByLibraryBookId(Integer libraryBookId, Integer userId) {
         return repository.findByLibraryBookIdAndLibraryBookUserId(libraryBookId, userId)
@@ -87,13 +86,16 @@ public class NoteService {
         note.setLibraryBook(libraryBook);
         var savedNote = repository.saveAndFlush(note);
         log.info("[NOTE_CREATE] User ID: {}, Library Book ID: {}", userId, request.libraryBookId());
+
         return mapper.toDto(savedNote);
     }
 
     private NoteDto updateExisting(Note existingNote, NoteRequest request) {
         mapper.update(existingNote, request);
         var savedNote = repository.saveAndFlush(existingNote);
-        log.info("[NOTE_UPDATE] User ID: {}, Library Book ID: {}", existingNote.getLibraryBook().getUser().getId(), existingNote.getLibraryBook().getId());
+        log.info("[NOTE_UPDATE] User ID: {}, Library Book ID: {}", existingNote.getLibraryBook().getUser().getId(),
+                existingNote.getLibraryBook().getId());
+
         return mapper.toDto(savedNote);
     }
 

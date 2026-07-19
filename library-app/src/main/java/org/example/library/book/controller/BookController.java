@@ -26,7 +26,6 @@ public class BookController {
     private final BookService service;
     private final BookDetailsService bookDetailsService;
 
-
     @GetMapping
     public Page<BookDto> getAllBooks(PaginationParams paginationParams, BookSearchParams searchParams) {
         return service.getAll(paginationParams, searchParams);

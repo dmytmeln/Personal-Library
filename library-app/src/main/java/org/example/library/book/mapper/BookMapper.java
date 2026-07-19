@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
+// todo refactor all mappers to use constant
 @Mapper(componentModel = "spring")
 public interface BookMapper {
 
@@ -42,8 +43,9 @@ public interface BookMapper {
     default String getLocalizedTitle(Book book) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = book.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for book: " + book.getId());
+        }
 
         return translation.getTitle();
     }
@@ -52,8 +54,9 @@ public interface BookMapper {
     default String getLocalizedDescription(Book book) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = book.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for book: " + book.getId());
+        }
 
         return translation.getDescription();
     }
@@ -62,21 +65,24 @@ public interface BookMapper {
     default String getLocalizedLanguage(Book book) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = book.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for book: " + book.getId());
+        }
 
         return translation.getBookLanguage();
     }
 
     @Named("getLocalizedCategoryName")
     default String getLocalizedCategoryName(Book book) {
-        if (book.getCategory() == null)
+        if (book.getCategory() == null) {
             return null;
+        }
 
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = book.getCategory().getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for category: " + book.getCategory().getId());
+        }
 
         return translation.getName();
     }
@@ -90,8 +96,9 @@ public interface BookMapper {
         return authors.stream()
                 .collect(toMap(Author::getId, a -> {
                     var translation = a.getTranslations().get(lang);
-                    if (translation == null)
+                    if (translation == null) {
                         throw new IllegalStateException("Translation not found for author: " + a.getId());
+                    }
 
                     return translation.getFullName();
                 }));

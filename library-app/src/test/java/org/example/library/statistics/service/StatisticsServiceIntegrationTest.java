@@ -55,12 +55,10 @@ class StatisticsServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private StatisticsService service;
 
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @Test
     void shouldReturnDashboardStats() {
@@ -140,7 +138,6 @@ class StatisticsServiceIntegrationTest extends BaseIntegrationTest {
                 .extracting("authorName", "count")
                 .containsExactly(tuple("Author 1", 3L));
     }
-
 
     private Category saveCategory() {
         var translation = CategoryTranslation.builder()

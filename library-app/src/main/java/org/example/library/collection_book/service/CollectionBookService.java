@@ -8,13 +8,13 @@ import org.example.library.collection_book.dto.CollectionBookSearchParams;
 import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.common.pagination.PageRequestBuilder;
+import org.example.library.common.pagination.PaginationParams;
+import org.example.library.common.pagination.SortableFields;
 import org.example.library.library_book.dto.LibraryBookDto;
 import org.example.library.library_book.mapper.LibraryBookMapper;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.library_book.repository.LibraryBookViewRepository;
-import org.example.library.common.pagination.PageRequestBuilder;
-import org.example.library.common.pagination.PaginationParams;
-import org.example.library.common.pagination.SortableFields;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +32,14 @@ public class CollectionBookService {
     private final LibraryBookMapper libraryBookMapper;
     private final PageRequestBuilder pageRequestBuilder;
 
-
     @Transactional(readOnly = true)
-    public Page<LibraryBookDto> getCollectionBooksPaginated(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, PaginationParams paginationParams) {
-        if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+    public Page<LibraryBookDto> getCollectionBooksPaginated(Integer userId,
+                                                            Integer collectionId,
+                                                            CollectionBookSearchParams searchParams,
+                                                            PaginationParams paginationParams) {
+        if (!collectionRepository.existsByIdAndUserId(collectionId, userId)) {
             throw new BadRequestException("error.collection.not_belong_to_user");
+        }
 
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.LIBRARY_BOOK_FIELDS);
 
@@ -46,15 +49,18 @@ public class CollectionBookService {
 
     @Transactional
     public void addBookToCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
-        if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+        if (!collectionRepository.existsByIdAndUserId(collectionId, userId)) {
             throw new BadRequestException("error.collection.not_belong_to_user");
+        }
 
-        if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId))
+        if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId)) {
             throw new NotFoundException("error.library_book.not_found");
+        }
 
         var id = new CollectionBookId(collectionId, libraryBookId);
-        if (repository.existsById(id))
+        if (repository.existsById(id)) {
             throw new BadRequestException("error.collection.book_already_added");
+        }
 
         var collectionBook = CollectionBook.builder()
                 .id(id)
@@ -67,12 +73,14 @@ public class CollectionBookService {
 
     @Transactional
     public void bulkAddBooksToCollection(Integer userId, Integer collectionId, List<Integer> libraryBookIds) {
-        if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+        if (!collectionRepository.existsByIdAndUserId(collectionId, userId)) {
             throw new BadRequestException("error.collection.not_belong_to_user");
+        }
 
         var libraryBooks = libraryBookRepository.findAllByIdInAndUserId(libraryBookIds, userId);
-        if (libraryBooks.isEmpty())
+        if (libraryBooks.isEmpty()) {
             throw new NotFoundException("error.library_book.none_found");
+        }
 
         var existingInCollection = repository.findLibraryBookIdsByCollectionId(collectionId);
 
@@ -90,12 +98,14 @@ public class CollectionBookService {
         }
     }
 
+    // TODO inverse ifs
     @Transactional
     public void removeBookFromCollection(Integer userId, Integer collectionId, Integer libraryBookId) {
         int deletedCount = repository.deleteByIdAndUserId(collectionId, libraryBookId, userId);
         if (deletedCount == 0) {
-            if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+            if (!collectionRepository.existsByIdAndUserId(collectionId, userId)) {
                 throw new BadRequestException("error.collection.not_belong_to_user");
+            }
 
             throw new NotFoundException("error.library_book.not_found");
         }
@@ -105,8 +115,9 @@ public class CollectionBookService {
     public void bulkRemoveBooksFromCollection(Integer userId, Integer collectionId, List<Integer> libraryBookIds) {
         int deletedCount = repository.deleteAllByCollectionIdAndLibraryBookIdInAndUserId(collectionId, libraryBookIds, userId);
         if (deletedCount == 0) {
-            if (!collectionRepository.existsByIdAndUserId(collectionId, userId))
+            if (!collectionRepository.existsByIdAndUserId(collectionId, userId)) {
                 throw new BadRequestException("error.collection.not_belong_to_user");
+            }
 
             throw new NotFoundException("error.collection.books_not_found_in_collection");
         }
@@ -116,8 +127,9 @@ public class CollectionBookService {
     public void removeBookFromAllCollections(Integer userId, Integer libraryBookId) {
         int deletedCount = repository.deleteByLibraryBookIdAndUserId(libraryBookId, userId);
         if (deletedCount == 0) {
-            if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId))
+            if (!libraryBookRepository.existsByIdAndUserId(libraryBookId, userId)) {
                 throw new NotFoundException("error.library_book.not_found");
+            }
 
             throw new NotFoundException("error.collection.books_not_found_in_collection");
         }

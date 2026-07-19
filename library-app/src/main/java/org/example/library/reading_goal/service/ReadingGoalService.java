@@ -20,7 +20,6 @@ public class ReadingGoalService {
     private final UserRepository userRepository;
     private final ReadingGoalMapper mapper;
 
-
     @Transactional(readOnly = true)
     public ReadingGoalDto getGoal(Integer userId, Integer year) {
         return repository.findByUserIdAndYear(userId, year)

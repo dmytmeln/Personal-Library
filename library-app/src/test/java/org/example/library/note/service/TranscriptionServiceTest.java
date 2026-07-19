@@ -26,8 +26,7 @@ class TranscriptionServiceTest {
         if (apiKey == null || apiKey.isBlank()) {
             throw new AssertionError("GROQ_API_KEY environment variable must be set to run this test");
         }
-        var service = new TranscriptionService(
-                apiKey,
+        var service = new TranscriptionService(apiKey,
                 "https://api.groq.com/openai/v1",
                 "whisper-large-v3-turbo");
         var audioPath = Path.of("src/test/resources/data/transcription/speech.mp3");

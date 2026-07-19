@@ -3,15 +3,31 @@ package org.example.library.library_book.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.library.book.dto.LanguageWithCount;
-import org.example.library.library_book.domain.LibraryBookStatus;
-import org.example.library.library_book.dto.*;
-import org.example.library.library_book.service.LibraryBookService;
 import org.example.library.common.pagination.PaginationParams;
+import org.example.library.library_book.domain.LibraryBookStatus;
+import org.example.library.library_book.dto.BulkRequest;
+import org.example.library.library_book.dto.BulkStatusUpdateRequest;
+import org.example.library.library_book.dto.CreateLocalBookDto;
+import org.example.library.library_book.dto.LibraryBookDto;
+import org.example.library.library_book.dto.LibraryBookSearchCriteria;
+import org.example.library.library_book.dto.LocationDto;
+import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
+import org.example.library.library_book.dto.UpdateLocalBookDto;
+import org.example.library.library_book.service.LibraryBookService;
 import org.example.library.security.UserPrincipal;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -22,13 +38,11 @@ public class LibraryBookController {
 
     private final LibraryBookService service;
 
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<LibraryBookDto> getAll(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                        PaginationParams paginationParams,
-                                       LibraryBookSearchCriteria criteria
-    ) {
+                                       LibraryBookSearchCriteria criteria) {
         return service.getAllByUserId(userPrincipal.getId(), criteria, paginationParams);
     }
 
@@ -63,8 +77,7 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto updateLocalBook(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                           @PathVariable Integer libraryBookId,
-                                          @Valid @RequestBody org.example.library.library_book.dto.UpdateLocalBookDto dto
-    ) {
+                                          @Valid @RequestBody UpdateLocalBookDto dto) {
         return service.updateLocalBook(libraryBookId, dto, userPrincipal.getId());
     }
 
@@ -78,8 +91,7 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto rate(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                @PathVariable Integer libraryBookId,
-                               @RequestParam Integer rating
-    ) {
+                               @RequestParam Integer rating) {
         return service.rate(libraryBookId, userPrincipal.getId(), rating);
     }
 
@@ -87,8 +99,7 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto updateStatus(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                        @PathVariable Integer libraryBookId,
-                                       @RequestParam LibraryBookStatus status
-    ) {
+                                       @RequestParam LibraryBookStatus status) {
         return service.updateStatus(libraryBookId, userPrincipal.getId(), status);
     }
 
@@ -96,14 +107,14 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto updateLocation(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                          @PathVariable Integer libraryBookId,
-                                         @Valid @RequestBody LocationDto dto
-    ) {
+                                         @Valid @RequestBody LocationDto dto) {
         return service.updateLocation(libraryBookId, userPrincipal.getId(), dto);
     }
 
     @PutMapping("/bulk-status")
     @ResponseStatus(HttpStatus.OK)
-    public void bulkUpdateStatus(@AuthenticationPrincipal UserPrincipal userPrincipal, @Valid @RequestBody BulkStatusUpdateRequest request) {
+    public void bulkUpdateStatus(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                 @Valid @RequestBody BulkStatusUpdateRequest request) {
         service.bulkUpdateStatus(request.getIds(), userPrincipal.getId(), request.getStatus());
     }
 
@@ -111,16 +122,14 @@ public class LibraryBookController {
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto updateDetails(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                         @PathVariable Integer libraryBookId,
-                                        @Valid @RequestBody UpdateLibraryBookDetailsDto dto
-    ) {
+                                        @Valid @RequestBody UpdateLibraryBookDetailsDto dto) {
         return service.updateDetails(libraryBookId, userPrincipal.getId(), dto);
     }
 
     @PutMapping("/{libraryBookId}/details/reset")
     @ResponseStatus(HttpStatus.OK)
     public LibraryBookDto resetDetails(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                                       @PathVariable Integer libraryBookId
-    ) {
+                                       @PathVariable Integer libraryBookId) {
         return service.resetDetails(libraryBookId, userPrincipal.getId());
     }
 

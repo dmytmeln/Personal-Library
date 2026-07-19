@@ -18,9 +18,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.Month.JANUARY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserProfileServiceTest {
@@ -50,8 +54,9 @@ class UserProfileServiceTest {
 
         var result = userProfileService.getUserProfileEmbedding(1);
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).isSameAs(expectedVector);
+        assertThat(result)
+                .isPresent()
+                .containsSame(expectedVector);
     }
 
     @Test
@@ -75,7 +80,7 @@ class UserProfileServiceTest {
         float[] v2 = new float[384];
         v2[1] = 1.0f;
         book2.setEmbedding(v2);
-        var fixedNow = LocalDateTime.of(2024, 1, 1, 12, 0);
+        var fixedNow = LocalDateTime.of(2024, JANUARY, 1, 12, 0);
 
         try (MockedStatic<LocalDateTime> mockedTime = mockStatic(LocalDateTime.class, CALLS_REAL_METHODS)) {
             mockedTime.when(LocalDateTime::now).thenReturn(fixedNow);

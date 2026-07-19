@@ -42,12 +42,10 @@ class BookEmbeddingBackfillServiceIntegrationTest extends BaseIntegrationTest {
 
     private Category defaultCategory;
 
-
     @BeforeAll
     static void setUpAll() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @BeforeEach
     void setUp() {

@@ -1,7 +1,18 @@
 package org.example.library.category.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.Book_;
 
@@ -9,6 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.SEQUENCE;
 
 @Entity
 @Table(name = "categories")
@@ -20,7 +35,7 @@ import java.util.Objects;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categories_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "categories_seq")
     @SequenceGenerator(name = "categories_seq", sequenceName = "categories_seq", allocationSize = 20, initialValue = 11)
     @Column(name = "category_id")
     private Integer id;
@@ -28,7 +43,7 @@ public class Category {
     @Column(name = "popularity_count", nullable = false)
     private Integer popularityCount;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", cascade = ALL, fetch = LAZY)
     @MapKey(name = "languageCode")
     @Builder.Default
     private Map<String, CategoryTranslation> translations = new HashMap<>();
@@ -38,20 +53,24 @@ public class Category {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Category category)) return false;
-        return Objects.equals(id, category.getId());
+        if (!(o instanceof Category category)) {
+            return false;
+        }
+
+        return Objects.equals(this.id, category.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
     public CategoryTranslation getDefaultTranslation() {
-        if (translations == null) {
+        if (this.translations == null) {
             throw new NullPointerException("Category translations must not be null");
         }
-        return translations.get("en");
+
+        return this.translations.get("en");
     }
 
 }

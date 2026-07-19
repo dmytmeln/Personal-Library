@@ -27,13 +27,14 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         SORT_MAPPING.put(LibraryBookView_.PUBLISH_YEAR, "publish_year");
     }
 
-
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Override
-    public Page<LibraryBookView> findCollectionBooks(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, Pageable pageable) {
+    public Page<LibraryBookView> findCollectionBooks(Integer userId,
+                                                     Integer collectionId,
+                                                     CollectionBookSearchParams searchParams,
+                                                     Pageable pageable) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var whereSql = buildWhereQueryPart(searchParams);
         var totalCount = getLibraryBooksCount(userId, collectionId, searchParams, whereSql, lang);
@@ -41,7 +42,12 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         return new PageImpl<>(results, pageable, totalCount);
     }
 
-    private List<LibraryBookView> getLibraryBooks(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, Pageable pageable, StringBuilder whereSql, String lang) {
+    private List<LibraryBookView> getLibraryBooks(Integer userId,
+                                                  Integer collectionId,
+                                                  CollectionBookSearchParams searchParams,
+                                                  Pageable pageable,
+                                                  StringBuilder whereSql,
+                                                  String lang) {
         var dataSql = buildLibraryBookQuery(pageable, whereSql);
 
         Query query = entityManager.createNativeQuery(dataSql.toString(), LibraryBookView.class);
@@ -71,7 +77,11 @@ public class LibraryBookViewRepositoryCustomImpl implements LibraryBookViewRepos
         return dataSql;
     }
 
-    private long getLibraryBooksCount(Integer userId, Integer collectionId, CollectionBookSearchParams searchParams, StringBuilder whereSql, String lang) {
+    private long getLibraryBooksCount(Integer userId,
+                                      Integer collectionId,
+                                      CollectionBookSearchParams searchParams,
+                                      StringBuilder whereSql,
+                                      String lang) {
         var countSql = "SELECT count(DISTINCT lbv.library_book_id) " + whereSql;
         var countQuery = entityManager.createNativeQuery(countSql);
         bindParameters(countQuery, userId, collectionId, searchParams, lang);

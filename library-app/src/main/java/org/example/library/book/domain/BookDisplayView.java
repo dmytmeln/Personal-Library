@@ -1,6 +1,12 @@
 package org.example.library.book.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import org.example.library.author.domain.Author;
 import org.hibernate.annotations.Immutable;
@@ -48,11 +54,9 @@ public class BookDisplayView {
     private String categoryName;
 
     @ManyToMany
-    @JoinTable(
-            name = "book_authors",
+    @JoinTable(name = "book_authors",
             joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "author_id")
-    )
+            inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<Author> authors;
 
 }

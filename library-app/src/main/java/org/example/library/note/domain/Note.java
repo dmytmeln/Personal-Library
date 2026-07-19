@@ -1,15 +1,32 @@
 package org.example.library.note.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.library.library_book.domain.LibraryBook;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.SEQUENCE;
+import static org.example.library.note.domain.Note.NoteType.TEXT;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
 @Table(name = "notes")
@@ -21,7 +38,7 @@ import java.util.Objects;
 public class Note {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notes_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "notes_seq")
     @SequenceGenerator(name = "notes_seq", sequenceName = "notes_seq", allocationSize = 20)
     @Column(name = "note_id")
     private Integer id;
@@ -29,10 +46,10 @@ public class Note {
     @Column(name = "content", nullable = true, columnDefinition = "text")
     private String content;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     @Column(name = "note_type", nullable = false, length = 20)
     @Builder.Default
-    private NoteType noteType = NoteType.TEXT;
+    private NoteType noteType = TEXT;
 
     @Column(name = "raw_transcript", nullable = true, columnDefinition = "text")
     private String rawTranscript;
@@ -54,24 +71,28 @@ public class Note {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "library_book_id", nullable = false, unique = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = CASCADE)
     private LibraryBook libraryBook;
-
-    public enum NoteType {
-        TEXT, VOICE
-    }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Note note)) return false;
-        return Objects.equals(id, note.id);
+        if (!(o instanceof Note note)) {
+            return false;
+        }
+
+        return Objects.equals(this.id, note.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
+    }
+
+    public enum NoteType {
+        TEXT,
+        VOICE
     }
 
 }

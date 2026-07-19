@@ -2,8 +2,8 @@ package org.example.library.reading_goal.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.reading_goal.domain.ReadingGoal;
 import org.example.library.reading_goal.dto.ReadingGoalDto;
 import org.example.library.reading_goal.repository.ReadingGoalRepository;
@@ -31,7 +31,6 @@ class ReadingGoalServiceIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ReadingGoalService service;
-
 
     @Test
     void shouldGetGoal() {
@@ -124,7 +123,6 @@ class ReadingGoalServiceIntegrationTest extends BaseIntegrationTest {
 
         assertThat(repository.findByUserIdAndYear(user.getId(), 2024)).isEmpty();
     }
-
 
     private User saveUser() {
         var user = User.builder()

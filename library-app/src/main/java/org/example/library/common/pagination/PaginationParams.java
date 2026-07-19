@@ -12,7 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class PaginationParams {
+
     private Integer page;
     private Integer size;
     private List<String> sort;
+
 }

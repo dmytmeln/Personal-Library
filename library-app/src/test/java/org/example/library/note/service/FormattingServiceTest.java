@@ -25,8 +25,7 @@ class FormattingServiceTest {
         if (apiKey == null || apiKey.isBlank()) {
             throw new AssertionError("GEMINI_API_KEY environment variable must be set to run this test");
         }
-        var service = new FormattingService(
-                apiKey,
+        var service = new FormattingService(apiKey,
                 "gemini-2.5-flash",
                 0.7);
         var author = Author.builder()

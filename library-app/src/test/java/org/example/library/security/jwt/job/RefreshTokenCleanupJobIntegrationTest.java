@@ -2,9 +2,9 @@ package org.example.library.security.jwt.job;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.auth.domain.RefreshToken;
 import org.example.library.auth.repository.RefreshTokenRepository;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.user.domain.User;
 import org.example.library.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,6 @@ class RefreshTokenCleanupJobIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private RefreshTokenCleanupJob job;
 
-
     @Test
     void shouldDeleteExpiredTokens() {
         var user = saveUser();
@@ -47,7 +46,6 @@ class RefreshTokenCleanupJobIntegrationTest extends BaseIntegrationTest {
         assertThat(remainingTokens).hasSize(1);
         assertThat(remainingTokens.get(0).getId()).isEqualTo(validToken.getId());
     }
-
 
     private User saveUser() {
         var user = User.builder()

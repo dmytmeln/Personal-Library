@@ -6,11 +6,17 @@ import org.example.library.book.dto.LanguageWithCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
 
 public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecificationExecutor<Book> {
 
@@ -30,7 +36,7 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
     Optional<Book> findEmbeddingById(Integer id);
 
     @Override
-    @EntityGraph(attributePaths = {"category"}, type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(attributePaths = {"category"}, type = LOAD)
     Page<Book> findAll(@Nullable Specification<Book> spec, Pageable pageable);
 
     @Query("SELECT COUNT(b) FROM Book b WHERE b.status <> :status AND b.owner IS NULL")
@@ -39,7 +45,8 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
     @Query("SELECT COUNT(b) FROM Book b WHERE b.owner IS NULL AND b.embedding IS NULL")
     long countBooksWithoutEmbedding();
 
-    @EntityGraph(attributePaths = {"category", "translations", "category.translations", "authors", "authors.translations"}, type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(attributePaths = {"category", "translations", "category.translations", "authors", "authors.translations"},
+            type = LOAD)
     @Query("SELECT b FROM Book b WHERE b.owner IS NULL AND b.embedding IS NULL")
     Page<Book> findBooksWithoutEmbedding(Pageable pageable);
 

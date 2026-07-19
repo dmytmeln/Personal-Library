@@ -2,10 +2,10 @@ package org.example.library.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.example.library.auth.dto.TokenResponse;
-import org.example.library.security.jwt.JwtService;
 import org.example.library.auth.domain.RefreshToken;
+import org.example.library.auth.dto.TokenResponse;
 import org.example.library.auth.repository.RefreshTokenRepository;
+import org.example.library.security.jwt.JwtService;
 import org.example.library.user.domain.User;
 import org.example.library.user.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +13,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,6 @@ public class RefreshTokenService {
 
     @Value("${application.security.jwt.refresh-expiration}")
     private long refreshTokenExpiration;
-
 
     @Transactional(noRollbackFor = SecurityException.class)
     public TokenResponse refreshToken(String rawToken, Integer tokenId) {
@@ -72,7 +72,7 @@ public class RefreshTokenService {
 
         var refreshToken = new RefreshToken();
         refreshToken.setUser(user);
-        var refreshTokenHash = DigestUtils.sha256Hex(rawRefreshToken.getBytes(StandardCharsets.UTF_8));
+        var refreshTokenHash = DigestUtils.sha256Hex(rawRefreshToken.getBytes(UTF_8));
         refreshToken.setRefreshTokenHash(refreshTokenHash);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenExpiration));
         refreshToken.setRevoked(false);
@@ -82,10 +82,8 @@ public class RefreshTokenService {
     }
 
     private boolean isTokenHashValid(String rawToken, String storedHash) {
-        var rawTokenHash = DigestUtils.sha256Hex(rawToken.getBytes(StandardCharsets.UTF_8));
-        return MessageDigest.isEqual(
-                rawTokenHash.getBytes(StandardCharsets.UTF_8),
-                storedHash.getBytes(StandardCharsets.UTF_8));
+        var rawTokenHash = DigestUtils.sha256Hex(rawToken.getBytes(UTF_8));
+        return MessageDigest.isEqual(rawTokenHash.getBytes(UTF_8), storedHash.getBytes(UTF_8));
     }
 
 }

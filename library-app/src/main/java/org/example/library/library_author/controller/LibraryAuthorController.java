@@ -23,11 +23,9 @@ public class LibraryAuthorController {
     private final AuthorService service;
 
     @GetMapping
-    public Page<AuthorWithBooksCount> getAll(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            PaginationParams paginationParams,
-            AuthorSearchParams searchParams
-    ) {
+    public Page<AuthorWithBooksCount> getAll(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                             PaginationParams paginationParams,
+                                             AuthorSearchParams searchParams) {
         return service.searchForUser(userPrincipal.getId(), paginationParams, searchParams);
     }
 

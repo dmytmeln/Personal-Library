@@ -13,7 +13,11 @@ import org.example.library.user.dto.UserResponse;
 import org.example.library.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,7 +28,6 @@ public class AuthenticationRestController {
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final CookieUtils cookieUtils;
-
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)

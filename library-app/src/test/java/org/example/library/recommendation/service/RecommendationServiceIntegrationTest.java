@@ -60,7 +60,6 @@ class RecommendationServiceIntegrationTest extends BaseIntegrationTest {
     private User testUser;
     private Category defaultCategory;
 
-
     @BeforeAll
     static void setUpAll() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
@@ -97,7 +96,6 @@ class RecommendationServiceIntegrationTest extends BaseIntegrationTest {
             userRepository.deleteAll();
         });
     }
-
 
     @Test
     void shouldReturnRecommendationsBasedOnVector() {
@@ -200,19 +198,24 @@ class RecommendationServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void shouldReturnBooksBasedOnMoodQuery() {
         transactionTemplate.executeWithoutResult(status -> {
-            float[] vector1 = new float[384]; vector1[0] = 0.9f;
+            float[] vector1 = new float[384];
+            vector1[0] = 0.9f;
             saveBook("Space Adventure", vector1, (short) 2024);
 
-            float[] vector2 = new float[384]; vector2[0] = 0.8f;
+            float[] vector2 = new float[384];
+            vector2[0] = 0.8f;
             saveBook("Galactic Journey", vector2, (short) 2023);
 
-            float[] vector3 = new float[384]; vector3[1] = 0.9f;
+            float[] vector3 = new float[384];
+            vector3[1] = 0.9f;
             saveBook("Historical Romance", vector3, (short) 2022);
 
-            float[] vector4 = new float[384]; vector4[1] = 0.8f;
+            float[] vector4 = new float[384];
+            vector4[1] = 0.8f;
             saveBook("Medieval Love", vector4, (short) 2021);
 
-            float[] vector5 = new float[384]; vector5[5] = 0.9f;
+            float[] vector5 = new float[384];
+            vector5[5] = 0.9f;
             saveBook("Cooking Basics", vector5, (short) 2020);
         });
 
@@ -221,7 +224,6 @@ class RecommendationServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(results).isNotEmpty();
         assertThat(results.get(0).getTitle()).containsAnyOf("Space Adventure", "Galactic Journey");
     }
-
 
     private Book saveBook(String title, float[] vector, short publishYear) {
         return saveBook(title, vector, publishYear, defaultCategory);

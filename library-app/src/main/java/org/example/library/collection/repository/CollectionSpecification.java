@@ -31,8 +31,8 @@ public class CollectionSpecification {
             }
 
             return cb.equal(root.join(Collection_.COLLECTION_BOOKS, INNER)
-                            .get(CollectionBook_.ID)
-                            .get(CollectionBookId_.LIBRARY_BOOK_ID),
+                    .get(CollectionBook_.ID)
+                    .get(CollectionBookId_.LIBRARY_BOOK_ID),
                     libraryBookId);
         };
     }

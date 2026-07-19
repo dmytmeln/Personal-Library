@@ -3,14 +3,28 @@ package org.example.library.collection.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.library.collection.dto.*;
+import org.example.library.collection.dto.BasicCollectionDto;
+import org.example.library.collection.dto.CollectionDetailsDto;
+import org.example.library.collection.dto.CollectionNodeDto;
+import org.example.library.collection.dto.CreateCollectionRequest;
+import org.example.library.collection.dto.MoveCollectionRequest;
+import org.example.library.collection.dto.UpdateCollectionDto;
 import org.example.library.collection.service.CollectionService;
 import org.example.library.collection_book.service.CollectionBookService;
-import org.example.library.security.UserDetailsImpl;
 import org.example.library.security.UserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -21,7 +35,6 @@ public class CollectionController {
 
     private final CollectionService service;
     private final CollectionBookService collectionBookService;
-
 
     @GetMapping("/tree")
     @ResponseStatus(HttpStatus.OK)

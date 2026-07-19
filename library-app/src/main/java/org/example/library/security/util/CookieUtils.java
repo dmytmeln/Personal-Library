@@ -19,7 +19,6 @@ public class CookieUtils {
 
     private static final String REFRESH_TOKEN_PATH = "/api/v1/auth/refresh";
 
-
     @Value("${application.security.jwt.access-cookie-name}")
     private String accessTokenCookieName;
 
@@ -35,11 +34,14 @@ public class CookieUtils {
     @Value("${application.security.jwt.refresh-expiration}")
     private long refreshTokenExpirationMs;
 
-
     public void setTokenCookies(HttpServletResponse response, TokenResponse tokenResponse) {
         setCookie(response, accessTokenCookieName, tokenResponse.accessToken(), accessTokenExpirationMs);
         setCookie(response, refreshTokenCookieName, tokenResponse.refreshToken(), refreshTokenExpirationMs, REFRESH_TOKEN_PATH);
-        setCookie(response, refreshTokenIdCookieName, String.valueOf(tokenResponse.refreshTokenId()), refreshTokenExpirationMs, REFRESH_TOKEN_PATH);
+        setCookie(response,
+                refreshTokenIdCookieName,
+                String.valueOf(tokenResponse.refreshTokenId()),
+                refreshTokenExpirationMs,
+                REFRESH_TOKEN_PATH);
     }
 
     public void clearTokenCookies(HttpServletResponse response) {
@@ -49,8 +51,9 @@ public class CookieUtils {
     }
 
     public Optional<String> getCookieValue(HttpServletRequest request, String name) {
-        if (request.getCookies() == null)
+        if (request.getCookies() == null) {
             return Optional.empty();
+        }
 
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> name.equals(cookie.getName()))

@@ -25,7 +25,8 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             FROM Author a
             JOIN a.translations tr ON tr.languageCode = :lang
             LEFT JOIN a.books b
-            WHERE (:name IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')) OR FUNCTION('similarity', tr.fullName, CAST(:name AS string)) > 0.3))
+            WHERE (:name IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))
+               OR FUNCTION('similarity', tr.fullName, CAST(:name AS string)) > 0.3))
               AND (:country IS NULL OR LOWER(tr.country) = LOWER(CAST(:country AS string)))
               AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
               AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
@@ -33,16 +34,14 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             HAVING (:booksCountMin IS NULL OR COUNT(b) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(b) <= :booksCountMax)
             """)
-    Page<AuthorWithBooksCount> searchWithBooksCount(
-            String name,
-            String country,
-            Short birthYearMin,
-            Short birthYearMax,
-            Integer booksCountMin,
-            Integer booksCountMax,
-            String lang,
-            Pageable pageable
-    );
+    Page<AuthorWithBooksCount> searchWithBooksCount(String name,
+                                                    String country,
+                                                    Short birthYearMin,
+                                                    Short birthYearMax,
+                                                    Integer booksCountMin,
+                                                    Integer booksCountMax,
+                                                    String lang,
+                                                    Pageable pageable);
 
     @Query("""
             SELECT
@@ -69,7 +68,8 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             JOIN a.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-              AND (:name IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')) OR FUNCTION('similarity', tr.fullName, CAST(:name AS string)) > 0.3))
+              AND (:name IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))
+               OR FUNCTION('similarity', tr.fullName, CAST(:name AS string)) > 0.3))
               AND (:country IS NULL OR LOWER(tr.country) = LOWER(CAST(:country AS string)))
               AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
               AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
@@ -77,17 +77,15 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
             """)
-    Page<AuthorWithBooksCount> searchForUser(
-            Integer userId,
-            String name,
-            String country,
-            Short birthYearMin,
-            Short birthYearMax,
-            Integer booksCountMin,
-            Integer booksCountMax,
-            String lang,
-            Pageable pageable
-    );
+    Page<AuthorWithBooksCount> searchForUser(Integer userId,
+                                             String name,
+                                             String country,
+                                             Short birthYearMin,
+                                             Short birthYearMax,
+                                             Integer booksCountMin,
+                                             Integer booksCountMax,
+                                             String lang,
+                                             Pageable pageable);
 
     @Query("""
             SELECT
@@ -104,11 +102,19 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
     List<CountryWithCount> findAllCountriesForUser(Integer userId, String lang);
 
     @Modifying
-    @Query(value = "UPDATE authors SET popularity_count = popularity_count + 1 WHERE author_id IN (SELECT author_id FROM book_authors WHERE book_id IN :bookIds)", nativeQuery = true)
+    @Query(value = """
+            UPDATE authors SET popularity_count = popularity_count + 1
+            WHERE author_id IN (SELECT author_id FROM book_authors WHERE book_id IN :bookIds)
+            """,
+            nativeQuery = true)
     void incrementPopularityCountByBookIds(List<Integer> bookIds);
 
     @Modifying
-    @Query(value = "UPDATE authors SET popularity_count = popularity_count - 1 WHERE author_id IN (SELECT author_id FROM book_authors WHERE book_id IN :bookIds)", nativeQuery = true)
+    @Query(value = """
+            UPDATE authors SET popularity_count = popularity_count - 1
+            WHERE author_id IN (SELECT author_id FROM book_authors WHERE book_id IN :bookIds)
+            """,
+            nativeQuery = true)
     void decrementPopularityCountByBookIds(List<Integer> bookIds);
 
 }

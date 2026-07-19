@@ -19,15 +19,15 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
 
-
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
-        var authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getEmail(),
-                        authRequest.getPassword()));
-        var userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(authRequest.getEmail(),
+                authRequest.getPassword());
+        var authenticated = authenticationManager.authenticate(usernamePasswordToken);
+
+        var userDetails = (UserDetailsImpl) authenticated.getPrincipal();
         var tokenResponse = refreshTokenService.generateNewTokens(userDetails.user());
         log.info("[LOGIN_SUCCESS] User: {}", authRequest.getEmail());
+
         return new AuthenticationResponse(tokenResponse, userMapper.toResponse(userDetails));
     }
 

@@ -9,7 +9,6 @@ import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.recommendation.adapter.EmbeddingModelAdapter;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,8 +37,9 @@ public class EmbeddingService {
     private String constructEmbeddingInput(Book book) {
         var englishBookTranslation = getDefaultBookTranslation(book);
         var englishCategoryTranslation = getDefaultCategoryTranslation(book.getCategory());
-        var authors = book.getAuthors().stream().
-                map(this::getAuthorDefaultTranslationName)
+        var authors = book.getAuthors().stream()
+                .map(this::getAuthorDefaultTranslationName)
+                // todo constant
                 .collect(Collectors.joining(", "));
 
         return constructEmbeddingInput(englishBookTranslation, englishCategoryTranslation, authors);

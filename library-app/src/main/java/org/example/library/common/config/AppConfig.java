@@ -20,7 +20,6 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import java.util.List;
 import java.util.Locale;
 
-
 @Configuration
 @EnableConfigurationProperties(value = PaginationProperties.class)
 public class AppConfig {
@@ -30,17 +29,17 @@ public class AppConfig {
         var authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
+
         return authProvider;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            JwtTokenProvider jwtTokenProvider,
-            DaoAuthenticationProvider daoAuthenticationProvider,
-            AuthenticationEventPublisher eventPublisher
-    ) {
+    public AuthenticationManager authenticationManager(JwtTokenProvider jwtTokenProvider,
+                                                       DaoAuthenticationProvider daoAuthenticationProvider,
+                                                       AuthenticationEventPublisher eventPublisher) {
         var providerManager = new ProviderManager(List.of(jwtTokenProvider, daoAuthenticationProvider));
         providerManager.setAuthenticationEventPublisher(eventPublisher);
+
         return providerManager;
     }
 
@@ -53,6 +52,7 @@ public class AppConfig {
     public LocaleResolver localeResolver() {
         var slr = new AcceptHeaderLocaleResolver();
         slr.setDefaultLocale(Locale.ENGLISH);
+
         return slr;
     }
 
@@ -62,6 +62,7 @@ public class AppConfig {
         messageSource.setBasename("messages");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setFallbackToSystemLocale(false);
+
         return messageSource;
     }
 

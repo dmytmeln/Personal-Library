@@ -3,9 +3,9 @@ package org.example.library.user.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.example.library.auth.dto.UserRegisterRequest;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.user.domain.Role;
 import org.example.library.user.domain.User;
 import org.example.library.user.dto.UpdateProfileRequest;
@@ -32,7 +32,6 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private UserService userService;
-
 
     @Test
     void shouldRegisterUser() {

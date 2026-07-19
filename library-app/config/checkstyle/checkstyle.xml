@@ -11,7 +11,7 @@
         <property name="eachLine" value="true"/>
     </module>
     <module name="LineLength">
-        <property name="max" value="120"/>
+        <property name="max" value="140"/>
         <property name="ignorePattern" value="^package|^import|https?://"/>
     </module>
     <module name="SuppressionFilter">
@@ -19,6 +19,11 @@
     </module>
 
     <module name="TreeWalker">
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="^\s*(?!.*\brecord\s+\w+\(\s*$)(?!(?:return|throw|new)\b)(?:[^=;{}]+\s+)+\w+\(\s*$"/>
+            <property name="maximum" value="0"/>
+            <property name="message" value="First parameter must remain on the method declaration line."/>
+        </module>
         <module name="AvoidStarImport"/>
         <module name="NeedBraces"/>
         <module name="LeftCurly"/>

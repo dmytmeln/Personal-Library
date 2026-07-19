@@ -82,7 +82,6 @@ class LibraryBookServiceIntegrationTest extends BaseIntegrationTest {
 
     private Category defaultCategory;
 
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
@@ -104,7 +103,6 @@ class LibraryBookServiceIntegrationTest extends BaseIntegrationTest {
         authorRepository.deleteAll();
         userRepository.deleteAll();
     }
-
 
     @Test
     void shouldGetAllByUserId() {
@@ -298,7 +296,6 @@ class LibraryBookServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(results.stream().anyMatch(r -> r.getBook().getTitle().equals("Space Adventure"))).isFalse();
     }
 
-
     @Test
     void shouldCascadeDeleteDependencies() {
         var book = saveBook("Cascade Test Book");
@@ -329,7 +326,8 @@ class LibraryBookServiceIntegrationTest extends BaseIntegrationTest {
 
         assertThat(repository.existsById(libraryBook.getId())).isFalse();
         assertThat(noteRepository.findByLibraryBookIdAndLibraryBookUserId(libraryBook.getId(), defaultUser.getId())).isEmpty();
-        assertThat(quoteRepository.findByLibraryBookIdAndLibraryBookUserIdOrderByCreatedAtDesc(libraryBook.getId(), defaultUser.getId())).isEmpty();
+        assertThat(quoteRepository.findByLibraryBookIdAndLibraryBookUserIdOrderByCreatedAtDesc(libraryBook.getId(), defaultUser.getId()))
+                .isEmpty();
         assertThat(collectionBookRepository.existsById(new CollectionBookId(libraryBook.getId(), collection.getId()))).isFalse();
     }
 

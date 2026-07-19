@@ -1,6 +1,13 @@
 package org.example.library.auth.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.library.user.domain.User;
@@ -9,6 +16,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 import java.util.Objects;
 
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.SEQUENCE;
+
 @Entity
 @Table(name = "refresh_tokens")
 @Getter
@@ -16,12 +26,12 @@ import java.util.Objects;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refresh_tokens_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "refresh_tokens_seq")
     @SequenceGenerator(name = "refresh_tokens_seq", sequenceName = "refresh_tokens_seq", allocationSize = 20)
     @Column(name = "refresh_token_id")
     private Integer id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -38,20 +48,22 @@ public class RefreshToken {
     @CreationTimestamp
     private Instant createdAt;
 
-
     public boolean isExpired() {
         return Instant.now().isAfter(this.expiryDate);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof RefreshToken that)) return false;
-        return Objects.equals(id, that.getId());
+        if (!(o instanceof RefreshToken that)) {
+            return false;
+        }
+
+        return Objects.equals(this.id, that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
 }

@@ -1,13 +1,9 @@
 package org.example.library.book.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -27,13 +23,19 @@ import org.example.library.category.domain.Category;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.Array;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.SEQUENCE;
+import static org.example.library.book.domain.BookStatus.NEW;
+import static org.hibernate.type.SqlTypes.VECTOR;
 
 @Entity
 @Table(name = "books")
@@ -45,16 +47,16 @@ import java.util.Set;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "books_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "books_seq")
     @SequenceGenerator(name = "books_seq", sequenceName = "books_seq", allocationSize = 20, initialValue = 56)
     @Column(name = "book_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "owner_user_id")
     private User owner;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -68,29 +70,27 @@ public class Book {
     private String coverImageUrl;
 
     @Column(name = "embedding", columnDefinition = "vector(384)")
-    @JdbcTypeCode(SqlTypes.VECTOR)
+    @JdbcTypeCode(VECTOR)
     @Array(length = 384)
     private float[] embedding;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
-    private BookStatus status = BookStatus.NEW;
+    private BookStatus status = NEW;
 
     @Column(name = "popularity_count", nullable = false)
     private Integer popularityCount;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book", cascade = ALL, fetch = LAZY)
     @MapKey(name = "languageCode")
     @Builder.Default
     private Map<String, BookTranslation> translations = new HashMap<>();
 
     @ManyToMany
-    @JoinTable(
-            name = "book_authors",
+    @JoinTable(name = "book_authors",
             joinColumns = {@JoinColumn(name = "book_id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "author_id", nullable = false)}
-    )
+            inverseJoinColumns = {@JoinColumn(name = "author_id", nullable = false)})
     @Builder.Default
     private Set<Author> authors = new HashSet<>();
 
@@ -100,18 +100,19 @@ public class Book {
             return false;
         }
 
-        return Objects.equals(id, book.getId());
+        return Objects.equals(this.id, book.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
     public BookTranslation getDefaultTranslation() {
-        Objects.requireNonNull(translations, "Book translations must not be null");
+        Objects.requireNonNull(this.translations, "Book translations must not be null");
 
-        return translations.get("en");
+        // todo
+        return this.translations.get("en");
     }
 
 }

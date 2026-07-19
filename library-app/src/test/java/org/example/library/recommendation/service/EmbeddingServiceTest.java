@@ -31,7 +31,6 @@ class EmbeddingServiceTest {
     @InjectMocks
     private EmbeddingService embeddingService;
 
-
     @Test
     void shouldGenerateEmbeddingSuccessfully() {
         var book = createBook("Fiction", "Test Title", "Test Description");
@@ -58,8 +57,7 @@ class EmbeddingServiceTest {
         var result = embeddingService.generateEmbeddings(books);
 
         assertThat(result).isEqualTo(expectedVectors);
-        var expectedInputs = List.of(
-                "Title: Title 1. Category: Fiction. Authors: , Description: Desc 1",
+        var expectedInputs = List.of("Title: Title 1. Category: Fiction. Authors: , Description: Desc 1",
                 "Title: Title 2. Category: Science. Authors: , Description: Desc 2");
         verify(embeddingModelAdapter).embed(expectedInputs);
     }

@@ -15,9 +15,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PageRequestBuilder {
 
+    // todo refactor
+
     private final SortValidator sortValidator;
     private final PaginationProperties paginationProperties;
-
 
     public Pageable buildPageRequest(PaginationParams paginationParams, Set<String> allowedSortFields) {
         int validatedPage = validatePage(paginationParams.getPage());
@@ -25,15 +26,17 @@ public class PageRequestBuilder {
         sortValidator.validateSortParameters(paginationParams.getSort(), allowedSortFields);
 
         var sortObj = buildSort(paginationParams.getSort());
-        if (!sortObj.isSorted())
+        if (!sortObj.isSorted()) {
             return PageRequest.of(validatedPage, validatedSize);
+        }
 
         return PageRequest.of(validatedPage, validatedSize, sortObj);
     }
 
     private int validatePage(Integer page) {
-        if (page == null || page < 0)
+        if (page == null || page < 0) {
             return 0;
+        }
 
         return page;
     }
@@ -44,23 +47,20 @@ public class PageRequestBuilder {
         }
 
         if (size < paginationProperties.getMinPageSize()) {
-            throw new InvalidPaginationParameterException(
-                    "error.pagination.min_page_size", paginationProperties.getMinPageSize()
-            );
+            throw new InvalidPaginationParameterException("error.pagination.min_page_size", paginationProperties.getMinPageSize());
         }
 
         if (size > paginationProperties.getMaxPageSize()) {
-            throw new InvalidPaginationParameterException(
-                    "error.pagination.max_page_size", paginationProperties.getMaxPageSize()
-            );
+            throw new InvalidPaginationParameterException("error.pagination.max_page_size", paginationProperties.getMaxPageSize());
         }
 
         return size;
     }
 
     private Sort buildSort(List<String> sort) {
-        if (sort == null || sort.isEmpty())
+        if (sort == null || sort.isEmpty()) {
             return Sort.unsorted();
+        }
 
         List<Sort.Order> orders = new ArrayList<>();
         for (String sortParam : sort) {

@@ -1,7 +1,20 @@
 package org.example.library.library_book.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.library.book.domain.Book;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
@@ -9,6 +22,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.SEQUENCE;
+import static org.example.library.library_book.domain.LibraryBookStatus.NO_TAG;
 
 @Entity
 @Table(name = "library_books")
@@ -20,7 +37,7 @@ import java.util.Objects;
 public class LibraryBook {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "library_books_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "library_books_seq")
     @SequenceGenerator(name = "library_books_seq", sequenceName = "library_books_seq", allocationSize = 20)
     @Column(name = "library_book_id")
     private Integer id;
@@ -28,7 +45,7 @@ public class LibraryBook {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @Builder.Default
-    private LibraryBookStatus status = LibraryBookStatus.NO_TAG;
+    private LibraryBookStatus status = NO_TAG;
 
     @Column(name = "added_at", nullable = false, updatable = false)
     @CreationTimestamp
@@ -64,11 +81,11 @@ public class LibraryBook {
     @Column(name = "custom_category_name")
     private String customCategoryName;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -81,13 +98,16 @@ public class LibraryBook {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof LibraryBook libraryBook)) return false;
-        return Objects.equals(id, libraryBook.getId());
+        if (!(o instanceof LibraryBook libraryBook)) {
+            return false;
+        }
+
+        return Objects.equals(this.id, libraryBook.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
 }

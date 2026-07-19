@@ -8,11 +8,11 @@ import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.dto.CategorySearchParams;
 import org.example.library.category.repository.CategoryRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.common.pagination.PaginationParams;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
-import org.example.library.common.pagination.PaginationParams;
 import org.example.library.user.domain.User;
 import org.example.library.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,9 +22,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
+import static java.util.Locale.ENGLISH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -49,12 +49,10 @@ class CategoryServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private CategoryService service;
 
-
     @BeforeAll
     static void setUp() {
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
+        LocaleContextHolder.setLocale(ENGLISH);
     }
-
 
     @Test
     void shouldReturnCategoryWhenGetById() {
@@ -170,7 +168,6 @@ class CategoryServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(result.getContent().get(0).getName()).isEqualTo("User Category");
         assertThat(result.getContent().get(0).getBooksCount()).isEqualTo(2);
     }
-
 
     private Category saveCategory(String name) {
         var translation = CategoryTranslation.builder()

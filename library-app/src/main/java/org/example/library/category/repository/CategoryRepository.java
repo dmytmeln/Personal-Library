@@ -28,18 +28,17 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             FROM Category c
             JOIN c.translations tr ON tr.languageCode = :lang
             LEFT JOIN c.books b
-            WHERE (:name IS NULL OR (LOWER(tr.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')) OR FUNCTION('similarity', tr.name, CAST(:name AS string)) > 0.3))
+            WHERE (:name IS NULL OR (LOWER(tr.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))
+               OR FUNCTION('similarity', tr.name, CAST(:name AS string)) > 0.3))
             GROUP BY c.id, tr.name, tr.description, c.popularityCount
             HAVING (:booksCountMin IS NULL OR COUNT(b) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(b) <= :booksCountMax)
             """)
-    Page<CategoryWithBooksCount> searchWithBooksCount(
-            String name,
-            Integer booksCountMin,
-            Integer booksCountMax,
-            String lang,
-            Pageable pageable
-    );
+    Page<CategoryWithBooksCount> searchWithBooksCount(String name,
+                                                      Integer booksCountMin,
+                                                      Integer booksCountMax,
+                                                      String lang,
+                                                      Pageable pageable);
 
     @Query("""
             SELECT
@@ -53,26 +52,33 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             JOIN c.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-              AND (:name IS NULL OR (LOWER(tr.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%')) OR FUNCTION('similarity', tr.name, CAST(:name AS string)) > 0.3))
+              AND (:name IS NULL OR (LOWER(tr.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))
+               OR FUNCTION('similarity', tr.name, CAST(:name AS string)) > 0.3))
             GROUP BY c.id, tr.name, tr.description, c.popularityCount
             HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
                AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
             """)
-    Page<CategoryWithBooksCount> searchForUser(
-            Integer userId,
-            String name,
-            Integer booksCountMin,
-            Integer booksCountMax,
-            String lang,
-            Pageable pageable
-    );
+    Page<CategoryWithBooksCount> searchForUser(Integer userId,
+                                               String name,
+                                               Integer booksCountMin,
+                                               Integer booksCountMax,
+                                               String lang,
+                                               Pageable pageable);
 
     @Modifying
-    @Query(value = "UPDATE categories SET popularity_count = popularity_count + 1 WHERE category_id IN (SELECT category_id FROM books WHERE book_id IN :bookIds)", nativeQuery = true)
+    @Query(value = """
+            UPDATE categories SET popularity_count = popularity_count + 1
+            WHERE category_id IN (SELECT category_id FROM books WHERE book_id IN :bookIds)
+            """,
+            nativeQuery = true)
     void incrementPopularityCountByBookIds(List<Integer> bookIds);
 
     @Modifying
-    @Query(value = "UPDATE categories SET popularity_count = popularity_count - 1 WHERE category_id IN (SELECT category_id FROM books WHERE book_id IN :bookIds)", nativeQuery = true)
+    @Query(value = """
+            UPDATE categories SET popularity_count = popularity_count - 1
+            WHERE category_id IN (SELECT category_id FROM books WHERE book_id IN :bookIds)
+            """,
+            nativeQuery = true)
     void decrementPopularityCountByBookIds(List<Integer> bookIds);
 
 }

@@ -20,7 +20,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestControllerAdvice
 @Slf4j
@@ -51,13 +54,16 @@ public class RestControllerExceptionHandler extends ResponseEntityExceptionHandl
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
         var errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(e -> Map.of("field", e.getField(), "message", e.getDefaultMessage()))
                 .toList();
         log.warn("[VALIDATION] {}", errors);
         var body = ExceptionResponse.of(errors);
+
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
@@ -101,7 +107,9 @@ public class RestControllerExceptionHandler extends ResponseEntityExceptionHandl
     }
 
     private String tryLocalize(String message, Object[] args) {
-        if (message == null) return null;
+        if (message == null) {
+            return null;
+        }
         try {
             return messageSource.getMessage(message, args, LocaleContextHolder.getLocale());
         } catch (NoSuchMessageException e) {

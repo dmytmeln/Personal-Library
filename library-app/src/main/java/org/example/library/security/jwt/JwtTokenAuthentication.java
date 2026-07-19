@@ -35,7 +35,6 @@ public class JwtTokenAuthentication implements Authentication {
         return new JwtTokenAuthentication(token);
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Optional.ofNullable(userPrincipal)

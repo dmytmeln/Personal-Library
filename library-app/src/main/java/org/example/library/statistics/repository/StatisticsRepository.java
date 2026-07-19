@@ -1,7 +1,13 @@
 package org.example.library.statistics.repository;
 
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.statistics.dto.*;
+import org.example.library.statistics.dto.AuthorCountryDistributionDto;
+import org.example.library.statistics.dto.CategoryDistributionDto;
+import org.example.library.statistics.dto.DashboardSummaryDto;
+import org.example.library.statistics.dto.LanguageDistributionDto;
+import org.example.library.statistics.dto.MonthlyReadingActivityDto;
+import org.example.library.statistics.dto.StatusDistributionDto;
+import org.example.library.statistics.dto.TopAuthorDto;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 

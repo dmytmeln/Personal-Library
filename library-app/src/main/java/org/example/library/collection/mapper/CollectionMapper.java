@@ -2,7 +2,11 @@
 package org.example.library.collection.mapper;
 
 import org.example.library.collection.domain.Collection;
-import org.example.library.collection.dto.*;
+import org.example.library.collection.dto.BasicCollectionDto;
+import org.example.library.collection.dto.CollectionDetailsDto;
+import org.example.library.collection.dto.CollectionNodeDto;
+import org.example.library.collection.dto.CreateCollectionRequest;
+import org.example.library.collection.dto.UpdateCollectionDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

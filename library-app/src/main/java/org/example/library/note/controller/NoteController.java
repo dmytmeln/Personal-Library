@@ -21,15 +21,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/api/v1/notes")
 @RequiredArgsConstructor
 public class NoteController {
 
     private final NoteService service;
-
 
     @GetMapping
     public NoteDto getByLibraryBookId(@RequestParam Integer libraryBookId,
@@ -53,7 +50,7 @@ public class NoteController {
     @PostMapping("/{libraryBookId}/voice")
     public VoiceNoteResponse uploadVoiceNote(@PathVariable Integer libraryBookId,
                                              @RequestParam("audio") MultipartFile audioFile,
-                                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException {
+                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return service.uploadVoiceNote(libraryBookId, audioFile, userPrincipal.getId());
     }
 

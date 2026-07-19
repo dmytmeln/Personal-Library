@@ -1,14 +1,12 @@
 package org.example.library.recommendation.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookStatus;
 import org.example.library.book.repository.BookRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.data.domain.Pageable;
 
 @Component
 @RequiredArgsConstructor

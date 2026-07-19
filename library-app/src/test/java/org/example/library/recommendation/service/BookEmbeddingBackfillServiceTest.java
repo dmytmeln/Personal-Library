@@ -1,16 +1,12 @@
 package org.example.library.recommendation.service;
 
-import org.example.library.book.domain.Book;
 import org.example.library.book.repository.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -28,7 +24,6 @@ class BookEmbeddingBackfillServiceTest {
     private BatchEmbeddingProcessor batchEmbeddingProcessor;
 
     private BookEmbeddingBackfillService bookEmbeddingBackfillService;
-
 
     @BeforeEach
     void setUp() {

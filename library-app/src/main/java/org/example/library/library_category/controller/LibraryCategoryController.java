@@ -20,11 +20,9 @@ public class LibraryCategoryController {
     private final CategoryService service;
 
     @GetMapping
-    public Page<CategoryWithBooksCount> getAll(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            PaginationParams paginationParams,
-            CategorySearchParams searchParams
-    ) {
+    public Page<CategoryWithBooksCount> getAll(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               PaginationParams paginationParams,
+                                               CategorySearchParams searchParams) {
         return service.searchForUser(userPrincipal.getId(), paginationParams, searchParams);
     }
 

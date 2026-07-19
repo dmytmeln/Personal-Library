@@ -26,7 +26,6 @@ public class BookService {
     private final BookMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
-
     public Page<BookDto> getAll(PaginationParams paginationParams, BookSearchParams searchParams) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var spec = BookSpecification.fromSearchParams(lang, searchParams);

@@ -25,8 +25,9 @@ public interface CategoryMapper {
     default String getLocalizedName(Category category) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = category.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for category: " + category.getId());
+        }
 
         return translation.getName();
     }
@@ -35,8 +36,9 @@ public interface CategoryMapper {
     default String getLocalizedDescription(Category category) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = category.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for category: " + category.getId());
+        }
 
         return translation.getDescription();
     }

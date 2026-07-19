@@ -110,4 +110,3 @@ public interface BookDisplayViewRepository extends JpaRepository<BookDisplayView
     List<BookDisplayView> findTrendingInFavoriteGenres(String languageCode, Integer userId, int limit);
 
 }
-

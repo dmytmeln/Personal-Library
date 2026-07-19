@@ -27,12 +27,11 @@ public class AuthorService {
     private final AuthorMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
-
     public Page<AuthorWithBooksCount> search(PaginationParams paginationParams, AuthorSearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
         var lang = LocaleContextHolder.getLocale().getLanguage();
-        return repository.searchWithBooksCount(
-                searchParams.getName(),
+
+        return repository.searchWithBooksCount(searchParams.getName(),
                 searchParams.getCountry(),
                 searchParams.getBirthYearMin(),
                 searchParams.getBirthYearMax(),

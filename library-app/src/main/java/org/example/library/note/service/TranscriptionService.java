@@ -22,10 +22,9 @@ public class TranscriptionService {
     @Getter
     private final String model;
 
-    public TranscriptionService(
-            @Value("${application.ai.groq.api-key}") String apiKey,
-            @Value("${application.ai.groq.base-url}") String baseUrl,
-            @Value("${application.ai.groq.model}") String model) {
+    public TranscriptionService(@Value("${application.ai.groq.api-key}") String apiKey,
+                                @Value("${application.ai.groq.base-url}") String baseUrl,
+                                @Value("${application.ai.groq.model}") String model) {
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
@@ -69,4 +68,3 @@ public class TranscriptionService {
     }
 
 }
-

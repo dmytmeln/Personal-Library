@@ -20,10 +20,8 @@ public class CategoryController {
     private final CategoryService service;
 
     @GetMapping
-    public Page<CategoryWithBooksCount> getAll(
-            PaginationParams paginationParams,
-            CategorySearchParams searchParams
-    ) {
+    public Page<CategoryWithBooksCount> getAll(PaginationParams paginationParams,
+                                               CategorySearchParams searchParams) {
         return service.search(paginationParams, searchParams);
     }
 

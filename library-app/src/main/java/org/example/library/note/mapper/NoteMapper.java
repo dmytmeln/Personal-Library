@@ -5,7 +5,11 @@ import org.example.library.note.domain.Note;
 import org.example.library.note.dto.NoteDto;
 import org.example.library.note.dto.NoteRequest;
 import org.example.library.note.dto.VoiceNoteResponse;
-import org.mapstruct.*;
+import org.mapstruct.BeforeMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.TargetType;
 
 @Mapper(componentModel = "spring")
 public interface NoteMapper {

@@ -12,11 +12,11 @@ import org.example.library.collection.domain.Collection;
 import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection_book.dto.CollectionBookSearchParams;
 import org.example.library.collection_book.repository.CollectionBookRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.BadRequestException;
+import org.example.library.common.pagination.PaginationParams;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
-import org.example.library.common.pagination.PaginationParams;
 import org.example.library.user.domain.Role;
 import org.example.library.user.domain.User;
 import org.example.library.user.repository.UserRepository;
@@ -60,12 +60,10 @@ class CollectionBookServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private CollectionBookService service;
 
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @Test
     void shouldAddBookToCollection() {
@@ -182,7 +180,6 @@ class CollectionBookServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(repository.findLibraryBookIdsByCollectionId(col1.getId())).isEmpty();
         assertThat(repository.findLibraryBookIdsByCollectionId(col2.getId())).isEmpty();
     }
-
 
     private User saveUser(String email) {
         var user = User.builder()

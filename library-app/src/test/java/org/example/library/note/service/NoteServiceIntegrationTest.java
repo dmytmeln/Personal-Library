@@ -5,8 +5,8 @@ import jakarta.persistence.PersistenceContext;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookStatus;
 import org.example.library.book.repository.BookRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.note.domain.Note;
@@ -42,7 +42,6 @@ class NoteServiceIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private NoteService service;
-
 
     @Test
     void shouldGetNoteByLibraryBookId() {
@@ -130,7 +129,6 @@ class NoteServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(repository.findByLibraryBookIdAndLibraryBookUserId(libraryBook.getId(), user.getId())).isEmpty();
     }
 
-
     private User saveUser() {
         var user = User.builder()
                 .email("user@example.com")
@@ -138,6 +136,7 @@ class NoteServiceIntegrationTest extends BaseIntegrationTest {
                 .password("pass")
                 .role(Role.USER)
                 .build();
+
         return userRepository.save(user);
     }
 
@@ -146,6 +145,7 @@ class NoteServiceIntegrationTest extends BaseIntegrationTest {
                 .status(BookStatus.NEW)
                 .popularityCount(0)
                 .build();
+
         return bookRepository.save(book);
     }
 
@@ -154,6 +154,7 @@ class NoteServiceIntegrationTest extends BaseIntegrationTest {
                 .user(user)
                 .book(book)
                 .build();
+
         return libraryBookRepository.save(libraryBook);
     }
 

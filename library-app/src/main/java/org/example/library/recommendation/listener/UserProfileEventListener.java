@@ -21,12 +21,10 @@ public class UserProfileEventListener {
     @Value("${library.recommendation.profile-rebuild-debounce:PT5M}")
     private Duration debounceDelay;
 
-
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onUserProfileUpdated(UserProfileUpdatedEvent event) {
         var userId = event.userId();
-        debounceService.debounce(
-                "user-profile-vector:" + userId,
+        debounceService.debounce("user-profile-vector:" + userId,
                 () -> userProfileService.rebuildUserProfileVector(userId),
                 debounceDelay);
     }

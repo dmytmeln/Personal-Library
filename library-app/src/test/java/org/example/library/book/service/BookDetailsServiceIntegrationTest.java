@@ -130,7 +130,6 @@ class BookDetailsServiceIntegrationTest extends BaseIntegrationTest {
                 .hasMessage("error.book.not_found");
     }
 
-
     private User saveUser(String email) {
         var user = User.builder()
                 .email(email)

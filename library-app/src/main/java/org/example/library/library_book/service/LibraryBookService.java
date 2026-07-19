@@ -16,7 +16,12 @@ import org.example.library.common.pagination.SortableFields;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.domain.LibraryBookView;
-import org.example.library.library_book.dto.*;
+import org.example.library.library_book.dto.CreateLocalBookDto;
+import org.example.library.library_book.dto.LibraryBookDto;
+import org.example.library.library_book.dto.LibraryBookSearchCriteria;
+import org.example.library.library_book.dto.LocationDto;
+import org.example.library.library_book.dto.UpdateLibraryBookDetailsDto;
+import org.example.library.library_book.dto.UpdateLocalBookDto;
 import org.example.library.library_book.mapper.LibraryBookMapper;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.library_book.repository.LibraryBookViewRepository;
@@ -42,7 +47,6 @@ public class LibraryBookService {
     private static final int RATING_LOWER_BOUND = 0;
     private static final int RATING_UPPER_BOUND = 5;
 
-
     private final LibraryBookRepository repository;
     private final LibraryBookViewRepository viewRepository;
     private final UserRepository userRepository;
@@ -53,7 +57,6 @@ public class LibraryBookService {
     private final PageRequestBuilder pageRequestBuilder;
     private final ApplicationEventPublisher eventPublisher;
     private final EmbeddingModelAdapter embeddingModelAdapter;
-
 
     @Transactional(readOnly = true)
     public Page<LibraryBookDto> getAllByUserId(Integer userId, LibraryBookSearchCriteria criteria, PaginationParams paginationParams) {
@@ -104,14 +107,16 @@ public class LibraryBookService {
 
     @Transactional
     public void create(Integer bookId, Integer userId) {
-        if (repository.existsByBookIdAndUserId(bookId, userId))
+        if (repository.existsByBookIdAndUserId(bookId, userId)) {
             throw new BadRequestException("error.library_book.already_added");
+        }
 
         var book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new NotFoundException("error.book.not_found"));
 
-        if (book.getOwner() != null && !book.getOwner().getId().equals(userId))
+        if (book.getOwner() != null && !book.getOwner().getId().equals(userId)) {
             throw new BadRequestException("error.library_book.access_denied");
+        }
 
         repository.save(LibraryBook.of(book, userRepository.getReferenceById(userId)));
 
@@ -131,16 +136,21 @@ public class LibraryBookService {
                 .filter(id -> !existingIds.contains(id))
                 .distinct()
                 .toList();
-        if (newBookIds.isEmpty()) return;
+        if (newBookIds.isEmpty()) {
+            return;
+        }
 
         var books = bookRepository.findAllById(newBookIds);
-        if (books.isEmpty())
+        if (books.isEmpty()) {
             throw new NotFoundException("error.book.none_found");
+        }
 
         var accessibleBooks = books.stream()
                 .filter(b -> b.getOwner() == null || b.getOwner().getId().equals(userId))
                 .toList();
-        if (accessibleBooks.isEmpty()) return;
+        if (accessibleBooks.isEmpty()) {
+            return;
+        }
 
         var libraryBooks = accessibleBooks.stream()
                 .map(book -> LibraryBook.of(book, userRepository.getReferenceById(userId)))
@@ -156,17 +166,20 @@ public class LibraryBookService {
             eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
         }
 
-        log.info("[LIBRARY_BOOK_BULK_ADD] User ID: {}, Accessible Book IDs: {}", userId, accessibleBooks.stream().map(Book::getId).toList());
+        log.info("[LIBRARY_BOOK_BULK_ADD] User ID: {}, Accessible Book IDs: {}", userId,
+                accessibleBooks.stream().map(Book::getId).toList());
     }
 
     @Transactional
     public LibraryBookDto rate(Integer libraryBookId, Integer userId, Integer rating) {
-        if (rating < RATING_LOWER_BOUND || rating > RATING_UPPER_BOUND)
+        if (rating < RATING_LOWER_BOUND || rating > RATING_UPPER_BOUND) {
             throw new BadRequestException("error.library_book.invalid_rating");
+        }
 
         int updatedCount = repository.updateRating(libraryBookId, userId, rating.byteValue());
-        if (updatedCount == 0)
+        if (updatedCount == 0) {
             throw new NotFoundException("error.library_book.not_found");
+        }
 
         repository.flush();
         eventPublisher.publishEvent(new UserProfileUpdatedEvent(userId));
@@ -194,7 +207,9 @@ public class LibraryBookService {
     @Transactional
     public void bulkUpdateStatus(List<Integer> libraryBookIds, Integer userId, LibraryBookStatus status) {
         var libraryBooks = repository.findAllByIdInAndUserId(libraryBookIds, userId);
-        if (libraryBooks.isEmpty()) return;
+        if (libraryBooks.isEmpty()) {
+            return;
+        }
 
         libraryBooks.forEach(lb -> updateBookStatus(lb, status));
         repository.saveAll(libraryBooks);
@@ -210,8 +225,9 @@ public class LibraryBookService {
 
         var book = libraryBook.getBook();
 
-        if (book.getOwner() == null || !book.getOwner().getId().equals(userId))
+        if (book.getOwner() == null || !book.getOwner().getId().equals(userId)) {
             throw new BadRequestException("error.library_book.access_denied");
+        }
 
         book.setPublishYear(dto.getPublishYear());
         book.setPages(dto.getPages());
@@ -267,8 +283,9 @@ public class LibraryBookService {
     @Transactional
     public LibraryBookDto resetDetails(Integer libraryBookId, Integer userId) {
         int updatedCount = repository.resetOverriddenFields(libraryBookId, userId);
-        if (updatedCount == 0)
+        if (updatedCount == 0) {
             throw new NotFoundException("error.library_book.not_found");
+        }
 
         repository.flush();
         var updatedView = getViewById(libraryBookId);
@@ -293,7 +310,9 @@ public class LibraryBookService {
     @Transactional
     public void bulkDelete(List<Integer> libraryBookIds, Integer userId) {
         var libraryBooks = repository.findAllByIdInAndUserIdWithBook(libraryBookIds, userId);
-        if (libraryBooks.isEmpty()) return;
+        if (libraryBooks.isEmpty()) {
+            return;
+        }
 
         var globalBookIds = libraryBooks.stream()
                 .filter(lb -> lb.getBook().getOwner() == null)
@@ -317,8 +336,12 @@ public class LibraryBookService {
 
         float[] queryVector = embeddingModelAdapter.embed(query);
         var lang = LocaleContextHolder.getLocale().getLanguage();
-        int validatedLimit = (limit == null || limit <= 0) ? 10 : Math.min(limit, 50);
-        var statusStr = status != null ? status.name() : null;
+        int validatedLimit = (limit == null || limit <= 0)
+                ? 10
+                : Math.min(limit, 50);
+        var statusStr = status != null
+                ? status.name()
+                : null;
 
         var results = viewRepository.searchByMood(queryVector, lang, userId, statusStr, validatedLimit);
 

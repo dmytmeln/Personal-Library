@@ -35,12 +35,10 @@ class BatchEmbeddingProcessorIntegrationTest extends BaseIntegrationTest {
 
     private Category defaultCategory;
 
-
     @BeforeAll
     static void setUpAll() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @BeforeEach
     void setUp() {
@@ -63,7 +61,6 @@ class BatchEmbeddingProcessorIntegrationTest extends BaseIntegrationTest {
         bookRepository.deleteAll();
         categoryRepository.deleteAll();
     }
-
 
     @Test
     void shouldProcessBatchAndPersistChanges() {

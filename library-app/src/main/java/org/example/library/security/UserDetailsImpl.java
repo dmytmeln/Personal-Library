@@ -43,9 +43,11 @@ public record UserDetailsImpl(User user) implements UserDetails, UserPrincipal {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (user.getRole() == null)
+        if (user.getRole() == null) {
             return Collections.emptyList();
+        }
 
+        // todo
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 

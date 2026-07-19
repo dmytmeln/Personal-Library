@@ -11,9 +11,9 @@ import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
 import org.example.library.collection_book.repository.CollectionBookRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
+import org.example.library.config.BaseIntegrationTest;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.domain.User;
@@ -53,12 +53,10 @@ class CollectionServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private CollectionService service;
 
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @Test
     void shouldReturnAllCollectionsForUser() {
@@ -284,7 +282,6 @@ class CollectionServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(collectionBookRepository.existsById(new CollectionBookId(source.getId(), libraryBook.getId()))).isFalse();
         assertThat(collectionBookRepository.existsById(new CollectionBookId(target.getId(), libraryBook.getId()))).isTrue();
     }
-
 
     private User saveUser() {
         var user = User.builder()

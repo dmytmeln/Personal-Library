@@ -12,8 +12,8 @@ import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
-import org.example.library.config.BaseIntegrationTest;
 import org.example.library.common.pagination.PaginationParams;
+import org.example.library.config.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,6 @@ class BookServiceIntegrationTest extends BaseIntegrationTest {
 
     private Category defaultCategory;
 
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
@@ -58,7 +57,6 @@ class BookServiceIntegrationTest extends BaseIntegrationTest {
     void init() {
         defaultCategory = saveCategory("Default Category");
     }
-
 
     @Test
     void shouldGetAllBooks() {
@@ -204,7 +202,6 @@ class BookServiceIntegrationTest extends BaseIntegrationTest {
         assertThat(languages).filteredOn(l -> l.getLanguage().equals("English"))
                 .extracting("count").containsExactly(2L);
     }
-
 
     private Category saveCategory(String name) {
         var translation = CategoryTranslation.builder()

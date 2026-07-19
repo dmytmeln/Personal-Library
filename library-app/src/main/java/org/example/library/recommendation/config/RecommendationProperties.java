@@ -18,5 +18,5 @@ public class RecommendationProperties {
     private float rating3Weight = 0.4f;
     private float lowRatingWeight = -0.5f;
     private float noRatingWeight = 0.5f;
-    
+
 }

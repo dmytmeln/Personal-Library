@@ -1,6 +1,10 @@
 package org.example.library.book.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Map;
 
@@ -10,6 +14,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class BookDto {
+
     private Integer id;
     private String title;
     private Integer categoryId;
@@ -22,4 +27,5 @@ public class BookDto {
     private Map<Integer, String> authors;
     private String customAuthorName;
     private Integer ownerId;
+
 }

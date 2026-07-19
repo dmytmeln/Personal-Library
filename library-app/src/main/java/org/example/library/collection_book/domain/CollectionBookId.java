@@ -16,17 +16,19 @@ public class CollectionBookId {
     private final Integer collectionId;
     private final Integer libraryBookId;
 
-
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CollectionBookId collectionBookId)) return false;
-        return Objects.equals(collectionId, collectionBookId.getCollectionId())
-                && Objects.equals(libraryBookId, collectionBookId.getLibraryBookId());
+        if (!(o instanceof CollectionBookId collectionBookId)) {
+            return false;
+        }
+
+        return Objects.equals(this.collectionId, collectionBookId.getCollectionId())
+                && Objects.equals(this.libraryBookId, collectionBookId.getLibraryBookId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(collectionId, libraryBookId);
+        return Objects.hash(this.collectionId, this.libraryBookId);
     }
 
 }

@@ -21,11 +21,19 @@ public interface CollectionBookRepository extends JpaRepository<CollectionBook, 
     void deleteAllByLibraryBookIdInAndUserId(List<Integer> libraryBookIds, Integer userId);
 
     @Modifying
-    @Query("DELETE FROM CollectionBook cb WHERE cb.id.collectionId = :collectionId AND cb.id.libraryBookId IN :libraryBookIds AND cb.collection.user.id = :userId")
+    @Query("""
+            DELETE FROM CollectionBook cb
+            WHERE cb.id.collectionId = :collectionId AND cb.id.libraryBookId IN :libraryBookIds
+              AND cb.collection.user.id = :userId
+            """)
     int deleteAllByCollectionIdAndLibraryBookIdInAndUserId(Integer collectionId, List<Integer> libraryBookIds, Integer userId);
 
     @Modifying
-    @Query("DELETE FROM CollectionBook cb WHERE cb.id.collectionId = :collectionId AND cb.id.libraryBookId = :libraryBookId AND cb.collection.user.id = :userId")
+    @Query("""
+            DELETE FROM CollectionBook cb
+            WHERE cb.id.collectionId = :collectionId AND cb.id.libraryBookId = :libraryBookId
+              AND cb.collection.user.id = :userId
+            """)
     int deleteByIdAndUserId(Integer collectionId, Integer libraryBookId, Integer userId);
 
     @Query("SELECT cb.id.libraryBookId FROM CollectionBook cb WHERE cb.id.collectionId = :collectionId")

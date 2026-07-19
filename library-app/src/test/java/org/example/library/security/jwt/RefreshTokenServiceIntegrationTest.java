@@ -28,7 +28,6 @@ class RefreshTokenServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private RefreshTokenService service;
 
-
     @AfterEach
     void tearDown() {
         refreshTokenRepository.deleteAllInBatch();
@@ -126,8 +125,8 @@ class RefreshTokenServiceIntegrationTest extends BaseIntegrationTest {
     void shouldThrowSecurityExceptionAndRevokeAllWhenTokenReused() {
         var user = saveUser();
         var initialResponse = service.generateNewTokens(user);
-        var secondTokenResponse = service.generateNewTokens(user);
-        
+        service.generateNewTokens(user);
+
         var token = refreshTokenRepository.findById(initialResponse.refreshTokenId())
                 .orElseThrow(() -> new AssertionError("Refresh token not found"));
         token.setRevoked(true);

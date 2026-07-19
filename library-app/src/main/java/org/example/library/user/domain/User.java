@@ -1,13 +1,28 @@
 package org.example.library.user.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.library.auth.domain.RefreshToken;
 import org.example.library.auth.domain.RefreshToken_;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.GenerationType.SEQUENCE;
+import static org.example.library.user.domain.Role.USER;
 
 @Entity
 @Table(name = "users")
@@ -19,7 +34,7 @@ import java.util.Objects;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "users_seq")
     @SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 20)
     @Column(name = "user_id")
     private Integer id;
@@ -33,10 +48,10 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     @Column(name = "role", nullable = false)
     @Builder.Default
-    private Role role = Role.USER;
+    private Role role = USER;
 
     @OneToMany(mappedBy = RefreshToken_.USER)
     @Builder.Default
@@ -44,13 +59,16 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof User user)) return false;
-        return Objects.equals(id, user.getId());
+        if (!(o instanceof User user)) {
+            return false;
+        }
+
+        return Objects.equals(this.id, user.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
 }

@@ -26,8 +26,9 @@ public interface AuthorMapper {
     default String getLocalizedFullName(Author author) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = author.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for author: " + author.getId());
+        }
 
         return translation.getFullName();
     }
@@ -36,8 +37,9 @@ public interface AuthorMapper {
     default String getLocalizedCountry(Author author) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = author.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for author: " + author.getId());
+        }
 
         return translation.getCountry();
     }
@@ -46,8 +48,9 @@ public interface AuthorMapper {
     default String getLocalizedBiography(Author author) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = author.getTranslations().get(lang);
-        if (translation == null)
+        if (translation == null) {
             throw new IllegalStateException("Translation not found for author: " + author.getId());
+        }
 
         return translation.getBiography();
     }

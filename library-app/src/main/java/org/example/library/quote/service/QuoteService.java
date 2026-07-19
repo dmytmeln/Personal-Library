@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.library_book.repository.LibraryBookRepository;
-import org.example.library.quote.domain.Quote;
 import org.example.library.quote.dto.QuoteDto;
 import org.example.library.quote.dto.QuoteRequest;
 import org.example.library.quote.mapper.QuoteMapper;

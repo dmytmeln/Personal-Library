@@ -28,8 +28,9 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasUserId(Integer userId) {
         return (root, query, cb) -> {
-            if (userId == null)
+            if (userId == null) {
                 return null;
+            }
 
             return cb.equal(root.get(LibraryBookView_.USER_ID), userId);
         };
@@ -37,33 +38,33 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasLanguageCode(String lang) {
         return (root, query, cb) -> {
-            if (lang == null)
+            if (lang == null) {
                 return null;
+            }
 
-            return cb.or(
-                    cb.equal(root.get(LibraryBookView_.LANGUAGE_CODE), lang),
-                    cb.isNull(root.get(LibraryBookView_.LANGUAGE_CODE))
-            );
+            return cb.or(cb.equal(root.get(LibraryBookView_.LANGUAGE_CODE), lang),
+                    cb.isNull(root.get(LibraryBookView_.LANGUAGE_CODE)));
         };
     }
 
     public static Specification<LibraryBookView> hasTitleLike(String title) {
         return (root, query, cb) -> {
-            if (title == null || title.isBlank())
+            if (title == null || title.isBlank()) {
                 return null;
+            }
 
             var lowerTitle = title.toLowerCase();
-            return cb.or(
-                    cb.like(cb.lower(root.get(LibraryBookView_.TITLE)), "%" + lowerTitle + "%"),
-                    cb.greaterThan(cb.function("similarity", Double.class, root.get(LibraryBookView_.TITLE), cb.literal(title)), 0.3)
-            );
+            // todo constants
+            return cb.or(cb.like(cb.lower(root.get(LibraryBookView_.TITLE)), "%" + lowerTitle + "%"),
+                    cb.greaterThan(cb.function("similarity", Double.class, root.get(LibraryBookView_.TITLE), cb.literal(title)), 0.3));
         };
     }
 
     public static Specification<LibraryBookView> hasLocationLike(String location) {
         return (root, query, cb) -> {
-            if (location == null || location.isBlank())
+            if (location == null || location.isBlank()) {
                 return null;
+            }
 
             var lowerLocation = location.toLowerCase();
             return cb.like(cb.lower(root.get(LibraryBookView_.LOCATION)), "%" + lowerLocation + "%");
@@ -72,8 +73,9 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasStatus(LibraryBookStatus status) {
         return (root, query, cb) -> {
-            if (status == null)
+            if (status == null) {
                 return null;
+            }
 
             return cb.equal(root.get(LibraryBookView_.STATUS), status);
         };
@@ -81,8 +83,9 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasAuthorId(Integer authorId) {
         return (root, query, cb) -> {
-            if (authorId == null)
+            if (authorId == null) {
                 return null;
+            }
 
             return cb.equal(root.join(LibraryBookView_.AUTHORS, JoinType.INNER).get(Author_.ID), authorId);
         };
@@ -90,8 +93,9 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasCategoryId(Integer categoryId) {
         return (root, query, cb) -> {
-            if (categoryId == null)
+            if (categoryId == null) {
                 return null;
+            }
 
             return cb.equal(root.get(LibraryBookView_.CATEGORY_ID), categoryId);
         };
@@ -99,14 +103,17 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasPublishYearBetween(Short min, Short max) {
         return (root, query, cb) -> {
-            if (min == null && max == null)
+            if (min == null && max == null) {
                 return null;
+            }
 
-            if (min != null && max != null)
+            if (min != null && max != null) {
                 return cb.between(root.get(LibraryBookView_.PUBLISH_YEAR), min, max);
+            }
 
-            if (min != null)
+            if (min != null) {
                 return cb.greaterThanOrEqualTo(root.get(LibraryBookView_.PUBLISH_YEAR), min);
+            }
 
             return cb.lessThanOrEqualTo(root.get(LibraryBookView_.PUBLISH_YEAR), max);
         };
@@ -114,14 +121,17 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasPagesBetween(Short min, Short max) {
         return (root, query, cb) -> {
-            if (min == null && max == null)
+            if (min == null && max == null) {
                 return null;
+            }
 
-            if (min != null && max != null)
+            if (min != null && max != null) {
                 return cb.between(root.get(LibraryBookView_.PAGES), min, max);
+            }
 
-            if (min != null)
+            if (min != null) {
                 return cb.greaterThanOrEqualTo(root.get(LibraryBookView_.PAGES), min);
+            }
 
             return cb.lessThanOrEqualTo(root.get(LibraryBookView_.PAGES), max);
         };
@@ -129,14 +139,17 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasRatingBetween(Byte min, Byte max) {
         return (root, query, cb) -> {
-            if (min == null && max == null)
+            if (min == null && max == null) {
                 return null;
+            }
 
-            if (min != null && max != null)
+            if (min != null && max != null) {
                 return cb.between(root.get(LibraryBookView_.RATING), min, max);
+            }
 
-            if (min != null)
+            if (min != null) {
                 return cb.greaterThanOrEqualTo(root.get(LibraryBookView_.RATING), min);
+            }
 
             return cb.lessThanOrEqualTo(root.get(LibraryBookView_.RATING), max);
         };
@@ -144,8 +157,9 @@ public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> hasLanguageIn(List<String> languages) {
         return (root, query, cb) -> {
-            if (languages == null || languages.isEmpty())
+            if (languages == null || languages.isEmpty()) {
                 return null;
+            }
 
             return root.get(LibraryBookView_.BOOK_LANGUAGE).in(languages);
         };

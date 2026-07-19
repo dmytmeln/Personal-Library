@@ -13,7 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 @Slf4j
 public class ControllerLoggingAspect {
-
+    // todo refactor to filter
     @Around("@within(org.springframework.web.bind.annotation.RestController)")
     public Object logControllerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         var signature = joinPoint.getSignature();
@@ -54,10 +54,13 @@ public class ControllerLoggingAspect {
         if (request == null) {
             return "no request";
         }
+
         var method = request.getMethod();
         var uri = request.getRequestURI();
         var queryString = request.getQueryString();
-        return queryString != null ? method + " " + uri + "?" + queryString : method + " " + uri;
+        return queryString != null
+                ? method + " " + uri + "?" + queryString
+                : method + " " + uri;
     }
 
 }

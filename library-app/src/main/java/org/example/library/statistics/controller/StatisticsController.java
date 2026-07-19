@@ -1,7 +1,6 @@
 package org.example.library.statistics.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.library.security.UserDetailsImpl;
 import org.example.library.security.UserPrincipal;
 import org.example.library.statistics.dto.DashboardStatsDto;
 import org.example.library.statistics.service.StatisticsService;
@@ -18,12 +17,9 @@ public class StatisticsController {
 
     private final StatisticsService service;
 
-
     @GetMapping("/dashboard")
-    public DashboardStatsDto getDashboardStats(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam Integer year
-    ) {
+    public DashboardStatsDto getDashboardStats(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               @RequestParam Integer year) {
         return service.getDashboardStats(userPrincipal.getId(), year);
     }
 

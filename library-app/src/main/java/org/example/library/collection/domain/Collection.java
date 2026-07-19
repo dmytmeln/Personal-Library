@@ -1,18 +1,34 @@
 package org.example.library.collection.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.user.domain.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.SEQUENCE;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
 @Table(name = "collections")
@@ -24,7 +40,7 @@ import java.util.Objects;
 public class Collection {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "collections_seq")
+    @GeneratedValue(strategy = SEQUENCE, generator = "collections_seq")
     @SequenceGenerator(name = "collections_seq", sequenceName = "collections_seq", allocationSize = 20)
     @Column(name = "collection_id")
     private Integer id;
@@ -43,16 +59,16 @@ public class Collection {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = CASCADE)
     private Collection parent;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "collection", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "collection", cascade = PERSIST, orphanRemoval = true)
     @Builder.Default
     private List<CollectionBook> collectionBooks = new ArrayList<>();
 
@@ -61,24 +77,27 @@ public class Collection {
     private List<Collection> children = new ArrayList<>();
 
     public void addChildrenCollection(Collection subCollection) {
-        children.add(subCollection);
+        this.children.add(subCollection);
         subCollection.setParent(this);
     }
 
     public void removeChildrenCollection(Collection subCollection) {
-        children.remove(subCollection);
+        this.children.remove(subCollection);
         subCollection.setParent(null);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Collection collection)) return false;
-        return Objects.equals(id, collection.getId());
+        if (!(o instanceof Collection collection)) {
+            return false;
+        }
+
+        return Objects.equals(this.id, collection.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
 }

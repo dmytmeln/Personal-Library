@@ -19,7 +19,9 @@ public class LibraryBookDetails extends BookDetails {
         this.collections = collections;
     }
 
-    public static LibraryBookDetails from(LibraryBookDto libraryBook, BookRatingSummary ratingSummary, List<BasicCollectionDto> collections) {
+    public static LibraryBookDetails from(LibraryBookDto libraryBook,
+                                          BookRatingSummary ratingSummary,
+                                          List<BasicCollectionDto> collections) {
         return new LibraryBookDetails(libraryBook, ratingSummary.getAverageRating(), ratingSummary.getRatingsCount(), collections);
     }
 

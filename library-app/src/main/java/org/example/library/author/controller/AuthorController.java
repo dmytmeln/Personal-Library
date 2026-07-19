@@ -23,10 +23,8 @@ public class AuthorController {
     private final AuthorService service;
 
     @GetMapping
-    public Page<AuthorWithBooksCount> getAll(
-            PaginationParams paginationParams,
-            AuthorSearchParams searchParams
-    ) {
+    public Page<AuthorWithBooksCount> getAll(PaginationParams paginationParams,
+                                             AuthorSearchParams searchParams) {
         return service.search(paginationParams, searchParams);
     }
 

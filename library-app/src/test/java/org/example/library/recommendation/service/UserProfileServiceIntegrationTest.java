@@ -63,12 +63,10 @@ class UserProfileServiceIntegrationTest extends BaseIntegrationTest {
     private User testUser;
     private Category defaultCategory;
 
-
     @BeforeAll
     static void setUpAll() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
-
 
     @BeforeEach
     void setUp() {

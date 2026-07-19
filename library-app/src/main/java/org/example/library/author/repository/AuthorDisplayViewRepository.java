@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AuthorDisplayViewRepository extends JpaRepository<AuthorDisplayView, Integer>, JpaSpecificationExecutor<AuthorDisplayView> {
+public interface AuthorDisplayViewRepository extends JpaRepository<AuthorDisplayView, Integer>,
+                                             JpaSpecificationExecutor<AuthorDisplayView> {
 
     Optional<AuthorDisplayView> findByIdAndLanguageCode(Integer id, String languageCode);
 

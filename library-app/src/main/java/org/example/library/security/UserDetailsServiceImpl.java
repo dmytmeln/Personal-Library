@@ -13,11 +13,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository repository;
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = repository.findUserByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("error.user.not_found"));
+
         return new UserDetailsImpl(user);
     }
 

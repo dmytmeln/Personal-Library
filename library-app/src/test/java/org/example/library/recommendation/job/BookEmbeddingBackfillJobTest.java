@@ -21,7 +21,6 @@ class BookEmbeddingBackfillJobTest {
 
     private BookEmbeddingBackfillJob job;
 
-
     @BeforeEach
     void setUp() {
         job = new BookEmbeddingBackfillJob(rebuildService, self);

@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CategoryDisplayViewRepository extends JpaRepository<CategoryDisplayView, Integer>, JpaSpecificationExecutor<CategoryDisplayView> {
+public interface CategoryDisplayViewRepository extends JpaRepository<CategoryDisplayView, Integer>,
+                                               JpaSpecificationExecutor<CategoryDisplayView> {
 
     Optional<CategoryDisplayView> findByIdAndLanguageCode(Integer id, String languageCode);
 

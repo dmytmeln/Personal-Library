@@ -39,12 +39,16 @@ public interface LibraryBookMapper {
 
     @Named("getLocalizedCategoryNameFromView")
     default String getLocalizedCategoryNameFromView(LibraryBookView view) {
-        if (view.getCategoryName() != null && !view.getCategoryName().isBlank())
+        if (view.getCategoryName() != null && !view.getCategoryName().isBlank()) {
             return view.getCategoryName();
+        }
 
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var translation = view.getCategory().getTranslations().get(lang);
-        return translation != null ? translation.getName() : null;
+
+        return translation != null
+                ? translation.getName()
+                : null;
     }
 
     @Mapping(target = "id", ignore = true)
@@ -61,15 +65,17 @@ public interface LibraryBookMapper {
 
     @Named("authorsToMap")
     default Map<Integer, String> authorsToMap(Collection<Author> authors) {
-        if (authors == null)
+        if (authors == null) {
             return null;
+        }
 
         var lang = LocaleContextHolder.getLocale().getLanguage();
         return authors.stream()
                 .collect(toMap(Author::getId, a -> {
                     var translation = a.getTranslations().get(lang);
-                    if (translation == null)
+                    if (translation == null) {
                         throw new IllegalStateException("Translation not found for author: " + a.getId());
+                    }
 
                     return translation.getFullName();
                 }));

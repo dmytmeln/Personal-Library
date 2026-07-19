@@ -31,7 +31,6 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-expiration}")
     private long refreshTokenExpirationMs;
 
-
     public String extractEmail(String refreshToken) {
         var claims = extractAllClaims(refreshToken);
         return claims.getSubject();
@@ -48,11 +47,9 @@ public class JwtService {
     }
 
     public String generateAccessToken(UserPrincipal userPrincipal) {
-        Map<String, Object> extraClaims = Map.of(
-                "id", userPrincipal.getId(),
+        Map<String, Object> extraClaims = Map.of("id", userPrincipal.getId(),
                 "role", userPrincipal.getRole().name(),
-                "fullName", userPrincipal.getFullName()
-        );
+                "fullName", userPrincipal.getFullName());
         return generateToken(extraClaims, userPrincipal.getEmail(), accessTokenExpirationMs);
     }
 
