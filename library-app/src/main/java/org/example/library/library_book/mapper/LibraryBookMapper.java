@@ -16,8 +16,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = SPRING)
 public interface LibraryBookMapper {
 
     @Mapping(target = "book", source = "libraryBookView")

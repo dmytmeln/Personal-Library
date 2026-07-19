@@ -23,7 +23,6 @@ public class FormattingService {
     private final String model;
     private final DefaultLanguage defaultLanguage;
 
-
     public FormattingService(@Value("${application.ai.gemini.api-key}") String apiKey,
                              @Value("${application.ai.gemini.model}") String model,
                              @Value("${application.ai.gemini.temperature}") double temperature,

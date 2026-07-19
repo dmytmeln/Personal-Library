@@ -11,7 +11,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.TargetType;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface NoteMapper {
 
     NoteDto toDto(Note note);

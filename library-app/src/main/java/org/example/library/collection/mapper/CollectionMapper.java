@@ -13,7 +13,9 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface CollectionMapper {
 
     @Mapping(target = "parentId", source = "parent.id")

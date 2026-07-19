@@ -8,7 +8,9 @@ import org.example.library.user.dto.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)

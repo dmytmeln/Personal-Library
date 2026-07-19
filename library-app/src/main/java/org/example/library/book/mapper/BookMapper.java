@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
-// todo refactor all mappers to use constant
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = SPRING)
 public interface BookMapper {
 
     List<BookDto> toDto(List<Book> books);

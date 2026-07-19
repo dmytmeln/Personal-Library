@@ -8,7 +8,9 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {LibraryBookMapper.class})
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING, uses = {LibraryBookMapper.class})
 public interface CollectionBookMapper {
 
     @Mapping(target = "libraryBook", source = "libraryBookView")

@@ -10,7 +10,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface AuthorMapper {
 
     @Mapping(target = "fullName", source = "author", qualifiedByName = "getLocalizedFullName")
