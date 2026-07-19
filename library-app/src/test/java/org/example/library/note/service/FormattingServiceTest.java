@@ -4,6 +4,7 @@ import org.example.library.author.domain.Author;
 import org.example.library.author.domain.AuthorTranslation;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookTranslation;
+import org.example.library.common.localization.DefaultLanguage;
 import org.example.library.library_book.domain.LibraryBook;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,8 @@ class FormattingServiceTest {
         }
         var service = new FormattingService(apiKey,
                 "gemini-2.5-flash",
-                0.7);
+                0.7,
+                new DefaultLanguage("en"));
         var author = Author.builder()
                 .translations(Map.of("en", AuthorTranslation.builder()
                         .languageCode("en")

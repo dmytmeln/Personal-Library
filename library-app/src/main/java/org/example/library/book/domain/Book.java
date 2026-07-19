@@ -108,11 +108,10 @@ public class Book {
         return Objects.hash(this.id);
     }
 
-    public BookTranslation getDefaultTranslation() {
+    public BookTranslation getTranslation(String languageCode) {
         Objects.requireNonNull(this.translations, "Book translations must not be null");
 
-        // todo
-        return this.translations.get("en");
+        return this.translations.get(languageCode);
     }
 
 }

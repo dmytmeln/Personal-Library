@@ -3,10 +3,10 @@ package org.example.library.note.service;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.example.library.author.domain.Author;
 import org.example.library.author.domain.AuthorTranslation;
 import org.example.library.book.domain.Book;
 import org.example.library.common.exception.FormattingException;
+import org.example.library.common.localization.DefaultLanguage;
 import org.example.library.library_book.domain.LibraryBook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,21 +21,25 @@ public class FormattingService {
     private final GoogleAiGeminiChatModel chatModel;
     @Getter
     private final String model;
+    private final DefaultLanguage defaultLanguage;
+
 
     public FormattingService(@Value("${application.ai.gemini.api-key}") String apiKey,
                              @Value("${application.ai.gemini.model}") String model,
-                             @Value("${application.ai.gemini.temperature}") double temperature) {
+                             @Value("${application.ai.gemini.temperature}") double temperature,
+                             DefaultLanguage defaultLanguage) {
         this.chatModel = GoogleAiGeminiChatModel.builder()
                 .apiKey(apiKey)
                 .modelName(model)
                 .temperature(temperature)
                 .build();
         this.model = model;
+        this.defaultLanguage = defaultLanguage;
     }
 
     public String formatTranscript(String rawTranscript, LibraryBook libraryBook) {
         var book = libraryBook.getBook();
-        var translation = book.getDefaultTranslation();
+        var translation = book.getTranslation(defaultLanguage.code());
 
         var title = Optional.ofNullable(libraryBook.getTitle())
                 .orElse(translation.getTitle());
@@ -87,7 +91,7 @@ public class FormattingService {
 
     private String getBookAuthorNames(Book book) {
         return book.getAuthors().stream()
-                .map(Author::getDefaultTranslation)
+                .map(author -> author.getTranslation(defaultLanguage.code()))
                 .map(AuthorTranslation::getFullName)
                 // todo constant
                 .collect(Collectors.joining(", "));

@@ -73,13 +73,12 @@ public class Author {
         return Objects.hash(this.id);
     }
 
-    public AuthorTranslation getDefaultTranslation() {
+    public AuthorTranslation getTranslation(String languageCode) {
         if (this.translations == null) {
             throw new NullPointerException("Author translations must not be null");
         }
 
-        // todo
-        return this.translations.get("en");
+        return this.translations.get(languageCode);
     }
 
 }

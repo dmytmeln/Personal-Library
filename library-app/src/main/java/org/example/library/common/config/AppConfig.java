@@ -1,7 +1,9 @@
 package org.example.library.common.config;
 
+import org.example.library.common.localization.DefaultLanguage;
 import org.example.library.common.pagination.PaginationProperties;
 import org.example.library.security.jwt.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +22,13 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import java.util.List;
 import java.util.Locale;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 @Configuration
 @EnableConfigurationProperties(value = PaginationProperties.class)
 public class AppConfig {
+
+    private static final String MESSAGE_BASENAME = "messages";
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService) {
@@ -49,9 +55,14 @@ public class AppConfig {
     }
 
     @Bean
-    public LocaleResolver localeResolver() {
+    public DefaultLanguage defaultLanguage(@Value("${application.localization.default-language:en}") String code) {
+        return new DefaultLanguage(code);
+    }
+
+    @Bean
+    public LocaleResolver localeResolver(DefaultLanguage defaultLanguage) {
         var slr = new AcceptHeaderLocaleResolver();
-        slr.setDefaultLocale(Locale.ENGLISH);
+        slr.setDefaultLocale(Locale.forLanguageTag(defaultLanguage.code()));
 
         return slr;
     }
@@ -59,8 +70,8 @@ public class AppConfig {
     @Bean
     public MessageSource messageSource() {
         var messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("messages");
-        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setBasename(MESSAGE_BASENAME);
+        messageSource.setDefaultEncoding(UTF_8.name());
         messageSource.setFallbackToSystemLocale(false);
 
         return messageSource;

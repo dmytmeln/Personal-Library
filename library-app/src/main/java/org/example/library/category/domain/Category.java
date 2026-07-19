@@ -65,12 +65,12 @@ public class Category {
         return Objects.hash(this.id);
     }
 
-    public CategoryTranslation getDefaultTranslation() {
+    public CategoryTranslation getTranslation(String languageCode) {
         if (this.translations == null) {
             throw new NullPointerException("Category translations must not be null");
         }
 
-        return this.translations.get("en");
+        return this.translations.get(languageCode);
     }
 
 }
