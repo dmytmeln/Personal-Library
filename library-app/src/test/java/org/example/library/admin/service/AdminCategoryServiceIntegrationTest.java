@@ -13,7 +13,11 @@ import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
-import org.example.library.config.BaseIntegrationTest;
+import org.example.library.config.PostgresTestContainer;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +30,10 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest
+@ActiveProfiles("test")
 @Transactional
-class AdminCategoryServiceIntegrationTest extends BaseIntegrationTest {
+class AdminCategoryServiceIntegrationTest {
 
     @PersistenceContext
     private EntityManager em;
@@ -40,6 +46,11 @@ class AdminCategoryServiceIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private AdminCategoryService categoryService;
+
+    @DynamicPropertySource
+    static void setPostgresProperties(DynamicPropertyRegistry registry) {
+        PostgresTestContainer.setProperties(registry);
+    }
 
     @Test
     void shouldReturnCategoryWhenGetById() {
