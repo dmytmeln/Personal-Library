@@ -29,10 +29,6 @@ databaseChangeLog:
                   type: integer
                   constraints:
                     nullable: true
-                    foreignKeyName: collections_parent_fk
-                    referencedTableName: collections
-                    referencedColumnNames: collection_id
-                    onDelete: CASCADE
               - column:
                   name: name
                   type: varchar(100)
@@ -55,3 +51,11 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: collections
+            baseColumnNames: parent_id
+            constraintName: collections_parent_fk
+            referencedTableName: collections
+            referencedColumnNames: collection_id
+            onDelete: CASCADE
+

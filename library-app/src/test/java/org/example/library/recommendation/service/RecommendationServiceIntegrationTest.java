@@ -178,8 +178,8 @@ class RecommendationServiceIntegrationTest {
         var popularBooks = recommendationService.getPopularBooks(testUser.getId(), 5);
 
         assertThat(popularBooks).hasSize(2);
-        assertThat(popularBooks.get(0).getTitle()).isEqualTo("Popular Book 1"); // 2 adds
-        assertThat(popularBooks.get(1).getTitle()).isEqualTo("Popular Book 2"); // 1 add
+        assertThat(popularBooks.get(0).getTitle()).as("2 adds").isEqualTo("Popular Book 1");
+        assertThat(popularBooks.get(1).getTitle()).as("1 add").isEqualTo("Popular Book 2");
     }
 
     @Test

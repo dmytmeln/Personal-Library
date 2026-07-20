@@ -196,7 +196,7 @@ class LibraryBookServiceIntegrationTest {
         var book1 = saveBook("Book 1");
         var book2 = saveBook("Book 2");
         var book3 = saveBook("Book 3");
-        saveLibraryBook(book1, defaultUser); // Already in library
+        saveLibraryBook(book1, defaultUser);
 
         service.bulkAdd(List.of(book1.getId(), book2.getId(), book3.getId()), defaultUser.getId());
 

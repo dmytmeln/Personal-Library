@@ -11,10 +11,6 @@ databaseChangeLog:
                   type: integer
                   constraints:
                     nullable: false
-                    foreignKeyName: collection_books_collections_fk
-                    referencedTableName: collections
-                    referencedColumnNames: collection_id
-                    onDelete: CASCADE
               - column:
                   name: library_book_id
                   type: integer
@@ -32,3 +28,11 @@ databaseChangeLog:
             tableName: collection_books
             columnNames: library_book_id, collection_id
             constraintName: collection_books_pk
+        - addForeignKeyConstraint:
+            baseTableName: collection_books
+            baseColumnNames: collection_id
+            constraintName: collection_books_collections_fk
+            referencedTableName: collections
+            referencedColumnNames: collection_id
+            onDelete: CASCADE
+
