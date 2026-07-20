@@ -4,7 +4,9 @@ import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookTranslation;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
+import org.example.library.common.localization.DefaultLanguage;
 import org.example.library.recommendation.adapter.EmbeddingModelAdapter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,8 +31,16 @@ class EmbeddingServiceTest {
     @Mock
     private EmbeddingModelAdapter embeddingModelAdapter;
 
+    @Mock
+    private DefaultLanguage defaultLanguage;
+
     @InjectMocks
     private EmbeddingService embeddingService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(defaultLanguage.code()).thenReturn("en");
+    }
 
     @Test
     void shouldGenerateEmbeddingSuccessfully() {

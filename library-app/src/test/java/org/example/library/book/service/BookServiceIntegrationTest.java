@@ -14,9 +14,8 @@ import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
 import org.example.library.common.pagination.PaginationParams;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@ContextConfiguration(initializers = PostgresTestContainer.class)
 class BookServiceIntegrationTest {
 
     @PersistenceContext
@@ -53,11 +53,6 @@ class BookServiceIntegrationTest {
     private BookService service;
 
     private Category defaultCategory;
-
-    @DynamicPropertySource
-    static void setPostgresProperties(DynamicPropertyRegistry registry) {
-        PostgresTestContainer.setProperties(registry);
-    }
 
     @BeforeAll
     static void setUp() {

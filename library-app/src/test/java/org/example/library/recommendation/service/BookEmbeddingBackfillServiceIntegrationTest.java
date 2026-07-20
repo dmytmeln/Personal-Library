@@ -8,9 +8,8 @@ import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "recommendations.trigger.count=2",
         "recommendations.rebuild.batch-size=1"
 })
+@ContextConfiguration(initializers = PostgresTestContainer.class)
 class BookEmbeddingBackfillServiceIntegrationTest {
 
     @Autowired
@@ -47,11 +47,6 @@ class BookEmbeddingBackfillServiceIntegrationTest {
     private TransactionTemplate transactionTemplate;
 
     private Category defaultCategory;
-
-    @DynamicPropertySource
-    static void setPostgresProperties(DynamicPropertyRegistry registry) {
-        PostgresTestContainer.setProperties(registry);
-    }
 
     @BeforeAll
     static void setUpAll() {

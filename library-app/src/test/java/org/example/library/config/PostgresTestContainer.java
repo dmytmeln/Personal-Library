@@ -1,9 +1,11 @@
 package org.example.library.config;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-public final class PostgresTestContainer {
+public final class PostgresTestContainer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER;
 
@@ -12,13 +14,14 @@ public final class PostgresTestContainer {
         POSTGRESQL_CONTAINER.start();
     }
 
-    public static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
-    }
-
-    private PostgresTestContainer() {
+    @Override
+    public void initialize(ConfigurableApplicationContext applicationContext) {
+        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
+                applicationContext,
+                "spring.datasource.url=" + POSTGRESQL_CONTAINER.getJdbcUrl(),
+                "spring.datasource.username=" + POSTGRESQL_CONTAINER.getUsername(),
+                "spring.datasource.password=" + POSTGRESQL_CONTAINER.getPassword()
+        );
     }
 
 }

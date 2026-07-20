@@ -4,9 +4,8 @@ import org.example.library.auth.domain.RefreshToken;
 import org.example.library.auth.repository.RefreshTokenRepository;
 import org.example.library.auth.service.RefreshTokenService;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.example.library.user.domain.User;
 import org.example.library.user.repository.UserRepository;
@@ -23,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ContextConfiguration(initializers = PostgresTestContainer.class)
 class RefreshTokenServiceIntegrationTest {
 
     @Autowired
@@ -33,11 +33,6 @@ class RefreshTokenServiceIntegrationTest {
 
     @Autowired
     private RefreshTokenService service;
-
-    @DynamicPropertySource
-    static void setPostgresProperties(DynamicPropertyRegistry registry) {
-        PostgresTestContainer.setProperties(registry);
-    }
 
     @AfterEach
     void tearDown() {

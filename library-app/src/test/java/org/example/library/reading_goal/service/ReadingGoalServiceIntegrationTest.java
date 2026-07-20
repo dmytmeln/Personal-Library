@@ -4,9 +4,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.example.library.reading_goal.domain.ReadingGoal;
 import org.example.library.reading_goal.dto.ReadingGoalDto;
@@ -24,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@ContextConfiguration(initializers = PostgresTestContainer.class)
 class ReadingGoalServiceIntegrationTest {
 
     @PersistenceContext
@@ -37,11 +37,6 @@ class ReadingGoalServiceIntegrationTest {
 
     @Autowired
     private ReadingGoalService service;
-
-    @DynamicPropertySource
-    static void setPostgresProperties(DynamicPropertyRegistry registry) {
-        PostgresTestContainer.setProperties(registry);
-    }
 
     @Test
     void shouldGetGoal() {

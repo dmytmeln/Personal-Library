@@ -14,9 +14,8 @@ import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.repository.LibraryBookRepository;
@@ -36,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@ContextConfiguration(initializers = PostgresTestContainer.class)
 class CollectionServiceIntegrationTest {
 
     @PersistenceContext
@@ -58,11 +58,6 @@ class CollectionServiceIntegrationTest {
 
     @Autowired
     private CollectionService service;
-
-    @DynamicPropertySource
-    static void setPostgresProperties(DynamicPropertyRegistry registry) {
-        PostgresTestContainer.setProperties(registry);
-    }
 
     @BeforeAll
     static void setUp() {

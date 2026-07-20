@@ -8,9 +8,8 @@ import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
@@ -40,6 +39,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(properties = "library.recommendation.profile-rebuild-debounce=PT1S")
+@ContextConfiguration(initializers = PostgresTestContainer.class)
 class UserProfileServiceIntegrationTest {
 
     @Autowired
@@ -68,11 +68,6 @@ class UserProfileServiceIntegrationTest {
 
     private User testUser;
     private Category defaultCategory;
-
-    @DynamicPropertySource
-    static void setPostgresProperties(DynamicPropertyRegistry registry) {
-        PostgresTestContainer.setProperties(registry);
-    }
 
     @BeforeAll
     static void setUpAll() {
