@@ -1,6 +1,8 @@
 package org.example.library.author.repository;
 
 import org.example.library.author.domain.Author;
+import org.example.library.author.domain.AuthorDisplayView;
+import org.example.library.author.dto.AuthorSearchParams;
 import org.example.library.author.dto.AuthorWithBooksCount;
 import org.example.library.author.dto.CountryWithCount;
 import org.springframework.data.domain.Page;
@@ -8,10 +10,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AuthorRepository extends JpaRepository<Author, Integer> {
+
+    @Query("SELECT v FROM AuthorDisplayView v WHERE v.id = :id AND v.languageCode = :languageCode")
+    Optional<AuthorDisplayView> findDisplayViewByIdAndLanguageCode(Integer id, String languageCode);
 
     @Query("""
             SELECT
@@ -25,22 +32,17 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             FROM Author a
             JOIN a.translations tr ON tr.languageCode = :lang
             LEFT JOIN a.books b
-            WHERE (:name IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))
-               OR FUNCTION('similarity', tr.fullName, CAST(:name AS string)) > 0.3))
-              AND (:country IS NULL OR LOWER(tr.country) = LOWER(CAST(:country AS string)))
-              AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
-              AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
+            WHERE (:#{#searchParams.name} IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:#{#searchParams.name} AS string), '%'))
+               OR FUNCTION('similarity', tr.fullName, CAST(:#{#searchParams.name} AS string)) > 0.3))
+              AND (:#{#searchParams.country} IS NULL OR LOWER(tr.country) = LOWER(CAST(:#{#searchParams.country} AS string)))
+              AND (:#{#searchParams.birthYearMin} IS NULL OR a.birthYear >= :#{#searchParams.birthYearMin})
+              AND (:#{#searchParams.birthYearMax} IS NULL OR a.birthYear <= :#{#searchParams.birthYearMax})
             GROUP BY a.id, tr.fullName, tr.country, a.birthYear, a.deathYear
-            HAVING (:booksCountMin IS NULL OR COUNT(b) >= :booksCountMin)
-               AND (:booksCountMax IS NULL OR COUNT(b) <= :booksCountMax)
+            HAVING (:#{#searchParams.booksCountMin} IS NULL OR COUNT(b) >= :#{#searchParams.booksCountMin})
+               AND (:#{#searchParams.booksCountMax} IS NULL OR COUNT(b) <= :#{#searchParams.booksCountMax})
             """)
-    Page<AuthorWithBooksCount> searchWithBooksCount(String name,
-                                                    String country,
-                                                    Short birthYearMin,
-                                                    Short birthYearMax,
-                                                    Integer booksCountMin,
-                                                    Integer booksCountMax,
-                                                    String lang,
+    Page<AuthorWithBooksCount> searchWithBooksCount(@Param("searchParams") AuthorSearchParams searchParams,
+                                                    @Param("lang") String lang,
                                                     Pageable pageable);
 
     @Query("""
@@ -68,23 +70,18 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             JOIN a.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-              AND (:name IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))
-               OR FUNCTION('similarity', tr.fullName, CAST(:name AS string)) > 0.3))
-              AND (:country IS NULL OR LOWER(tr.country) = LOWER(CAST(:country AS string)))
-              AND (:birthYearMin IS NULL OR a.birthYear >= :birthYearMin)
-              AND (:birthYearMax IS NULL OR a.birthYear <= :birthYearMax)
+              AND (:#{#searchParams.name} IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:#{#searchParams.name} AS string), '%'))
+               OR FUNCTION('similarity', tr.fullName, CAST(:#{#searchParams.name} AS string)) > 0.3))
+              AND (:#{#searchParams.country} IS NULL OR LOWER(tr.country) = LOWER(CAST(:#{#searchParams.country} AS string)))
+              AND (:#{#searchParams.birthYearMin} IS NULL OR a.birthYear >= :#{#searchParams.birthYearMin})
+              AND (:#{#searchParams.birthYearMax} IS NULL OR a.birthYear <= :#{#searchParams.birthYearMax})
             GROUP BY a.id, tr.fullName, tr.country, a.birthYear, a.deathYear
-            HAVING (:booksCountMin IS NULL OR COUNT(DISTINCT lb.id) >= :booksCountMin)
-               AND (:booksCountMax IS NULL OR COUNT(DISTINCT lb.id) <= :booksCountMax)
+            HAVING (:#{#searchParams.booksCountMin} IS NULL OR COUNT(DISTINCT lb.id) >= :#{#searchParams.booksCountMin})
+               AND (:#{#searchParams.booksCountMax} IS NULL OR COUNT(DISTINCT lb.id) <= :#{#searchParams.booksCountMax})
             """)
-    Page<AuthorWithBooksCount> searchForUser(Integer userId,
-                                             String name,
-                                             String country,
-                                             Short birthYearMin,
-                                             Short birthYearMax,
-                                             Integer booksCountMin,
-                                             Integer booksCountMax,
-                                             String lang,
+    Page<AuthorWithBooksCount> searchForUser(@Param("userId") Integer userId,
+                                             @Param("searchParams") AuthorSearchParams searchParams,
+                                             @Param("lang") String lang,
                                              Pageable pageable);
 
     @Query("""

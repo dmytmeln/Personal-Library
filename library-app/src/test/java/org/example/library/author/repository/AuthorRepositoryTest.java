@@ -1,7 +1,9 @@
 package org.example.library.author.repository;
 
 import org.example.library.author.domain.Author;
+import org.example.library.author.domain.AuthorDisplayView;
 import org.example.library.author.domain.AuthorTranslation;
+import org.example.library.author.dto.AuthorSearchParams;
 import org.example.library.author.dto.AuthorWithBooksCount;
 import org.example.library.author.dto.CountryWithCount;
 import org.example.library.book.domain.Book;
@@ -68,6 +70,25 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
     }
 
     @Test
+    void findDisplayViewByIdAndLanguageCode_ShouldReturnAuthorDisplayView_WhenAuthorAndTranslationExist() {
+        Author author = createAuthor();
+        testDbClient.saveAuthor(author);
+
+        Optional<AuthorDisplayView> actual = repository.findDisplayViewByIdAndLanguageCode(author.getId(), "en");
+
+        assertThat(actual).isPresent();
+        AuthorDisplayView view = actual.get();
+        assertThat(view.getId()).isEqualTo(author.getId());
+        assertThat(view.getBirthYear()).isEqualTo((short) 1900);
+        assertThat(view.getDeathYear()).isEqualTo((short) 1980);
+        assertThat(view.getPopularityCount()).isZero();
+        assertThat(view.getLanguageCode()).isEqualTo("en");
+        assertThat(view.getFullName()).isEqualTo("John Doe");
+        assertThat(view.getCountry()).isEqualTo("USA");
+        assertThat(view.getBiography()).isEqualTo("Bio info");
+    }
+
+    @Test
     void searchWithBooksCount_ShouldReturnPaginatedAuthorsWithBooksCount() {
         Author author = createAuthor();
         testDbClient.saveAuthor(author);
@@ -75,8 +96,11 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
         testDbClient.saveBook(book);
         testDbClient.linkBookToAuthor(book.getId(), author.getId());
 
+        AuthorSearchParams searchParams = new AuthorSearchParams();
+        searchParams.setName("John");
+
         Page<AuthorWithBooksCount> actual = repository.searchWithBooksCount(
-                "John", null, null, null, null, null, "en", PageRequest.of(0, 10));
+                searchParams, "en", PageRequest.of(0, 10));
 
         assertThat(actual.getContent()).hasSize(1);
         AuthorWithBooksCount dto = actual.getContent().get(0);
@@ -124,9 +148,11 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
                 .build();
         testDbClient.saveLibraryBook(libraryBook);
 
+        AuthorSearchParams searchParams = new AuthorSearchParams();
+        searchParams.setName("John");
+
         Page<AuthorWithBooksCount> actual = repository.searchForUser(user.getId(),
-                "John",
-                null, null, null, null, null,
+                searchParams,
                 "en",
                 PageRequest.of(0, 10));
 

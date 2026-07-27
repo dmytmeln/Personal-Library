@@ -6,7 +6,6 @@ import org.example.library.author.dto.AuthorSearchParams;
 import org.example.library.author.dto.AuthorWithBooksCount;
 import org.example.library.author.dto.CountryWithCount;
 import org.example.library.author.mapper.AuthorMapper;
-import org.example.library.author.repository.AuthorDisplayViewRepository;
 import org.example.library.author.repository.AuthorRepository;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.common.pagination.PageRequestBuilder;
@@ -23,54 +22,41 @@ import java.util.List;
 public class AuthorService {
 
     private final AuthorRepository repository;
-    private final AuthorDisplayViewRepository displayViewRepository;
     private final AuthorMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
     public Page<AuthorWithBooksCount> search(PaginationParams paginationParams, AuthorSearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
-        var lang = LocaleContextHolder.getLocale().getLanguage();
+        var languageCode = getLanguageCode();
 
-        return repository.searchWithBooksCount(searchParams.getName(),
-                searchParams.getCountry(),
-                searchParams.getBirthYearMin(),
-                searchParams.getBirthYearMax(),
-                searchParams.getBooksCountMin(),
-                searchParams.getBooksCountMax(),
-                lang,
-                pageable);
+        return repository.searchWithBooksCount(searchParams, languageCode, pageable);
     }
 
     public AuthorDto getById(Integer authorId) {
-        var lang = LocaleContextHolder.getLocale().getLanguage();
-        return displayViewRepository.findByIdAndLanguageCode(authorId, lang)
+        var languageCode = getLanguageCode();
+        return repository.findDisplayViewByIdAndLanguageCode(authorId, languageCode)
                 .map(mapper::toDto)
                 .orElseThrow(() -> new NotFoundException("error.author.not_found"));
     }
 
     public List<CountryWithCount> getAllCountries() {
-        var lang = LocaleContextHolder.getLocale().getLanguage();
-        return repository.findAllCountriesWithCount(lang);
+        var languageCode = getLanguageCode();
+        return repository.findAllCountriesWithCount(languageCode);
     }
 
     public Page<AuthorWithBooksCount> searchForUser(Integer userId, PaginationParams paginationParams, AuthorSearchParams searchParams) {
         var pageable = pageRequestBuilder.buildPageRequest(paginationParams, SortableFields.AUTHOR_FIELDS);
-        var lang = LocaleContextHolder.getLocale().getLanguage();
-        return repository.searchForUser(
-                userId,
-                searchParams.getName(),
-                searchParams.getCountry(),
-                searchParams.getBirthYearMin(),
-                searchParams.getBirthYearMax(),
-                searchParams.getBooksCountMin(),
-                searchParams.getBooksCountMax(),
-                lang,
-                pageable);
+        var languageCode = getLanguageCode();
+        return repository.searchForUser(userId, searchParams, languageCode, pageable);
     }
 
     public List<CountryWithCount> getCountriesForUser(Integer userId) {
-        var lang = LocaleContextHolder.getLocale().getLanguage();
-        return repository.findAllCountriesForUser(userId, lang);
+        var languageCode = getLanguageCode();
+        return repository.findAllCountriesForUser(userId, languageCode);
+    }
+
+    private String getLanguageCode() {
+        return LocaleContextHolder.getLocale().getLanguage();
     }
 
 }
