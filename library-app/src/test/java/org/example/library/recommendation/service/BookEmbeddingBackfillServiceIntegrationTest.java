@@ -1,22 +1,21 @@
 package org.example.library.recommendation.service;
 
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
 import org.example.library.book.domain.BookTranslation;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -24,6 +23,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.example.library.book.domain.BookStatus.NEW;
+import static org.example.library.book.domain.BookStatus.SYNCED;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -83,7 +84,7 @@ class BookEmbeddingBackfillServiceIntegrationTest {
 
         var books = bookRepository.findAll();
         assertThat(books).hasSize(1);
-        assertThat(books.get(0).getStatus()).isEqualTo(BookStatus.SYNCED);
+        assertThat(books.get(0).getStatus()).isEqualTo(SYNCED);
         assertThat(books.get(0).getEmbedding()).isNotNull();
         assertThat(books.get(0).getEmbedding()).hasSize(384);
     }
@@ -112,7 +113,7 @@ class BookEmbeddingBackfillServiceIntegrationTest {
         var books = bookRepository.findAll();
         assertThat(books).hasSize(3);
         assertThat(books).allMatch(b -> b.getEmbedding() != null);
-        assertThat(books).allMatch(b -> b.getStatus() == BookStatus.SYNCED);
+        assertThat(books).allMatch(b -> b.getStatus() == SYNCED);
     }
 
     @Test
@@ -134,7 +135,7 @@ class BookEmbeddingBackfillServiceIntegrationTest {
                     .findFirst().orElseThrow();
             assertThat(bookWithEmbedding.getEmbedding()).isEqualTo(existingEmbedding);
             assertThat(bookWithoutEmbedding.getEmbedding()).isNotNull();
-            assertThat(bookWithoutEmbedding.getStatus()).isEqualTo(BookStatus.SYNCED);
+            assertThat(bookWithoutEmbedding.getStatus()).isEqualTo(SYNCED);
         });
     }
 
@@ -149,7 +150,7 @@ class BookEmbeddingBackfillServiceIntegrationTest {
                 .pages((short) 100)
                 .coverImageUrl("url")
                 .popularityCount(0)
-                .status(embedding == null ? BookStatus.NEW : BookStatus.SYNCED)
+                .status(embedding == null ? NEW : SYNCED)
                 .embedding(embedding)
                 .build();
         var translation = BookTranslation.builder()

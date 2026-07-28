@@ -1,32 +1,27 @@
 package org.example.library.book.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.author.domain.Author;
 import org.example.library.author.domain.AuthorTranslation;
-import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.BookTranslation;
 import org.example.library.book.dto.GlobalBookDetails;
 import org.example.library.book.dto.LibraryBookDetails;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
-import org.example.library.category.repository.CategoryRepository;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Locale;
 import java.util.Map;
@@ -34,37 +29,34 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.PRELIMINARY;
+import static org.example.library.library_book.domain.LibraryBookStatus.READING;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class BookDetailsServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
+    @Autowired
+    private TestDbClient testDbClient;
 
     @Autowired
     private BookDetailsService service;
 
-    @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
-
-    @Autowired
-    private AuthorRepository authorRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
     @BeforeAll
     static void setUp() {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
+    }
+
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
     }
 
     @Test
@@ -73,9 +65,7 @@ class BookDetailsServiceIntegrationTest {
         var author = saveAuthor();
         var category = saveCategory();
         var book = saveBook("Book Title", author, category);
-        saveLibraryBook(user, book, "User Title");
-        em.flush();
-        em.clear();
+        saveLibraryBook(user, book, "User Title", null);
 
         var details = service.getDetails(book.getId(), user.getId());
 
@@ -93,8 +83,6 @@ class BookDetailsServiceIntegrationTest {
         var author = saveAuthor();
         var category = saveCategory();
         var book = saveBook("Book Title", author, category);
-        em.flush();
-        em.clear();
 
         var details = service.getDetails(book.getId(), user.getId());
 
@@ -111,14 +99,8 @@ class BookDetailsServiceIntegrationTest {
         var author = saveAuthor();
         var category = saveCategory();
         var book = saveBook("Rated Book", author, category);
-        var lb1 = saveLibraryBook(user1, book, "Title 1");
-        lb1.setRating((byte) 5);
-        libraryBookRepository.save(lb1);
-        var lb2 = saveLibraryBook(user2, book, "Title 2");
-        lb2.setRating((byte) 3);
-        libraryBookRepository.save(lb2);
-        em.flush();
-        em.clear();
+        saveLibraryBook(user1, book, "Title 1", (byte) 5);
+        saveLibraryBook(user2, book, "Title 2", (byte) 3);
 
         var details = service.getDetails(book.getId(), user1.getId());
 
@@ -141,9 +123,11 @@ class BookDetailsServiceIntegrationTest {
                 .email(email)
                 .fullName("Test User")
                 .password("password")
+                .role(USER)
                 .build();
 
-        return userRepository.save(user);
+        testDbClient.saveUser(user);
+        return user;
     }
 
     private Author saveAuthor() {
@@ -151,6 +135,7 @@ class BookDetailsServiceIntegrationTest {
                 .birthYear((short) 1900)
                 .popularityCount(0)
                 .build();
+
         var translation = AuthorTranslation.builder()
                 .languageCode("en")
                 .fullName("Author Name")
@@ -159,13 +144,15 @@ class BookDetailsServiceIntegrationTest {
                 .build();
         author.setTranslations(Map.of("en", translation));
 
-        return authorRepository.save(author);
+        testDbClient.saveAuthor(author);
+        return author;
     }
 
     private Category saveCategory() {
         var category = Category.builder()
                 .popularityCount(0)
                 .build();
+
         var translation = CategoryTranslation.builder()
                 .languageCode("en")
                 .name("Category Name")
@@ -173,15 +160,18 @@ class BookDetailsServiceIntegrationTest {
                 .build();
         category.setTranslations(Map.of("en", translation));
 
-        return categoryRepository.save(category);
+        testDbClient.saveCategory(category);
+        return category;
     }
 
     private Book saveBook(String title, Author author, Category category) {
         var book = Book.builder()
                 .popularityCount(0)
+                .status(PRELIMINARY)
                 .authors(author != null ? Set.of(author) : Set.of())
                 .category(category)
                 .build();
+
         var translation = BookTranslation.builder()
                 .languageCode("en")
                 .title(title)
@@ -190,17 +180,24 @@ class BookDetailsServiceIntegrationTest {
                 .build();
         book.setTranslations(Map.of("en", translation));
 
-        return bookRepository.save(book);
+        testDbClient.saveBook(book);
+        if (author != null) {
+            testDbClient.linkBookToAuthor(book.getId(), author.getId());
+        }
+
+        return book;
     }
 
-    private LibraryBook saveLibraryBook(User user, Book book, String title) {
+    private void saveLibraryBook(User user, Book book, String title, Byte rating) {
         var libraryBook = LibraryBook.builder()
                 .user(user)
                 .book(book)
                 .title(title)
+                .status(READING)
+                .rating(rating)
                 .build();
 
-        return libraryBookRepository.save(libraryBook);
+        testDbClient.saveLibraryBook(libraryBook);
     }
 
 }

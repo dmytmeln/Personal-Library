@@ -1,30 +1,24 @@
 package org.example.library.recommendation.service;
 
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
 import org.example.library.book.domain.BookTranslation;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
-import org.example.library.category.repository.CategoryRepository;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.domain.LibraryBookStatus;
-import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.recommendation.event.UserProfileUpdatedEvent;
-import org.example.library.recommendation.repository.UserProfileVectorRepository;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -35,6 +29,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.example.library.book.domain.BookStatus.SYNCED;
+import static org.example.library.library_book.domain.LibraryBookStatus.FAVORITE;
+import static org.example.library.library_book.domain.LibraryBookStatus.READING;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -43,22 +41,10 @@ import static org.awaitility.Awaitility.await;
 class UserProfileServiceIntegrationTest {
 
     @Autowired
+    private TestDbClient testDbClient;
+
+    @Autowired
     private UserProfileService userProfileService;
-
-    @Autowired
-    private UserProfileVectorRepository userProfileVectorRepository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
-
-    @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -76,8 +62,15 @@ class UserProfileServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder().email("test@example.com").fullName("Test User").password("pass").build();
-        userRepository.save(testUser);
+        testDbClient.cleanDatabase();
+
+        testUser = User.builder()
+                .email("test@example.com")
+                .fullName("Test User")
+                .password("pass")
+                .role(USER)
+                .build();
+        testDbClient.saveUser(testUser);
 
         var translation = CategoryTranslation.builder()
                 .languageCode("en")
@@ -90,32 +83,29 @@ class UserProfileServiceIntegrationTest {
                 .build();
         translation.setCategory(defaultCategory);
 
-        categoryRepository.save(defaultCategory);
+        testDbClient.saveCategory(defaultCategory);
     }
 
     @AfterEach
-    void tearDown() {
-        libraryBookRepository.deleteAll();
-        userProfileVectorRepository.deleteAll();
-        bookRepository.deleteAll();
-        categoryRepository.deleteAll();
-        userRepository.deleteAll();
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
     }
 
     @Test
     void shouldAsynchronouslyRebuildVectorOnEventAfterCommit() {
-        var book = saveBook("Java Book", new float[384]);
-        book.getEmbedding()[0] = 1.0f;
-        bookRepository.save(book);
+        var embedding = new float[384];
+        embedding[0] = 1.0f;
+        var book = saveBook("Java Book", embedding);
 
         transactionTemplate.executeWithoutResult(status -> {
             var lb = LibraryBook.builder()
                     .user(testUser)
                     .book(book)
-                    .status(LibraryBookStatus.FAVORITE)
+                    .status(FAVORITE)
+                    .title("Java Book")
                     .addedAt(LocalDateTime.now())
                     .build();
-            libraryBookRepository.save(lb);
+            testDbClient.saveLibraryBook(lb);
 
             eventPublisher.publishEvent(new UserProfileUpdatedEvent(testUser.getId()));
         });
@@ -129,18 +119,19 @@ class UserProfileServiceIntegrationTest {
 
     @Test
     void shouldDeleteVectorOnEventWhenLibraryIsEmpty() {
-        var book = saveBook("Java Book", new float[384]);
-        book.getEmbedding()[0] = 1.0f;
-        bookRepository.save(book);
+        var embedding = new float[384];
+        embedding[0] = 1.0f;
+        var book = saveBook("Java Book", embedding);
 
         transactionTemplate.executeWithoutResult(status -> {
             var lb = LibraryBook.builder()
                     .user(testUser)
                     .book(book)
-                    .status(LibraryBookStatus.READING)
+                    .status(READING)
+                    .title("Java Book")
                     .addedAt(LocalDateTime.now())
                     .build();
-            libraryBookRepository.save(lb);
+            testDbClient.saveLibraryBook(lb);
             eventPublisher.publishEvent(new UserProfileUpdatedEvent(testUser.getId()));
         });
 
@@ -149,13 +140,13 @@ class UserProfileServiceIntegrationTest {
         });
 
         transactionTemplate.executeWithoutResult(status -> {
-            libraryBookRepository.deleteAll();
+            testDbClient.deleteAllLibraryBooks();
             eventPublisher.publishEvent(new UserProfileUpdatedEvent(testUser.getId()));
         });
 
         await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
-            var savedVector = userProfileVectorRepository.findById(testUser.getId());
-            assertThat(savedVector).isEmpty();
+            var savedVector = testDbClient.findUserProfileVectorById(testUser.getId());
+            assertThat(savedVector).isNull();
         });
     }
 
@@ -166,9 +157,10 @@ class UserProfileServiceIntegrationTest {
                 .pages((short) 100)
                 .coverImageUrl("url")
                 .popularityCount(0)
-                .status(BookStatus.SYNCED)
+                .status(SYNCED)
                 .embedding(embedding)
                 .build();
+
         var translation = BookTranslation.builder()
                 .languageCode("en")
                 .title(title)
@@ -178,7 +170,8 @@ class UserProfileServiceIntegrationTest {
                 .build();
         book.setTranslations(Map.of("en", translation));
 
-        return bookRepository.save(book);
+        testDbClient.saveBook(book);
+        return book;
     }
 
 }

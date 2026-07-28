@@ -1,26 +1,23 @@
 package org.example.library.admin.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.admin.dto.AdminBookDto;
 import org.example.library.author.domain.Author;
 import org.example.library.author.domain.AuthorTranslation;
-import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
 import org.example.library.book.domain.BookTranslation;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
-import org.example.library.category.repository.CategoryRepository;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,35 +26,37 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.PRELIMINARY;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class AdminBookServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
+    @Autowired
+    private TestDbClient testDbClient;
 
     @Autowired
     private BookRepository bookRepository;
 
     @Autowired
-    private AuthorRepository authorRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
     private AdminBookService bookService;
+
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+    }
 
     @Test
     void shouldReturnBookWhenGetById() {
         var category = saveCategory("Category");
         var author = saveAuthor();
         var book = saveBook("Book Title", category, Set.of(author));
-        em.flush();
-        em.clear();
 
         var result = bookService.getBook(book.getId());
 
@@ -91,16 +90,15 @@ class AdminBookServiceIntegrationTest {
                 .build();
 
         bookService.createBook(dto);
-        em.flush();
-        em.clear();
 
         var books = bookRepository.findAll();
         assertThat(books).hasSize(1);
-        var book = books.get(0);
+        var book = testDbClient.findBookById(books.get(0).getId());
+        assertThat(book).isNotNull();
         assertThat(book.getCategory().getId()).isEqualTo(category.getId());
-        assertThat(book.getAuthors()).hasSize(1);
+        assertThat(testDbClient.existsBookAuthorLink(book.getId(), author.getId())).isTrue();
         assertThat(book.getTranslations().get("en").getTitle()).isEqualTo("New Book");
-        assertThat(book.getStatus()).isEqualTo(BookStatus.PRELIMINARY);
+        assertThat(book.getStatus()).isEqualTo(PRELIMINARY);
     }
 
     @Test
@@ -118,11 +116,9 @@ class AdminBookServiceIntegrationTest {
                 .build();
 
         bookService.updateBook(book.getId(), dto);
-        em.flush();
-        em.clear();
 
-        var updatedBook = bookRepository.findById(book.getId())
-                .orElseThrow(() -> new AssertionError("Book not found after update"));
+        var updatedBook = testDbClient.findBookById(book.getId());
+        assertThat(updatedBook).isNotNull();
         assertThat(updatedBook.getCategory().getId()).isEqualTo(newCategory.getId());
         assertThat(updatedBook.getTranslations().get("en").getTitle()).isEqualTo("New Title");
         assertThat(updatedBook.getPublishYear()).isEqualTo((short) 2021);
@@ -131,34 +127,27 @@ class AdminBookServiceIntegrationTest {
     @Test
     void shouldDeleteBook() {
         var book = saveBook("Title", null, Set.of());
-        em.flush();
-        em.clear();
 
         bookService.deleteBook(book.getId());
-        em.flush();
-        em.clear();
 
-        assertThat(bookRepository.existsById(book.getId())).isFalse();
+        assertThat(testDbClient.findBookById(book.getId())).isNull();
     }
 
     @Test
     void shouldDeleteBooksBulk() {
         var b1 = saveBook("B1", null, Set.of());
         var b2 = saveBook("B2", null, Set.of());
-        em.flush();
-        em.clear();
 
         bookService.deleteBooks(List.of(b1.getId(), b2.getId()));
-        em.flush();
-        em.clear();
 
-        assertThat(bookRepository.findAll()).isEmpty();
+        assertThat(testDbClient.countBooks()).isZero();
     }
 
     private Category saveCategory(String name) {
         var category = Category.builder()
                 .popularityCount(0)
                 .build();
+
         var translation = CategoryTranslation.builder()
                 .languageCode("en")
                 .name(name)
@@ -166,7 +155,9 @@ class AdminBookServiceIntegrationTest {
                 .category(category)
                 .build();
         category.setTranslations(new HashMap<>(Map.of("en", translation)));
-        return categoryRepository.save(category);
+
+        testDbClient.saveCategory(category);
+        return category;
     }
 
     private Author saveAuthor() {
@@ -179,12 +170,13 @@ class AdminBookServiceIntegrationTest {
                 .languageCode("en")
                 .fullName("Author")
                 .country("USA")
-                .biography("Biography of " + "Author")
+                .biography("Biography of Author")
                 .author(author)
                 .build();
         author.setTranslations(new HashMap<>(Map.of("en", translation)));
 
-        return authorRepository.save(author);
+        testDbClient.saveAuthor(author);
+        return author;
     }
 
     private Book saveBook(String title, Category category, Set<Author> authors) {
@@ -193,9 +185,10 @@ class AdminBookServiceIntegrationTest {
                 .authors(authors)
                 .publishYear((short) 2000)
                 .pages((short) 200)
-                .status(BookStatus.PRELIMINARY)
+                .status(PRELIMINARY)
                 .popularityCount(0)
                 .build();
+
         var translation = BookTranslation.builder()
                 .languageCode("en")
                 .title(title)
@@ -204,7 +197,15 @@ class AdminBookServiceIntegrationTest {
                 .book(book)
                 .build();
         book.setTranslations(new HashMap<>(Map.of("en", translation)));
-        return bookRepository.save(book);
+
+        testDbClient.saveBook(book);
+        if (authors != null) {
+            for (Author author : authors) {
+                testDbClient.linkBookToAuthor(book.getId(), author.getId());
+            }
+        }
+
+        return book;
     }
 
 }

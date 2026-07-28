@@ -1,60 +1,43 @@
 package org.example.library.collection.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.book.domain.Book;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.collection.domain.Collection;
 import org.example.library.collection.dto.CreateCollectionRequest;
 import org.example.library.collection.dto.UpdateCollectionDto;
-import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
-import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.PRELIMINARY;
+import static org.example.library.library_book.domain.LibraryBookStatus.TO_READ;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class CollectionServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
-    private CollectionRepository collectionRepository;
-
-    @Autowired
-    private CollectionBookRepository collectionBookRepository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BookRepository bookRepository;
+    private TestDbClient testDbClient;
 
     @Autowired
     private CollectionService service;
@@ -64,13 +47,28 @@ class CollectionServiceIntegrationTest {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
 
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+        LocaleContextHolder.resetLocaleContext();
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        LocaleContextHolder.resetLocaleContext();
+    }
+
     @Test
     void shouldReturnAllCollectionsForUser() {
         var user = saveUser();
         saveCollection("Collection 1", user);
         saveCollection("Collection 2", user);
-        em.flush();
-        em.clear();
 
         var result = service.getAllCollections(user.getId(), null);
 
@@ -85,8 +83,6 @@ class CollectionServiceIntegrationTest {
         var book = saveBook();
         var libraryBook = saveLibraryBook(book, user);
         saveCollectionBook(collection, libraryBook);
-        em.flush();
-        em.clear();
 
         var result = service.getAllByUserIdAndBookId(user.getId(), book.getId());
 
@@ -98,11 +94,12 @@ class CollectionServiceIntegrationTest {
     void shouldReturnUserCollectionTree() {
         var user = saveUser();
         var root = saveCollection("Root", user);
-        var child = saveCollection("Child", user);
-        child.setParent(root);
-        collectionRepository.save(child);
-        em.flush();
-        em.clear();
+        var child = Collection.builder()
+                .name("Child")
+                .user(user)
+                .parent(root)
+                .build();
+        testDbClient.saveCollection(child);
 
         var result = service.getUserCollectionTree(user.getId());
 
@@ -116,11 +113,12 @@ class CollectionServiceIntegrationTest {
     void shouldReturnCollectionDetailsWithAncestors() {
         var user = saveUser();
         var root = saveCollection("Root", user);
-        var child = saveCollection("Child", user);
-        child.setParent(root);
-        collectionRepository.save(child);
-        em.flush();
-        em.clear();
+        var child = Collection.builder()
+                .name("Child")
+                .user(user)
+                .parent(root)
+                .build();
+        testDbClient.saveCollection(child);
 
         var result = service.getCollectionDetails(child.getId(), user.getId());
 
@@ -132,8 +130,6 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldThrowNotFoundWhenGettingNonExistentCollectionDetails() {
         var user = saveUser();
-        em.flush();
-        em.clear();
 
         assertThatThrownBy(() -> service.getCollectionDetails(-1, user.getId()))
                 .isInstanceOf(NotFoundException.class)
@@ -146,14 +142,12 @@ class CollectionServiceIntegrationTest {
         var request = new CreateCollectionRequest();
         request.setName("New Collection");
         request.setDescription("Description");
-        em.flush();
-        em.clear();
 
         var result = service.createCollection(request, user.getId());
 
         assertThat(result.getId()).isNotNull();
         assertThat(result.getName()).isEqualTo("New Collection");
-        assertThat(collectionRepository.existsById(result.getId())).isTrue();
+        assertThat(testDbClient.findCollectionById(result.getId())).isNotNull();
     }
 
     @Test
@@ -163,14 +157,12 @@ class CollectionServiceIntegrationTest {
         var request = new CreateCollectionRequest();
         request.setName("Sub");
         request.setParentId(parent.getId());
-        em.flush();
-        em.clear();
 
         var result = service.createCollection(request, user.getId());
 
         assertThat(result.getName()).isEqualTo("Sub");
-        var saved = collectionRepository.findById(result.getId())
-                .orElseThrow(() -> new AssertionError("Collection not found after save"));
+        var saved = testDbClient.findCollectionById(result.getId());
+        assertThat(saved).isNotNull();
         assertThat(saved.getParent().getId()).isEqualTo(parent.getId());
     }
 
@@ -178,18 +170,16 @@ class CollectionServiceIntegrationTest {
     void shouldThrowBadRequestWhenCreatingCollectionExceedingMaxDepth() {
         var user = saveUser();
         var c1 = saveCollection("c1", user);
-        var c2 = saveCollection("c2", user);
-        c2.setParent(c1);
-        var c3 = saveCollection("c3", user);
-        c3.setParent(c2);
-        var c4 = saveCollection("c4", user);
-        c4.setParent(c3);
-        collectionRepository.saveAll(java.util.List.of(c2, c3, c4));
+        var c2 = Collection.builder().name("c2").user(user).parent(c1).build();
+        testDbClient.saveCollection(c2);
+        var c3 = Collection.builder().name("c3").user(user).parent(c2).build();
+        testDbClient.saveCollection(c3);
+        var c4 = Collection.builder().name("c4").user(user).parent(c3).build();
+        testDbClient.saveCollection(c4);
+
         var request = new CreateCollectionRequest();
         request.setName("c5");
         request.setParentId(c4.getId());
-        em.flush();
-        em.clear();
 
         assertThatThrownBy(() -> service.createCollection(request, user.getId()))
                 .isInstanceOf(BadRequestException.class)
@@ -202,14 +192,12 @@ class CollectionServiceIntegrationTest {
         var collection = saveCollection("Old Name", user);
         var dto = new UpdateCollectionDto();
         dto.setName("New Name");
-        em.flush();
-        em.clear();
 
         var result = service.updateCollection(collection.getId(), dto, user.getId());
 
         assertThat(result.getName()).isEqualTo("New Name");
-        var saved = collectionRepository.findById(collection.getId())
-                .orElseThrow(() -> new AssertionError("Collection not found after update"));
+        var saved = testDbClient.findCollectionById(collection.getId());
+        assertThat(saved).isNotNull();
         assertThat(saved.getName()).isEqualTo("New Name");
     }
 
@@ -218,16 +206,13 @@ class CollectionServiceIntegrationTest {
         var user = saveUser();
         var parent1 = saveCollection("Parent 1", user);
         var parent2 = saveCollection("Parent 2", user);
-        var child = saveCollection("Child", user);
-        child.setParent(parent1);
-        collectionRepository.save(child);
-        em.flush();
-        em.clear();
+        var child = Collection.builder().name("Child").user(user).parent(parent1).build();
+        testDbClient.saveCollection(child);
 
         service.moveCollection(child.getId(), parent2.getId(), user.getId());
 
-        var saved = collectionRepository.findById(child.getId())
-                .orElseThrow(() -> new AssertionError("Collection not found after move"));
+        var saved = testDbClient.findCollectionById(child.getId());
+        assertThat(saved).isNotNull();
         assertThat(saved.getParent().getId()).isEqualTo(parent2.getId());
     }
 
@@ -235,16 +220,13 @@ class CollectionServiceIntegrationTest {
     void shouldMakeCollectionRootWhenMovingToNullParent() {
         var user = saveUser();
         var parent = saveCollection("Parent", user);
-        var child = saveCollection("Child", user);
-        child.setParent(parent);
-        collectionRepository.save(child);
-        em.flush();
-        em.clear();
+        var child = Collection.builder().name("Child").user(user).parent(parent).build();
+        testDbClient.saveCollection(child);
 
         service.moveCollection(child.getId(), null, user.getId());
 
-        var saved = collectionRepository.findById(child.getId())
-                .orElseThrow(() -> new AssertionError("Collection not found after moving to root"));
+        var saved = testDbClient.findCollectionById(child.getId());
+        assertThat(saved).isNotNull();
         assertThat(saved.getParent()).isNull();
     }
 
@@ -252,8 +234,6 @@ class CollectionServiceIntegrationTest {
     void shouldThrowBadRequestWhenMovingCollectionToItself() {
         var user = saveUser();
         var collection = saveCollection("Collection", user);
-        em.flush();
-        em.clear();
 
         assertThatThrownBy(() -> service.moveCollection(collection.getId(), collection.getId(), user.getId()))
                 .isInstanceOf(BadRequestException.class)
@@ -264,12 +244,10 @@ class CollectionServiceIntegrationTest {
     void shouldDeleteCollection() {
         var user = saveUser();
         var collection = saveCollection("To Delete", user);
-        em.flush();
-        em.clear();
 
         service.deleteCollection(collection.getId(), user.getId());
 
-        assertThat(collectionRepository.existsById(collection.getId())).isFalse();
+        assertThat(testDbClient.findCollectionById(collection.getId())).isNull();
     }
 
     @Test
@@ -280,13 +258,11 @@ class CollectionServiceIntegrationTest {
         var book = saveBook();
         var libraryBook = saveLibraryBook(book, user);
         saveCollectionBook(source, libraryBook);
-        em.flush();
-        em.clear();
 
         service.moveBook(source.getId(), target.getId(), libraryBook.getId(), user.getId());
 
-        assertThat(collectionBookRepository.existsById(new CollectionBookId(source.getId(), libraryBook.getId()))).isFalse();
-        assertThat(collectionBookRepository.existsById(new CollectionBookId(target.getId(), libraryBook.getId()))).isTrue();
+        assertThat(testDbClient.findCollectionBookById(source.getId(), libraryBook.getId())).isNull();
+        assertThat(testDbClient.findCollectionBookById(target.getId(), libraryBook.getId())).isNotNull();
     }
 
     private User saveUser() {
@@ -294,8 +270,11 @@ class CollectionServiceIntegrationTest {
                 .email("user@test.com")
                 .fullName("Test User")
                 .password("password")
+                .role(USER)
                 .build();
-        return userRepository.save(user);
+
+        testDbClient.saveUser(user);
+        return user;
     }
 
     private Collection saveCollection(String name, User user) {
@@ -303,23 +282,31 @@ class CollectionServiceIntegrationTest {
                 .name(name)
                 .user(user)
                 .build();
-        return collectionRepository.save(collection);
+
+        testDbClient.saveCollection(collection);
+        return collection;
     }
 
     private Book saveBook() {
         var book = Book.builder()
+                .status(PRELIMINARY)
                 .popularityCount(0)
                 .build();
-        return bookRepository.save(book);
+
+        testDbClient.saveBook(book);
+        return book;
     }
 
     private LibraryBook saveLibraryBook(Book book, User user) {
         var libraryBook = LibraryBook.builder()
                 .book(book)
                 .user(user)
+                .status(TO_READ)
                 .title("Test Library Book")
                 .build();
-        return libraryBookRepository.save(libraryBook);
+
+        testDbClient.saveLibraryBook(libraryBook);
+        return libraryBook;
     }
 
     private void saveCollectionBook(Collection collection, LibraryBook libraryBook) {
@@ -328,7 +315,8 @@ class CollectionServiceIntegrationTest {
                 .collection(collection)
                 .libraryBook(libraryBook)
                 .build();
-        collectionBookRepository.save(collectionBook);
+
+        testDbClient.saveCollectionBook(collectionBook);
     }
 
 }

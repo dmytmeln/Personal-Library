@@ -1,41 +1,47 @@
 package org.example.library.security.jwt.job;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.auth.domain.RefreshToken;
 import org.example.library.auth.repository.RefreshTokenRepository;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class RefreshTokenCleanupJobIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
+    @Autowired
+    private TestDbClient testDbClient;
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private RefreshTokenCleanupJob job;
+
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+    }
 
     @Test
     void shouldDeleteExpiredTokens() {
@@ -43,8 +49,6 @@ class RefreshTokenCleanupJobIntegrationTest {
         saveToken(user, Instant.now().minus(1, ChronoUnit.HOURS));
         saveToken(user, Instant.now().minus(1, ChronoUnit.MINUTES));
         var validToken = saveToken(user, Instant.now().plus(1, ChronoUnit.HOURS));
-        em.flush();
-        em.clear();
 
         job.cleanupExpiredTokens();
 
@@ -58,8 +62,11 @@ class RefreshTokenCleanupJobIntegrationTest {
                 .email("user@test.com")
                 .fullName("Test User")
                 .password("password")
+                .role(USER)
                 .build();
-        return userRepository.save(user);
+
+        testDbClient.saveUser(user);
+        return user;
     }
 
     private RefreshToken saveToken(User user, Instant expiryDate) {
@@ -67,7 +74,11 @@ class RefreshTokenCleanupJobIntegrationTest {
         token.setUser(user);
         token.setExpiryDate(expiryDate);
         token.setRefreshTokenHash("some-hash");
-        return refreshTokenRepository.save(token);
+        token.setCreatedAt(Instant.now());
+
+        testDbClient.saveRefreshToken(token);
+        return token;
     }
 
 }
+

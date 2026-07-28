@@ -1,35 +1,29 @@
 package org.example.library.author.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.author.domain.Author;
 import org.example.library.author.domain.AuthorTranslation;
 import org.example.library.author.dto.AuthorSaveRequest;
 import org.example.library.author.dto.AuthorSaveRequest.AuthorTranslationRequest;
 import org.example.library.author.dto.AuthorSearchParams;
-import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
 import org.example.library.book.domain.BookTranslation;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.common.pagination.PaginationParams;
 import org.example.library.config.PostgresTestContainer;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,27 +33,16 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.PRELIMINARY;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional // todo
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class AuthorServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
-    private AuthorRepository repository;
-
-    @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
+    private TestDbClient testDbClient;
 
     @Autowired
     private AuthorService service;
@@ -69,8 +52,14 @@ class AuthorServiceIntegrationTest {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
 
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
     @AfterEach
-    void cleanUpLocaleEach() {
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
         LocaleContextHolder.resetLocaleContext();
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
@@ -83,8 +72,6 @@ class AuthorServiceIntegrationTest {
     @Test
     void shouldReturnAuthorWhenGetById() {
         var expected = saveAuthor("John Doe", "USA");
-        em.flush();
-        em.clear();
 
         var result = service.getLocalizedAuthor(expected.getId());
 
@@ -94,7 +81,9 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldThrowNotFoundWhenGetByIdWithoutExistingAuthor() {
-        assertThatThrownBy(() -> service.getLocalizedAuthor(-99999))
+        var nonExistingId = -99999;
+
+        assertThatThrownBy(() -> service.getLocalizedAuthor(nonExistingId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("error.author.not_found");
     }
@@ -106,8 +95,6 @@ class AuthorServiceIntegrationTest {
         saveBook(author);
         var otherAuthor = saveAuthor("Author 2", "USA");
         saveBook(otherAuthor);
-        em.flush();
-        em.clear();
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -134,8 +121,6 @@ class AuthorServiceIntegrationTest {
         saveBook(auth3);
         saveBook(auth3);
         saveBook(auth3);
-        em.flush();
-        em.clear();
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -154,8 +139,6 @@ class AuthorServiceIntegrationTest {
     @Test
     void shouldFindAuthorWithTypo() {
         saveAuthor("John Doe", "USA");
-        em.flush();
-        em.clear();
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -170,15 +153,18 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldSearchAuthorsForUser() {
-        var user = User.builder().email("test@example.com").fullName("Test User").password("pass").build();
-        userRepository.save(user);
+        var user = User.builder()
+                .email("test@example.com")
+                .fullName("Test User")
+                .password("pass")
+                .role(USER)
+                .build();
+        testDbClient.saveUser(user);
         var author = saveAuthor("User Author", "USA");
         var book1 = saveBook(author);
         var book2 = saveBook(author);
-        libraryBookRepository.save(LibraryBook.builder().user(user).book(book1).title("Title 1").build());
-        libraryBookRepository.save(LibraryBook.builder().user(user).book(book2).title("Title 2").build());
-        em.flush();
-        em.clear();
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book1).title("Title 1").build());
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book2).title("Title 2").build());
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -197,8 +183,6 @@ class AuthorServiceIntegrationTest {
         saveAuthor("Auth 1", "USA");
         saveAuthor("Auth 2", "UK");
         saveAuthor("Auth 3", "USA");
-        em.flush();
-        em.clear();
 
         var countries = service.getAuthorCountriesWithCount();
 
@@ -208,16 +192,19 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldReturnCountriesForUser() {
-        var user = User.builder().email("user@example.com").fullName("User").password("pass").build();
-        userRepository.save(user);
+        var user = User.builder()
+                .email("user@example.com")
+                .fullName("User")
+                .password("pass")
+                .role(USER)
+                .build();
+        testDbClient.saveUser(user);
         var auth1 = saveAuthor("Auth 1", "USA");
         var auth2 = saveAuthor("Auth 2", "UK");
         var book1 = saveBook(auth1);
         var book2 = saveBook(auth2);
-        libraryBookRepository.save(LibraryBook.builder().user(user).book(book1).title("T1").build());
-        libraryBookRepository.save(LibraryBook.builder().user(user).book(book2).title("T2").build());
-        em.flush();
-        em.clear();
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book1).title("T1").build());
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book2).title("T2").build());
 
         var countries = service.getUserAuthorCountriesWithCount(user.getId());
 
@@ -228,8 +215,6 @@ class AuthorServiceIntegrationTest {
     @Test
     void shouldReturnAuthorResponseWhenGetAuthor() {
         var author = saveAuthor("Author Name", "USA");
-        em.flush();
-        em.clear();
 
         var result = service.getAuthorWithAllTranslations(author.getId());
 
@@ -239,7 +224,9 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldThrowNotFoundWhenGetAuthorByIdWithoutExistingAuthor() {
-        assertThatThrownBy(() -> service.getAuthorWithAllTranslations(-1))
+        var nonExistingId = -1;
+
+        assertThatThrownBy(() -> service.getAuthorWithAllTranslations(nonExistingId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("error.author.not_found");
     }
@@ -256,15 +243,12 @@ class AuthorServiceIntegrationTest {
                 .build();
 
         var response = service.saveAuthor(dto);
-        em.flush();
-        em.clear();
 
         assertThat(response).isNotNull();
         assertThat(response.getTranslations().get("en").getFullName()).isEqualTo("New Author");
 
-        var authors = repository.findAll();
-        assertThat(authors).hasSize(1);
-        var author = authors.get(0);
+        var author = testDbClient.findAuthorById(response.getId());
+        assertThat(author).isNotNull();
         assertThat(author.getTranslations().get("en").getFullName()).isEqualTo("New Author");
         assertThat(author.getBirthYear()).isEqualTo((short) 1950);
     }
@@ -295,29 +279,27 @@ class AuthorServiceIntegrationTest {
                         .country("USA")
                         .build()))
                 .build();
-        em.flush();
-        em.clear();
 
         var response = service.updateAuthor(author.getId(), dto);
-        em.flush();
-        em.clear();
 
         assertThat(response.getTranslations().get("en").getFullName()).isEqualTo("New Name");
         assertThat(response.getDeathYear()).isEqualTo((short) 2000);
 
-        var updatedAuthor = repository.findById(author.getId())
-                .orElseThrow(() -> new AssertionError("Author not found after update"));
+        var updatedAuthor = testDbClient.findAuthorById(author.getId());
+        assertThat(updatedAuthor).isNotNull();
         assertThat(updatedAuthor.getTranslations().get("en").getFullName()).isEqualTo("New Name");
         assertThat(updatedAuthor.getDeathYear()).isEqualTo((short) 2000);
     }
 
     @Test
     void shouldRemoveOmittedTranslationsOnUpdate() {
-        var author = saveAuthor("John Doe", "USA");
-        author.upsertTranslation("uk", "Джон Доу", "США", "Біографія");
-        repository.save(author);
-        em.flush();
-        em.clear();
+        var ukTranslation = AuthorTranslation.builder()
+                .languageCode("uk")
+                .fullName("Джон Доу")
+                .country("США")
+                .biography("Біографія")
+                .build();
+        var author = saveAuthor("John Doe", "USA", Map.of("uk", ukTranslation));
         var dto = AuthorSaveRequest.builder()
                 .birthYear(author.getBirthYear())
                 .translations(Map.of("en", AuthorTranslationRequest.builder()
@@ -328,11 +310,9 @@ class AuthorServiceIntegrationTest {
                 .build();
 
         service.updateAuthor(author.getId(), dto);
-        em.flush();
-        em.clear();
 
-        var updatedAuthor = repository.findById(author.getId())
-                .orElseThrow(() -> new AssertionError("Author not found after update"));
+        var updatedAuthor = testDbClient.findAuthorById(author.getId());
+        assertThat(updatedAuthor).isNotNull();
         assertThat(updatedAuthor.getTranslations()).containsKey("en");
         assertThat(updatedAuthor.getTranslations()).doesNotContainKey("uk");
     }
@@ -340,24 +320,18 @@ class AuthorServiceIntegrationTest {
     @Test
     void shouldDeleteAuthor() {
         var author = saveAuthor("Author", "USA");
-        em.flush();
-        em.clear();
 
         service.deleteAuthor(author.getId());
-        em.flush();
-        em.clear();
 
-        assertThat(repository.existsById(author.getId())).isFalse();
+        assertThat(testDbClient.findAuthorById(author.getId())).isNull();
     }
 
     @Test
     void shouldThrowBadRequestWhenDeleteAuthorWithBooks() {
         var author = saveAuthor("Author", "USA");
         saveBook(Set.of(author));
-        em.flush();
-        em.clear();
-
         var authorId = author.getId();
+
         assertThatThrownBy(() -> service.deleteAuthor(authorId))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("error.author.has_books");
@@ -367,14 +341,10 @@ class AuthorServiceIntegrationTest {
     void shouldDeleteAuthorsBulk() {
         var a1 = saveAuthor("A1", "USA");
         var a2 = saveAuthor("A2", "USA");
-        em.flush();
-        em.clear();
 
         service.deleteAuthors(List.of(a1.getId(), a2.getId()));
-        em.flush();
-        em.clear();
 
-        assertThat(repository.findAll()).isEmpty();
+        assertThat(testDbClient.countAuthors()).isZero();
     }
 
     @Test
@@ -382,31 +352,42 @@ class AuthorServiceIntegrationTest {
         var a1 = saveAuthor("A1", "USA");
         var a2 = saveAuthor("A2", "USA");
         saveBook(Set.of(a1));
-        em.flush();
-        em.clear();
-
         var authorIds = List.of(a1.getId(), a2.getId());
+
         assertThatThrownBy(() -> service.deleteAuthors(authorIds))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("error.author.has_books");
     }
 
     private Author saveAuthor(String fullName, String country) {
+        return saveAuthor(fullName, country, null);
+    }
+
+    private Author saveAuthor(String fullName, String country, Map<String, AuthorTranslation> extraTranslations) {
         var author = Author.builder()
                 .birthYear((short) 1900)
                 .popularityCount(0)
                 .build();
 
-        var translation = AuthorTranslation.builder()
+        var translations = new HashMap<String, AuthorTranslation>();
+        translations.put("en", AuthorTranslation.builder()
                 .languageCode("en")
                 .fullName(fullName)
                 .country(country)
                 .biography("Biography of " + fullName)
                 .author(author)
-                .build();
-        author.setTranslations(new HashMap<>(Map.of("en", translation)));
+                .build());
 
-        return repository.save(author);
+        if (extraTranslations != null) {
+            extraTranslations.forEach((code, trans) -> {
+                trans.setAuthor(author);
+                translations.put(code, trans);
+            });
+        }
+        author.setTranslations(translations);
+
+        testDbClient.saveAuthor(author);
+        return author;
     }
 
     private Book saveBook(Author author) {
@@ -416,7 +397,7 @@ class AuthorServiceIntegrationTest {
     private Book saveBook(Set<Author> authors) {
         var book = Book.builder()
                 .authors(authors)
-                .status(BookStatus.PRELIMINARY)
+                .status(PRELIMINARY)
                 .popularityCount(0)
                 .build();
 
@@ -429,7 +410,14 @@ class AuthorServiceIntegrationTest {
                 .build();
         book.setTranslations(new HashMap<>(Map.of("en", translation)));
 
-        return bookRepository.save(book);
+        testDbClient.saveBook(book);
+        if (authors != null) {
+            for (Author author : authors) {
+                testDbClient.linkBookToAuthor(book.getId(), author.getId());
+            }
+        }
+
+        return book;
     }
 
 }

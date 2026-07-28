@@ -1,67 +1,45 @@
 package org.example.library.collection_book.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
-import org.example.library.category.repository.CategoryRepository;
 import org.example.library.collection.domain.Collection;
-import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection_book.dto.CollectionBookSearchParams;
-import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.pagination.PaginationParams;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.repository.LibraryBookRepository;
-import org.example.library.user.domain.Role;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.NEW;
+import static org.example.library.library_book.domain.LibraryBookStatus.TO_READ;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class CollectionBookServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
-    private CollectionBookRepository repository;
-
-    @Autowired
-    private CollectionRepository collectionRepository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private TestDbClient testDbClient;
 
     @Autowired
     private CollectionBookService service;
@@ -71,19 +49,33 @@ class CollectionBookServiceIntegrationTest {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
     }
 
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+        LocaleContextHolder.resetLocaleContext();
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        LocaleContextHolder.resetLocaleContext();
+    }
+
     @Test
     void shouldAddBookToCollection() {
         var user = saveUser("user@example.com");
         var book = saveBook();
         var libraryBook = saveLibraryBook(user, book);
         var collection = saveCollection(user, "My Collection");
-        em.flush();
-        em.clear();
 
         service.addBookToCollection(user.getId(), collection.getId(), libraryBook.getId());
 
-        var result = repository.findLibraryBookIdsByCollectionId(collection.getId());
-        assertThat(result).containsExactly(libraryBook.getId());
+        assertThat(testDbClient.findCollectionBookById(collection.getId(), libraryBook.getId())).isNotNull();
     }
 
     @Test
@@ -93,8 +85,6 @@ class CollectionBookServiceIntegrationTest {
         var book = saveBook();
         var libraryBook = saveLibraryBook(user1, book);
         var collection = saveCollection(user2, "User 2 Collection");
-        em.flush();
-        em.clear();
 
         assertThatThrownBy(() -> service.addBookToCollection(user1.getId(), collection.getId(), libraryBook.getId()))
                 .isInstanceOf(BadRequestException.class)
@@ -109,13 +99,11 @@ class CollectionBookServiceIntegrationTest {
         var lb1 = saveLibraryBook(user, book1);
         var lb2 = saveLibraryBook(user, book2);
         var collection = saveCollection(user, "Bulk Collection");
-        em.flush();
-        em.clear();
 
         service.bulkAddBooksToCollection(user.getId(), collection.getId(), List.of(lb1.getId(), lb2.getId()));
 
-        var result = repository.findLibraryBookIdsByCollectionId(collection.getId());
-        assertThat(result).containsExactlyInAnyOrder(lb1.getId(), lb2.getId());
+        assertThat(testDbClient.findCollectionBookById(collection.getId(), lb1.getId())).isNotNull();
+        assertThat(testDbClient.findCollectionBookById(collection.getId(), lb2.getId())).isNotNull();
     }
 
     @Test
@@ -128,8 +116,7 @@ class CollectionBookServiceIntegrationTest {
         var collection = saveCollection(user, "Paginated Collection");
         service.addBookToCollection(user.getId(), collection.getId(), lb1.getId());
         service.addBookToCollection(user.getId(), collection.getId(), lb2.getId());
-        em.flush();
-        em.clear();
+
         var searchParams = new CollectionBookSearchParams();
         var paginationParams = new PaginationParams();
         paginationParams.setPage(0);
@@ -147,12 +134,10 @@ class CollectionBookServiceIntegrationTest {
         var lb = saveLibraryBook(user, book);
         var collection = saveCollection(user, "Removal Collection");
         service.addBookToCollection(user.getId(), collection.getId(), lb.getId());
-        em.flush();
-        em.clear();
 
         service.removeBookFromCollection(user.getId(), collection.getId(), lb.getId());
 
-        assertThat(repository.findLibraryBookIdsByCollectionId(collection.getId())).isEmpty();
+        assertThat(testDbClient.findCollectionBookById(collection.getId(), lb.getId())).isNull();
     }
 
     @Test
@@ -162,12 +147,10 @@ class CollectionBookServiceIntegrationTest {
         var lb2 = saveLibraryBook(user, saveBook());
         var collection = saveCollection(user, "Bulk Removal");
         service.bulkAddBooksToCollection(user.getId(), collection.getId(), List.of(lb1.getId(), lb2.getId()));
-        em.flush();
-        em.clear();
 
         service.bulkRemoveBooksFromCollection(user.getId(), collection.getId(), List.of(lb1.getId(), lb2.getId()));
 
-        assertThat(repository.findLibraryBookIdsByCollectionId(collection.getId())).isEmpty();
+        assertThat(testDbClient.countCollectionBooks()).isZero();
     }
 
     @Test
@@ -178,13 +161,10 @@ class CollectionBookServiceIntegrationTest {
         var col2 = saveCollection(user, "Col 2");
         service.addBookToCollection(user.getId(), col1.getId(), lb.getId());
         service.addBookToCollection(user.getId(), col2.getId(), lb.getId());
-        em.flush();
-        em.clear();
 
         service.removeBookFromAllCollections(user.getId(), lb.getId());
 
-        assertThat(repository.findLibraryBookIdsByCollectionId(col1.getId())).isEmpty();
-        assertThat(repository.findLibraryBookIdsByCollectionId(col2.getId())).isEmpty();
+        assertThat(testDbClient.countCollectionBooks()).isZero();
     }
 
     private User saveUser(String email) {
@@ -192,45 +172,53 @@ class CollectionBookServiceIntegrationTest {
                 .email(email)
                 .fullName("User")
                 .password("pass")
-                .role(Role.USER)
+                .role(USER)
                 .build();
 
-        return userRepository.save(user);
+        testDbClient.saveUser(user);
+        return user;
     }
 
     private Category saveCategory() {
+        var category = Category.builder()
+                .popularityCount(0)
+                .build();
+
         var translation = CategoryTranslation.builder()
                 .languageCode("en")
                 .name("Default Category")
-                .description("Description of " + "Default Category")
+                .description("Description of Default Category")
+                .category(category)
                 .build();
-        var category = Category.builder()
-                .popularityCount(0)
-                .translations(Map.of("en", translation))
-                .build();
-        translation.setCategory(category);
+        category.setTranslations(new HashMap<>(Map.of("en", translation)));
 
-        return categoryRepository.save(category);
+        testDbClient.saveCategory(category);
+        return category;
     }
 
     private Book saveBook() {
         var category = saveCategory();
+
         var book = Book.builder()
                 .category(category)
-                .status(BookStatus.NEW)
+                .status(NEW)
                 .popularityCount(0)
                 .build();
 
-        return bookRepository.save(book);
+        testDbClient.saveBook(book);
+        return book;
     }
 
     private LibraryBook saveLibraryBook(User user, Book book) {
         var libraryBook = LibraryBook.builder()
                 .user(user)
                 .book(book)
+                .status(TO_READ)
+                .title("Library Book")
                 .build();
 
-        return libraryBookRepository.save(libraryBook);
+        testDbClient.saveLibraryBook(libraryBook);
+        return libraryBook;
     }
 
     private Collection saveCollection(User user, String name) {
@@ -239,7 +227,8 @@ class CollectionBookServiceIntegrationTest {
                 .name(name)
                 .build();
 
-        return collectionRepository.save(collection);
+        testDbClient.saveCollection(collection);
+        return collection;
     }
 
 }

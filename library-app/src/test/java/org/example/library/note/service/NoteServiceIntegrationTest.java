@@ -1,53 +1,48 @@
 package org.example.library.note.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.note.domain.Note;
 import org.example.library.note.dto.NoteRequest;
-import org.example.library.note.repository.NoteRepository;
-import org.example.library.user.domain.Role;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.NEW;
+import static org.example.library.library_book.domain.LibraryBookStatus.NO_TAG;
+import static org.example.library.note.domain.Note.NoteType.TEXT;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class NoteServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
-    private NoteRepository repository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BookRepository bookRepository;
+    private TestDbClient testDbClient;
 
     @Autowired
     private NoteService service;
+
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+    }
 
     @Test
     void shouldGetNoteByLibraryBookId() {
@@ -56,11 +51,10 @@ class NoteServiceIntegrationTest {
         var libraryBook = saveLibraryBook(user, book);
         var note = Note.builder()
                 .content("Sample Note")
+                .noteType(TEXT)
                 .libraryBook(libraryBook)
                 .build();
-        repository.save(note);
-        em.flush();
-        em.clear();
+        testDbClient.saveNote(note);
 
         var result = service.getByLibraryBookId(libraryBook.getId(), user.getId());
 
@@ -89,8 +83,8 @@ class NoteServiceIntegrationTest {
 
         assertThat(result.id()).isNotNull();
         assertThat(result.content()).isEqualTo("New Note Content");
-        var savedNote = repository.findByLibraryBookIdAndLibraryBookUserId(libraryBook.getId(), user.getId())
-                .orElseThrow(() -> new AssertionError("Note should have been saved"));
+        var savedNote = testDbClient.findNoteById(result.id());
+        assertThat(savedNote).isNotNull();
         assertThat(savedNote.getContent()).isEqualTo("New Note Content");
     }
 
@@ -101,19 +95,18 @@ class NoteServiceIntegrationTest {
         var libraryBook = saveLibraryBook(user, book);
         var note = Note.builder()
                 .content("Old Content")
+                .noteType(TEXT)
                 .libraryBook(libraryBook)
                 .build();
-        repository.save(note);
-        em.flush();
-        em.clear();
+        testDbClient.saveNote(note);
         var request = new NoteRequest(libraryBook.getId(), "Updated Content");
 
         var result = service.createOrUpdate(request, user.getId());
 
         assertThat(result.id()).isEqualTo(note.getId());
         assertThat(result.content()).isEqualTo("Updated Content");
-        var updatedNote = repository.findById(note.getId())
-                .orElseThrow(() -> new AssertionError("Note not found after update"));
+        var updatedNote = testDbClient.findNoteById(note.getId());
+        assertThat(updatedNote).isNotNull();
         assertThat(updatedNote.getContent()).isEqualTo("Updated Content");
     }
 
@@ -124,15 +117,14 @@ class NoteServiceIntegrationTest {
         var libraryBook = saveLibraryBook(user, book);
         var note = Note.builder()
                 .content("Note to delete")
+                .noteType(TEXT)
                 .libraryBook(libraryBook)
                 .build();
-        repository.save(note);
-        em.flush();
-        em.clear();
+        testDbClient.saveNote(note);
 
         service.delete(libraryBook.getId(), user.getId());
 
-        assertThat(repository.findByLibraryBookIdAndLibraryBookUserId(libraryBook.getId(), user.getId())).isEmpty();
+        assertThat(testDbClient.findNoteById(note.getId())).isNull();
     }
 
     private User saveUser() {
@@ -140,28 +132,33 @@ class NoteServiceIntegrationTest {
                 .email("user@example.com")
                 .fullName("User")
                 .password("pass")
-                .role(Role.USER)
+                .role(USER)
                 .build();
 
-        return userRepository.save(user);
+        testDbClient.saveUser(user);
+        return user;
     }
 
     private Book saveBook() {
         var book = Book.builder()
-                .status(BookStatus.NEW)
+                .status(NEW)
                 .popularityCount(0)
                 .build();
 
-        return bookRepository.save(book);
+        testDbClient.saveBook(book);
+        return book;
     }
 
     private LibraryBook saveLibraryBook(User user, Book book) {
         var libraryBook = LibraryBook.builder()
                 .user(user)
                 .book(book)
+                .title("Title")
+                .status(NO_TAG)
                 .build();
 
-        return libraryBookRepository.save(libraryBook);
+        testDbClient.saveLibraryBook(libraryBook);
+        return libraryBook;
     }
 
 }

@@ -555,6 +555,10 @@ public class TestDbClient {
         return jdbcClient.sql("SELECT COUNT(*) FROM library_books").query(Long.class).single();
     }
 
+    public void deleteAllLibraryBooks() {
+        jdbcClient.sql("DELETE FROM library_books").update();
+    }
+
     public void saveCollectionBook(CollectionBook collectionBook) {
         if (collectionBook.getAddedAt() == null) {
             collectionBook.setAddedAt(LocalDateTime.now());

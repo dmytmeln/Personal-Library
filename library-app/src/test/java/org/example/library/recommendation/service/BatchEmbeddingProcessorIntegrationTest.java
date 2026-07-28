@@ -1,29 +1,30 @@
 package org.example.library.recommendation.service;
 
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
 import org.example.library.book.domain.BookTranslation;
 import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.example.library.book.domain.BookStatus.NEW;
+import static org.example.library.book.domain.BookStatus.SYNCED;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -80,7 +81,7 @@ class BatchEmbeddingProcessorIntegrationTest {
         assertThat(updatedBooks).hasSize(2);
         assertThat(updatedBooks).allMatch(b -> b.getEmbedding() != null);
         assertThat(updatedBooks).allMatch(b -> b.getEmbedding().length == 384);
-        assertThat(updatedBooks).allMatch(b -> b.getStatus() == BookStatus.SYNCED);
+        assertThat(updatedBooks).allMatch(b -> b.getStatus() == SYNCED);
     }
 
     private Book createBook(String title, String description) {
@@ -90,7 +91,7 @@ class BatchEmbeddingProcessorIntegrationTest {
                 .pages((short) 100)
                 .coverImageUrl("url")
                 .popularityCount(0)
-                .status(BookStatus.NEW)
+                .status(NEW)
                 .build();
         var translation = BookTranslation.builder()
                 .languageCode("en")

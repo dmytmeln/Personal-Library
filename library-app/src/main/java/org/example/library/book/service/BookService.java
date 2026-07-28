@@ -14,6 +14,7 @@ import org.example.library.common.pagination.SortableFields;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class BookService {
     private final BookMapper mapper;
     private final PageRequestBuilder pageRequestBuilder;
 
+    @Transactional(readOnly = true)
     public Page<BookDto> getAll(PaginationParams paginationParams, BookSearchParams searchParams) {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         var spec = BookSpecification.fromSearchParams(lang, searchParams);
@@ -35,6 +37,7 @@ public class BookService {
                 .map(mapper::toBookDto);
     }
 
+    @Transactional(readOnly = true)
     public List<LanguageWithCount> getAllLanguages() {
         var lang = LocaleContextHolder.getLocale().getLanguage();
         return repository.findAllLanguagesWithCount(lang);

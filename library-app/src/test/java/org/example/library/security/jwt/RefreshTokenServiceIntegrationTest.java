@@ -4,26 +4,32 @@ import org.example.library.auth.domain.RefreshToken;
 import org.example.library.auth.repository.RefreshTokenRepository;
 import org.example.library.auth.service.RefreshTokenService;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.user.domain.User;
 import org.example.library.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class RefreshTokenServiceIntegrationTest {
+
+    @Autowired
+    private TestDbClient testDbClient;
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
@@ -34,10 +40,14 @@ class RefreshTokenServiceIntegrationTest {
     @Autowired
     private RefreshTokenService service;
 
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
     @AfterEach
-    void tearDown() {
-        refreshTokenRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
     }
 
     @Test
@@ -49,8 +59,8 @@ class RefreshTokenServiceIntegrationTest {
         assertThat(response.accessToken()).isNotBlank();
         assertThat(response.refreshToken()).isNotBlank();
         assertThat(response.refreshTokenId()).isNotNull();
-        var savedToken = refreshTokenRepository.findById(response.refreshTokenId())
-                .orElseThrow(() -> new AssertionError("Refresh token not found after generation"));
+        var savedToken = testDbClient.findRefreshTokenById(response.refreshTokenId());
+        assertThat(savedToken).isNotNull();
         assertThat(savedToken.getUser().getId()).isEqualTo(user.getId());
         assertThat(savedToken.isRevoked()).isFalse();
         assertThat(savedToken.getExpiryDate()).isAfter(Instant.now());
@@ -67,13 +77,13 @@ class RefreshTokenServiceIntegrationTest {
         assertThat(response.refreshToken()).isNotBlank();
         assertThat(response.refreshTokenId()).isNotNull();
         assertThat(response.refreshTokenId()).isNotEqualTo(initialResponse.refreshTokenId());
-        var oldToken = refreshTokenRepository.findById(initialResponse.refreshTokenId())
-                .orElseThrow(() -> new AssertionError("Old refresh token not found"));
+        var oldToken = testDbClient.findRefreshTokenById(initialResponse.refreshTokenId());
+        assertThat(oldToken).isNotNull();
         assertThat(oldToken.isRevoked())
                 .as("Old token should be revoked")
                 .isTrue();
-        var newToken = refreshTokenRepository.findById(response.refreshTokenId())
-                .orElseThrow(() -> new AssertionError("New refresh token not found"));
+        var newToken = testDbClient.findRefreshTokenById(response.refreshTokenId());
+        assertThat(newToken).isNotNull();
         assertThat(newToken.isRevoked()).isFalse();
     }
 
@@ -122,8 +132,8 @@ class RefreshTokenServiceIntegrationTest {
                 .isInstanceOf(SecurityException.class)
                 .hasMessage("Identity mismatch. Please log in again.");
 
-        var token = refreshTokenRepository.findById(initialResponse.refreshTokenId())
-                .orElseThrow(() -> new AssertionError("Refresh token not found"));
+        var token = testDbClient.findRefreshTokenById(initialResponse.refreshTokenId());
+        assertThat(token).isNotNull();
         assertThat(token.isRevoked()).isTrue();
     }
 
@@ -170,8 +180,12 @@ class RefreshTokenServiceIntegrationTest {
                 .email("user@test.com")
                 .fullName("Test User")
                 .password("password")
+                .role(USER)
                 .build();
-        return userRepository.save(user);
+
+        testDbClient.saveUser(user);
+        return user;
     }
 
 }
+

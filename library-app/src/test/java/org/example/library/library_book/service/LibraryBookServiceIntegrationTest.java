@@ -1,32 +1,24 @@
 package org.example.library.library_book.service;
 
-import org.example.library.author.repository.AuthorRepository;
 import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookStatus;
 import org.example.library.book.domain.BookTranslation;
-import org.example.library.book.repository.BookRepository;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
-import org.example.library.category.repository.CategoryRepository;
 import org.example.library.collection.domain.Collection;
-import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
-import org.example.library.collection_book.repository.CollectionBookRepository;
 import org.example.library.common.pagination.PaginationParams;
 import org.example.library.config.PostgresTestContainer;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.dto.CreateLocalBookDto;
 import org.example.library.library_book.dto.LibraryBookSearchCriteria;
 import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.note.domain.Note;
-import org.example.library.note.repository.NoteRepository;
 import org.example.library.quote.domain.Quote;
-import org.example.library.quote.repository.QuoteRepository;
-import org.example.library.user.domain.Role;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,17 +26,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.example.library.book.domain.BookStatus.SYNCED;
+import static org.example.library.library_book.domain.LibraryBookStatus.NO_TAG;
+import static org.example.library.library_book.domain.LibraryBookStatus.READ;
+import static org.example.library.library_book.domain.LibraryBookStatus.READING;
+import static org.example.library.library_book.domain.LibraryBookStatus.TO_READ;
+import static org.example.library.note.domain.Note.NoteType.TEXT;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -52,37 +51,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LibraryBookServiceIntegrationTest {
 
     @Autowired
+    private TestDbClient testDbClient;
+
+    @Autowired
     private LibraryBookRepository repository;
 
     @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private CollectionBookRepository collectionBookRepository;
-
-    @Autowired
-    private CollectionRepository collectionRepository;
-
-    @Autowired
-    private AuthorRepository authorRepository;
-
-    @Autowired
-    private NoteRepository noteRepository;
-
-    @Autowired
-    private QuoteRepository quoteRepository;
-
-    @Autowired
     private LibraryBookService service;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     private User defaultUser;
 
@@ -94,20 +69,22 @@ class LibraryBookServiceIntegrationTest {
     }
 
     @BeforeEach
-    void init() {
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
         defaultUser = saveUser();
         defaultCategory = saveCategory();
     }
 
     @AfterEach
-    void tearDown() {
-        collectionBookRepository.deleteAll();
-        collectionRepository.deleteAll();
-        repository.deleteAll();
-        bookRepository.deleteAll();
-        categoryRepository.deleteAll();
-        authorRepository.deleteAll();
-        userRepository.deleteAll();
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+        LocaleContextHolder.resetLocaleContext();
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        LocaleContextHolder.resetLocaleContext();
     }
 
     @Test
@@ -129,7 +106,7 @@ class LibraryBookServiceIntegrationTest {
                 .title("Local Book")
                 .description("Local Description")
                 .bookLanguage("uk")
-                .status(LibraryBookStatus.READING)
+                .status(READING)
                 .build();
 
         service.createLocalBook(dto, defaultUser.getId());
@@ -138,7 +115,7 @@ class LibraryBookServiceIntegrationTest {
         assertThat(libraryBooks).hasSize(1);
         var saved = libraryBooks.get(0);
         assertThat(saved.getTitle()).isEqualTo("Local Book");
-        assertThat(saved.getStatus()).isEqualTo(LibraryBookStatus.READING);
+        assertThat(saved.getStatus()).isEqualTo(READING);
         assertThat(saved.getBook().getOwner().getId()).isEqualTo(defaultUser.getId());
     }
 
@@ -161,24 +138,22 @@ class LibraryBookServiceIntegrationTest {
         var result = service.rate(libraryBook.getId(), defaultUser.getId(), 5);
 
         assertThat(result.getRating()).isEqualTo((byte) 5);
-        var updated = repository.findById(libraryBook.getId())
-                .orElseThrow(() -> new AssertionError("Library book not found after rating"));
+        var updated = testDbClient.findLibraryBookById(libraryBook.getId());
+        assertThat(updated).isNotNull();
         assertThat(updated.getRating()).isEqualTo((byte) 5);
     }
 
     @Test
     void shouldUpdateStatus() {
         var book = saveBook("Book Status");
-        var libraryBook = saveLibraryBook(book, defaultUser);
-        libraryBook.setStatus(LibraryBookStatus.NO_TAG);
-        repository.saveAndFlush(libraryBook);
+        var libraryBook = saveLibraryBook(book, defaultUser, NO_TAG);
 
-        var result = service.updateStatus(libraryBook.getId(), defaultUser.getId(), LibraryBookStatus.READ);
+        var result = service.updateStatus(libraryBook.getId(), defaultUser.getId(), READ);
 
-        assertThat(result.getStatus()).isEqualTo(LibraryBookStatus.READ.name());
-        var updated = repository.findById(libraryBook.getId())
-                .orElseThrow(() -> new AssertionError("Library book not found after status update"));
-        assertThat(updated.getStatus()).isEqualTo(LibraryBookStatus.READ);
+        assertThat(result.getStatus()).isEqualTo(READ.name());
+        var updated = testDbClient.findLibraryBookById(libraryBook.getId());
+        assertThat(updated).isNotNull();
+        assertThat(updated.getStatus()).isEqualTo(READ);
     }
 
     @Test
@@ -188,7 +163,7 @@ class LibraryBookServiceIntegrationTest {
 
         service.delete(libraryBook.getId(), defaultUser.getId());
 
-        assertThat(repository.existsById(libraryBook.getId())).isFalse();
+        assertThat(testDbClient.findLibraryBookById(libraryBook.getId())).isNull();
     }
 
     @Test
@@ -208,24 +183,24 @@ class LibraryBookServiceIntegrationTest {
 
     @Test
     void shouldBulkUpdateStatus() {
-        var lb1 = saveLibraryBook(saveBook("B1"), defaultUser);
-        var lb2 = saveLibraryBook(saveBook("B2"), defaultUser);
-        lb1.setStatus(LibraryBookStatus.TO_READ);
-        lb2.setStatus(LibraryBookStatus.READING);
-        repository.saveAllAndFlush(List.of(lb1, lb2));
+        var lb1 = saveLibraryBook(saveBook("B1"), defaultUser, TO_READ);
+        var lb2 = saveLibraryBook(saveBook("B2"), defaultUser, READING);
 
-        service.bulkUpdateStatus(List.of(lb1.getId(), lb2.getId()), defaultUser.getId(), LibraryBookStatus.READ);
+        service.bulkUpdateStatus(List.of(lb1.getId(), lb2.getId()), defaultUser.getId(), READ);
 
-        var updatedLb1 = repository.findById(lb1.getId()).orElseThrow();
-        var updatedLb2 = repository.findById(lb2.getId()).orElseThrow();
-        assertThat(updatedLb1.getStatus()).isEqualTo(LibraryBookStatus.READ);
+        var updatedLb1 = testDbClient.findLibraryBookById(lb1.getId());
+        var updatedLb2 = testDbClient.findLibraryBookById(lb2.getId());
+        assertThat(updatedLb1).isNotNull();
+        assertThat(updatedLb2).isNotNull();
+        assertThat(updatedLb1.getStatus()).isEqualTo(READ);
         assertThat(updatedLb1.getFinishedAt()).isEqualTo(LocalDate.now());
-        assertThat(updatedLb2.getStatus()).isEqualTo(LibraryBookStatus.READ);
+        assertThat(updatedLb2.getStatus()).isEqualTo(READ);
         assertThat(updatedLb2.getFinishedAt()).isEqualTo(LocalDate.now());
 
-        service.bulkUpdateStatus(List.of(lb1.getId()), defaultUser.getId(), LibraryBookStatus.READING);
-        updatedLb1 = repository.findById(lb1.getId()).orElseThrow();
-        assertThat(updatedLb1.getStatus()).isEqualTo(LibraryBookStatus.READING);
+        service.bulkUpdateStatus(List.of(lb1.getId()), defaultUser.getId(), READING);
+        updatedLb1 = testDbClient.findLibraryBookById(lb1.getId());
+        assertThat(updatedLb1).isNotNull();
+        assertThat(updatedLb1.getStatus()).isEqualTo(READING);
         assertThat(updatedLb1.getFinishedAt()).isNull();
     }
 
@@ -236,33 +211,31 @@ class LibraryBookServiceIntegrationTest {
 
         service.bulkDelete(List.of(lb1.getId(), lb2.getId()), defaultUser.getId());
 
-        assertThat(repository.existsById(lb1.getId())).isFalse();
-        assertThat(repository.existsById(lb2.getId())).isFalse();
+        assertThat(testDbClient.findLibraryBookById(lb1.getId())).isNull();
+        assertThat(testDbClient.findLibraryBookById(lb2.getId())).isNull();
     }
 
     @Test
     void shouldSearchByMoodWithoutStatusFilter() {
-        transactionTemplate.executeWithoutResult(status -> {
-            float[] v1 = new float[384];
-            v1[0] = 0.9f;
-            saveLibraryBook(saveBook("Space Adventure", v1), defaultUser, LibraryBookStatus.READ);
+        float[] v1 = new float[384];
+        v1[0] = 0.9f;
+        saveLibraryBook(saveBook("Space Adventure", v1), defaultUser, READ);
 
-            float[] v2 = new float[384];
-            v2[0] = 0.8f;
-            saveLibraryBook(saveBook("Galactic Journey", v2), defaultUser, LibraryBookStatus.TO_READ);
+        float[] v2 = new float[384];
+        v2[0] = 0.8f;
+        saveLibraryBook(saveBook("Galactic Journey", v2), defaultUser, TO_READ);
 
-            float[] v3 = new float[384];
-            v3[1] = 0.9f;
-            saveLibraryBook(saveBook("Historical Romance", v3), defaultUser, LibraryBookStatus.TO_READ);
+        float[] v3 = new float[384];
+        v3[1] = 0.9f;
+        saveLibraryBook(saveBook("Historical Romance", v3), defaultUser, TO_READ);
 
-            float[] v4 = new float[384];
-            v4[1] = 0.8f;
-            saveLibraryBook(saveBook("Medieval Love", v4), defaultUser, LibraryBookStatus.READING);
+        float[] v4 = new float[384];
+        v4[1] = 0.8f;
+        saveLibraryBook(saveBook("Medieval Love", v4), defaultUser, READING);
 
-            float[] v5 = new float[384];
-            v5[5] = 0.9f;
-            saveLibraryBook(saveBook("Cooking Basics", v5), defaultUser, LibraryBookStatus.TO_READ);
-        });
+        float[] v5 = new float[384];
+        v5[5] = 0.9f;
+        saveLibraryBook(saveBook("Cooking Basics", v5), defaultUser, TO_READ);
 
         var results = service.searchByMood("space trip", null, defaultUser.getId(), 2);
 
@@ -273,29 +246,27 @@ class LibraryBookServiceIntegrationTest {
 
     @Test
     void shouldSearchByMoodWithStatusFilter() {
-        transactionTemplate.executeWithoutResult(status -> {
-            float[] v1 = new float[384];
-            v1[0] = 0.9f;
-            saveLibraryBook(saveBook("Space Adventure", v1), defaultUser, LibraryBookStatus.READ);
+        float[] v1 = new float[384];
+        v1[0] = 0.9f;
+        saveLibraryBook(saveBook("Space Adventure", v1), defaultUser, READ);
 
-            float[] v2 = new float[384];
-            v2[0] = 0.8f;
-            saveLibraryBook(saveBook("Galactic Journey", v2), defaultUser, LibraryBookStatus.TO_READ);
+        float[] v2 = new float[384];
+        v2[0] = 0.8f;
+        saveLibraryBook(saveBook("Galactic Journey", v2), defaultUser, TO_READ);
 
-            float[] v3 = new float[384];
-            v3[1] = 0.9f;
-            saveLibraryBook(saveBook("Historical Romance", v3), defaultUser, LibraryBookStatus.TO_READ);
+        float[] v3 = new float[384];
+        v3[1] = 0.9f;
+        saveLibraryBook(saveBook("Historical Romance", v3), defaultUser, TO_READ);
 
-            float[] v4 = new float[384];
-            v4[1] = 0.8f;
-            saveLibraryBook(saveBook("Medieval Love", v4), defaultUser, LibraryBookStatus.READING);
+        float[] v4 = new float[384];
+        v4[1] = 0.8f;
+        saveLibraryBook(saveBook("Medieval Love", v4), defaultUser, READING);
 
-            float[] v5 = new float[384];
-            v5[5] = 0.9f;
-            saveLibraryBook(saveBook("Cooking Basics", v5), defaultUser, LibraryBookStatus.TO_READ);
-        });
+        float[] v5 = new float[384];
+        v5[5] = 0.9f;
+        saveLibraryBook(saveBook("Cooking Basics", v5), defaultUser, TO_READ);
 
-        var results = service.searchByMood("space trip", LibraryBookStatus.TO_READ, defaultUser.getId(), 2);
+        var results = service.searchByMood("space trip", TO_READ, defaultUser.getId(), 2);
 
         assertThat(results).isNotEmpty();
         assertThat(results.get(0).getBook().getTitle()).isEqualTo("Galactic Journey");
@@ -306,35 +277,38 @@ class LibraryBookServiceIntegrationTest {
     void shouldCascadeDeleteDependencies() {
         var book = saveBook("Cascade Test Book");
         var libraryBook = saveLibraryBook(book, defaultUser);
-        var collection = collectionRepository.save(Collection.builder()
+        var collection = Collection.builder()
                 .name("Test Collection")
                 .user(defaultUser)
-                .build());
-        transactionTemplate.executeWithoutResult(status -> {
-            var managedLibraryBook = repository.findById(libraryBook.getId()).orElseThrow();
-            var managedCollection = collectionRepository.findById(collection.getId()).orElseThrow();
-            collectionBookRepository.save(CollectionBook.builder()
-                    .id(new CollectionBookId(managedLibraryBook.getId(), managedCollection.getId()))
-                    .libraryBook(managedLibraryBook)
-                    .collection(managedCollection)
-                    .build());
-            noteRepository.save(Note.builder()
-                    .libraryBook(managedLibraryBook)
-                    .content("Test Note")
-                    .build());
-            quoteRepository.save(Quote.builder()
-                    .libraryBook(managedLibraryBook)
-                    .text("Test Quote 1")
-                    .build());
-        });
+                .build();
+        testDbClient.saveCollection(collection);
+
+        var collectionBook = CollectionBook.builder()
+                .id(new CollectionBookId(collection.getId(), libraryBook.getId()))
+                .collection(collection)
+                .libraryBook(libraryBook)
+                .build();
+        testDbClient.saveCollectionBook(collectionBook);
+
+        var note = Note.builder()
+                .libraryBook(libraryBook)
+                .content("Test Note")
+                .noteType(TEXT)
+                .build();
+        testDbClient.saveNote(note);
+
+        var quote = Quote.builder()
+                .libraryBook(libraryBook)
+                .text("Test Quote 1")
+                .build();
+        testDbClient.saveQuote(quote);
 
         service.delete(libraryBook.getId(), defaultUser.getId());
 
-        assertThat(repository.existsById(libraryBook.getId())).isFalse();
-        assertThat(noteRepository.findByLibraryBookIdAndLibraryBookUserId(libraryBook.getId(), defaultUser.getId())).isEmpty();
-        assertThat(quoteRepository.findByLibraryBookIdAndLibraryBookUserIdOrderByCreatedAtDesc(libraryBook.getId(), defaultUser.getId()))
-                .isEmpty();
-        assertThat(collectionBookRepository.existsById(new CollectionBookId(libraryBook.getId(), collection.getId()))).isFalse();
+        assertThat(testDbClient.findLibraryBookById(libraryBook.getId())).isNull();
+        assertThat(testDbClient.countNotes()).isZero();
+        assertThat(testDbClient.countQuotes()).isZero();
+        assertThat(testDbClient.findCollectionBookById(collection.getId(), libraryBook.getId())).isNull();
     }
 
     private User saveUser() {
@@ -342,23 +316,28 @@ class LibraryBookServiceIntegrationTest {
                 .email("test@example.com")
                 .fullName("Test User")
                 .password("password")
-                .role(Role.USER)
+                .role(USER)
                 .build();
-        return userRepository.save(user);
+
+        testDbClient.saveUser(user);
+        return user;
     }
 
     private Category saveCategory() {
+        var category = Category.builder()
+                .popularityCount(0)
+                .build();
+
         var translation = CategoryTranslation.builder()
                 .languageCode("en")
                 .name("Default Category")
                 .description("Description")
+                .category(category)
                 .build();
-        var category = Category.builder()
-                .popularityCount(0)
-                .translations(Map.of("en", translation))
-                .build();
-        translation.setCategory(category);
-        return categoryRepository.save(category);
+        category.setTranslations(new HashMap<>(Map.of("en", translation)));
+
+        testDbClient.saveCategory(category);
+        return category;
     }
 
     private Book saveBook(String title) {
@@ -369,11 +348,12 @@ class LibraryBookServiceIntegrationTest {
         var book = Book.builder()
                 .category(defaultCategory)
                 .owner(null)
-                .status(BookStatus.SYNCED)
+                .status(SYNCED)
                 .embedding(embedding)
                 .popularityCount(0)
                 .authors(Set.of())
                 .build();
+
         var translation = BookTranslation.builder()
                 .languageCode("en")
                 .title(title)
@@ -381,20 +361,22 @@ class LibraryBookServiceIntegrationTest {
                 .description("Description")
                 .book(book)
                 .build();
-        book.setTranslations(Map.of("en", translation));
+        book.setTranslations(new HashMap<>(Map.of("en", translation)));
 
-        return bookRepository.save(book);
+        testDbClient.saveBook(book);
+        return book;
     }
 
     private LibraryBook saveLibraryBook(Book book, User user) {
-        return saveLibraryBook(book, user, LibraryBookStatus.TO_READ);
+        return saveLibraryBook(book, user, TO_READ);
     }
 
     private LibraryBook saveLibraryBook(Book book, User user, LibraryBookStatus status) {
         var libraryBook = LibraryBook.of(book, user);
         libraryBook.setStatus(status);
 
-        return repository.save(libraryBook);
+        testDbClient.saveLibraryBook(libraryBook);
+        return libraryBook;
     }
 
 }

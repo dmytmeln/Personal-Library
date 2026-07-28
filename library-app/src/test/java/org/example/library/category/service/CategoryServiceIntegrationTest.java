@@ -1,56 +1,44 @@
 package org.example.library.category.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.book.domain.Book;
-import org.example.library.book.repository.BookRepository;
+import org.example.library.book.domain.BookTranslation;
 import org.example.library.category.domain.Category;
 import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.dto.CategorySearchParams;
-import org.example.library.category.repository.CategoryRepository;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.common.pagination.PaginationParams;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.library_book.repository.LibraryBookRepository;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Locale.ENGLISH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.book.domain.BookStatus.PRELIMINARY;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class CategoryServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
-    private CategoryRepository repository;
-
-    @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private LibraryBookRepository libraryBookRepository;
+    private TestDbClient testDbClient;
 
     @Autowired
     private CategoryService service;
@@ -60,11 +48,26 @@ class CategoryServiceIntegrationTest {
         LocaleContextHolder.setLocale(ENGLISH);
     }
 
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+        LocaleContextHolder.resetLocaleContext();
+        LocaleContextHolder.setLocale(ENGLISH);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        LocaleContextHolder.resetLocaleContext();
+    }
+
     @Test
     void shouldReturnCategoryWhenGetById() {
         var expected = saveCategory("Test Category");
-        em.flush();
-        em.clear();
 
         var existingCategory = service.getById(expected.getId());
 
@@ -86,8 +89,6 @@ class CategoryServiceIntegrationTest {
         saveBook(category);
         var otherCategory = saveCategory("Science");
         saveBook(otherCategory);
-        em.flush();
-        em.clear();
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -105,8 +106,6 @@ class CategoryServiceIntegrationTest {
     @Test
     void shouldFindCategoryWithTypo() {
         saveCategory("History");
-        em.flush();
-        em.clear();
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -130,8 +129,6 @@ class CategoryServiceIntegrationTest {
         saveBook(cat3);
         saveBook(cat3);
         saveBook(cat3);
-        em.flush();
-        em.clear();
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -149,19 +146,17 @@ class CategoryServiceIntegrationTest {
 
     @Test
     void shouldSearchCategoriesForUser() {
-        var user = User.builder().email("test@example.com").fullName("Test User").password("pass").build();
-        userRepository.save(user);
-        var otherUser = User.builder().email("other@example.com").fullName("Other User").password("pass").build();
-        userRepository.save(otherUser);
+        var user = User.builder().email("test@example.com").fullName("Test User").password("pass").role(USER).build();
+        testDbClient.saveUser(user);
+        var otherUser = User.builder().email("other@example.com").fullName("Other User").password("pass").role(USER).build();
+        testDbClient.saveUser(otherUser);
         var category = saveCategory("User Category");
         var book1 = saveBook(category);
         var book2 = saveBook(category);
         var book3 = saveBook(category);
-        libraryBookRepository.save(LibraryBook.builder().user(user).book(book1).title("Title 1").build());
-        libraryBookRepository.save(LibraryBook.builder().user(user).book(book2).title("Title 2").build());
-        libraryBookRepository.save(LibraryBook.builder().user(otherUser).book(book3).title("Title 3").build());
-        em.flush();
-        em.clear();
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book1).title("Title 1").build());
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book2).title("Title 2").build());
+        testDbClient.saveLibraryBook(LibraryBook.builder().user(otherUser).book(book3).title("Title 3").build());
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -176,25 +171,40 @@ class CategoryServiceIntegrationTest {
     }
 
     private Category saveCategory(String name) {
+        var category = Category.builder()
+                .popularityCount(0)
+                .build();
+
         var translation = CategoryTranslation.builder()
                 .languageCode("en")
                 .name(name)
                 .description("Description of " + name)
+                .category(category)
                 .build();
-        var category = Category.builder()
-                .popularityCount(0)
-                .translations(Map.of("en", translation))
-                .build();
-        translation.setCategory(category);
-        return repository.save(category);
+        category.setTranslations(new HashMap<>(Map.of("en", translation)));
+
+        testDbClient.saveCategory(category);
+        return category;
     }
 
     private Book saveBook(Category category) {
         var book = Book.builder()
                 .category(category)
+                .status(PRELIMINARY)
                 .popularityCount(0)
                 .build();
-        return bookRepository.save(book);
+
+        var translation = BookTranslation.builder()
+                .languageCode("en")
+                .title("Book")
+                .bookLanguage("English")
+                .description("Desc Book")
+                .book(book)
+                .build();
+        book.setTranslations(new HashMap<>(Map.of("en", translation)));
+
+        testDbClient.saveBook(book);
+        return book;
     }
 
 }

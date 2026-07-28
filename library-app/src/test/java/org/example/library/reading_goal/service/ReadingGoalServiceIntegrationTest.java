@@ -1,42 +1,43 @@
 package org.example.library.reading_goal.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.config.PostgresTestContainer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ActiveProfiles;
+import org.example.library.config.TestDbClient;
 import org.example.library.reading_goal.domain.ReadingGoal;
 import org.example.library.reading_goal.dto.ReadingGoalDto;
-import org.example.library.reading_goal.repository.ReadingGoalRepository;
-import org.example.library.user.domain.Role;
 import org.example.library.user.domain.User;
-import org.example.library.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.example.library.user.domain.Role.USER;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @ContextConfiguration(initializers = PostgresTestContainer.class)
 class ReadingGoalServiceIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
-    private ReadingGoalRepository repository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private TestDbClient testDbClient;
 
     @Autowired
     private ReadingGoalService service;
+
+    @BeforeEach
+    void cleanDbBefore() {
+        testDbClient.cleanDatabase();
+    }
+
+    @AfterEach
+    void tearDownEach() {
+        testDbClient.cleanDatabase();
+    }
 
     @Test
     void shouldGetGoal() {
@@ -47,9 +48,7 @@ class ReadingGoalServiceIntegrationTest {
                 .targetBooks(10)
                 .targetPages(2000)
                 .build();
-        repository.save(goal);
-        em.flush();
-        em.clear();
+        testDbClient.saveReadingGoal(goal);
 
         var result = service.getGoal(user.getId(), 2024);
 
@@ -81,9 +80,10 @@ class ReadingGoalServiceIntegrationTest {
         assertThat(result.getId()).isNotNull();
         assertThat(result.getYear()).isEqualTo(2024);
         assertThat(result.getTargetBooks()).isEqualTo(15);
-        var savedGoal = repository.findByUserIdAndYear(user.getId(), 2024)
-                .orElseThrow(() -> new AssertionError("Reading goal not found after creation"));
+        var savedGoal = testDbClient.findReadingGoalById(result.getId());
+        assertThat(savedGoal).isNotNull();
         assertThat(savedGoal.getTargetBooks()).isEqualTo(15);
+        assertThat(savedGoal.getTargetPages()).isEqualTo(3000);
     }
 
     @Test
@@ -95,9 +95,7 @@ class ReadingGoalServiceIntegrationTest {
                 .targetBooks(10)
                 .targetPages(2000)
                 .build();
-        repository.save(goal);
-        em.flush();
-        em.clear();
+        testDbClient.saveReadingGoal(goal);
         var dto = ReadingGoalDto.builder()
                 .year(2024)
                 .targetBooks(20)
@@ -108,9 +106,10 @@ class ReadingGoalServiceIntegrationTest {
 
         assertThat(result.getId()).isEqualTo(goal.getId());
         assertThat(result.getTargetBooks()).isEqualTo(20);
-        var updatedGoal = repository.findById(goal.getId())
-                .orElseThrow(() -> new AssertionError("Reading goal not found after update"));
+        var updatedGoal = testDbClient.findReadingGoalById(goal.getId());
+        assertThat(updatedGoal).isNotNull();
         assertThat(updatedGoal.getTargetBooks()).isEqualTo(20);
+        assertThat(updatedGoal.getTargetPages()).isEqualTo(4000);
     }
 
     @Test
@@ -121,13 +120,11 @@ class ReadingGoalServiceIntegrationTest {
                 .year(2024)
                 .targetBooks(10)
                 .build();
-        repository.save(goal);
-        em.flush();
-        em.clear();
+        testDbClient.saveReadingGoal(goal);
 
         service.delete(user.getId(), 2024);
 
-        assertThat(repository.findByUserIdAndYear(user.getId(), 2024)).isEmpty();
+        assertThat(testDbClient.findReadingGoalById(goal.getId())).isNull();
     }
 
     private User saveUser() {
@@ -135,9 +132,11 @@ class ReadingGoalServiceIntegrationTest {
                 .email("user@example.com")
                 .fullName("User")
                 .password("pass")
-                .role(Role.USER)
+                .role(USER)
                 .build();
-        return userRepository.save(user);
+
+        testDbClient.saveUser(user);
+        return user;
     }
 
 }
