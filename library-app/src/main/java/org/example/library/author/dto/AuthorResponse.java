@@ -1,4 +1,4 @@
-package org.example.library.admin.dto;
+package org.example.library.author.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,22 +13,24 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AdminAuthorDto {
+public class AuthorResponse {
 
     private Integer id;
     private Short birthYear;
     private Short deathYear;
-    private Map<String, AdminAuthorTranslationDto> translations;
+    private Map<String, AuthorTranslationResponse> translations;
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class AdminAuthorTranslationDto {
+    public static class AuthorTranslationResponse {
+
         private String fullName;
         private String country;
         private String biography;
+
     }
 
 }

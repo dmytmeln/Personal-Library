@@ -23,80 +23,105 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
     @Query("""
             SELECT
                 a.id AS id,
-                tr.fullName AS fullName,
-                tr.country AS country,
+                COALESCE(MAX(CASE WHEN tr.languageCode = :requestedLang THEN tr.fullName END),
+                        MAX(CASE WHEN tr.languageCode = :defaultLang THEN tr.fullName END)) AS fullName,
+                COALESCE(MAX(CASE WHEN tr.languageCode = :requestedLang THEN tr.country END),
+                        MAX(CASE WHEN tr.languageCode = :defaultLang THEN tr.country END)) AS country,
                 a.birthYear AS birthYear,
                 a.deathYear AS deathYear,
                 a.popularityCount AS popularityCount,
                 COUNT(b) AS booksCount
             FROM Author a
-            JOIN a.translations tr ON tr.languageCode = :lang
+            JOIN a.translations tr ON tr.languageCode IN (:requestedLang, :defaultLang)
             LEFT JOIN a.books b
-            WHERE (:#{#searchParams.name} IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:#{#searchParams.name} AS string), '%'))
-               OR FUNCTION('similarity', tr.fullName, CAST(:#{#searchParams.name} AS string)) > 0.3))
+            WHERE (:#{#searchParams.name} IS NULL OR (
+                LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:#{#searchParams.name} AS string), '%'))
+                OR FUNCTION('similarity', tr.fullName, CAST(:#{#searchParams.name} AS string)) > 0.3))
               AND (:#{#searchParams.country} IS NULL OR LOWER(tr.country) = LOWER(CAST(:#{#searchParams.country} AS string)))
               AND (:#{#searchParams.birthYearMin} IS NULL OR a.birthYear >= :#{#searchParams.birthYearMin})
               AND (:#{#searchParams.birthYearMax} IS NULL OR a.birthYear <= :#{#searchParams.birthYearMax})
-            GROUP BY a.id, tr.fullName, tr.country, a.birthYear, a.deathYear
+            GROUP BY a.id, a.birthYear, a.deathYear, a.popularityCount
             HAVING (:#{#searchParams.booksCountMin} IS NULL OR COUNT(b) >= :#{#searchParams.booksCountMin})
                AND (:#{#searchParams.booksCountMax} IS NULL OR COUNT(b) <= :#{#searchParams.booksCountMax})
             """)
     Page<AuthorWithBooksCount> searchWithBooksCount(@Param("searchParams") AuthorSearchParams searchParams,
-                                                    @Param("lang") String lang,
+                                                    @Param("requestedLang") String requestedLang,
+                                                    @Param("defaultLang") String defaultLang,
                                                     Pageable pageable);
 
     @Query("""
             SELECT
-                tr.country AS country,
-                COUNT(a) AS count
-            FROM Author a
-            JOIN a.translations tr ON tr.languageCode = :lang
-            GROUP BY tr.country
-            ORDER BY COUNT(a) DESC
+                sub.country AS country,
+                COUNT(sub.id) AS count
+            FROM (
+                SELECT
+                    a.id AS id,
+                    COALESCE(MAX(CASE WHEN tr.languageCode = :requestedLang THEN tr.country END),
+                            MAX(CASE WHEN tr.languageCode = :defaultLang THEN tr.country END)) AS country
+                FROM Author a
+                JOIN a.translations tr ON tr.languageCode IN (:requestedLang, :defaultLang)
+                GROUP BY a.id
+            ) sub
+            GROUP BY sub.country
+            ORDER BY COUNT(sub.id) DESC
             """)
-    List<CountryWithCount> findAllCountriesWithCount(String lang);
+    List<CountryWithCount> findAllAuthorCountriesWithCount(@Param("requestedLang") String requestedLang,
+                                                           @Param("defaultLang") String defaultLang);
 
     @Query("""
             SELECT
                 a.id AS id,
-                tr.fullName AS fullName,
-                tr.country AS country,
+                COALESCE(MAX(CASE WHEN tr.languageCode = :requestedLang THEN tr.fullName END),
+                        MAX(CASE WHEN tr.languageCode = :defaultLang THEN tr.fullName END)) AS fullName,
+                COALESCE(MAX(CASE WHEN tr.languageCode = :requestedLang THEN tr.country END),
+                        MAX(CASE WHEN tr.languageCode = :defaultLang THEN tr.country END)) AS country,
                 a.birthYear AS birthYear,
                 a.deathYear AS deathYear,
                 a.popularityCount AS popularityCount,
                 COUNT(DISTINCT lb.id) AS booksCount
             FROM Author a
-            JOIN a.translations tr ON tr.languageCode = :lang
+            JOIN a.translations tr ON tr.languageCode IN (:requestedLang, :defaultLang)
             JOIN a.books b
             JOIN LibraryBook lb ON lb.book.id = b.id
             WHERE lb.user.id = :userId
-              AND (:#{#searchParams.name} IS NULL OR (LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:#{#searchParams.name} AS string), '%'))
-               OR FUNCTION('similarity', tr.fullName, CAST(:#{#searchParams.name} AS string)) > 0.3))
+              AND (:#{#searchParams.name} IS NULL OR (
+                LOWER(tr.fullName) LIKE LOWER(CONCAT('%', CAST(:#{#searchParams.name} AS string), '%'))
+                OR FUNCTION('similarity', tr.fullName, CAST(:#{#searchParams.name} AS string)) > 0.3))
               AND (:#{#searchParams.country} IS NULL OR LOWER(tr.country) = LOWER(CAST(:#{#searchParams.country} AS string)))
               AND (:#{#searchParams.birthYearMin} IS NULL OR a.birthYear >= :#{#searchParams.birthYearMin})
               AND (:#{#searchParams.birthYearMax} IS NULL OR a.birthYear <= :#{#searchParams.birthYearMax})
-            GROUP BY a.id, tr.fullName, tr.country, a.birthYear, a.deathYear
+            GROUP BY a.id, a.birthYear, a.deathYear, a.popularityCount
             HAVING (:#{#searchParams.booksCountMin} IS NULL OR COUNT(DISTINCT lb.id) >= :#{#searchParams.booksCountMin})
                AND (:#{#searchParams.booksCountMax} IS NULL OR COUNT(DISTINCT lb.id) <= :#{#searchParams.booksCountMax})
             """)
     Page<AuthorWithBooksCount> searchForUser(@Param("userId") Integer userId,
                                              @Param("searchParams") AuthorSearchParams searchParams,
-                                             @Param("lang") String lang,
+                                             @Param("requestedLang") String requestedLang,
+                                             @Param("defaultLang") String defaultLang,
                                              Pageable pageable);
 
     @Query("""
             SELECT
-                tr.country AS country,
-                COUNT(DISTINCT a.id) AS count
-            FROM Author a
-            JOIN a.translations tr ON tr.languageCode = :lang
-            JOIN a.books b
-            JOIN LibraryBook lb ON lb.book.id = b.id
-            WHERE lb.user.id = :userId
-            GROUP BY tr.country
-            ORDER BY COUNT(DISTINCT a.id) DESC
+                sub.country AS country,
+                COUNT(sub.id) AS count
+            FROM (
+                SELECT
+                    a.id AS id,
+                    COALESCE(MAX(CASE WHEN tr.languageCode = :requestedLang THEN tr.country END),
+                            MAX(CASE WHEN tr.languageCode = :defaultLang THEN tr.country END)) AS country
+                FROM Author a
+                JOIN a.translations tr ON tr.languageCode IN (:requestedLang, :defaultLang)
+                JOIN a.books b
+                JOIN LibraryBook lb ON lb.book.id = b.id
+                WHERE lb.user.id = :userId
+                GROUP BY a.id
+            ) sub
+            GROUP BY sub.country
+            ORDER BY COUNT(sub.id) DESC
             """)
-    List<CountryWithCount> findAllCountriesForUser(Integer userId, String lang);
+    List<CountryWithCount> findAllAuthorCountriesWithCountForUser(@Param("userId") Integer userId,
+                                                                  @Param("requestedLang") String requestedLang,
+                                                                  @Param("defaultLang") String defaultLang);
 
     @Modifying
     @Query(value = """

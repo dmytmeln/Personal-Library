@@ -1,8 +1,10 @@
 package org.example.library.admin.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.library.admin.dto.AdminAuthorDto;
-import org.example.library.admin.service.AdminAuthorService;
+import org.example.library.author.dto.AuthorResponse;
+import org.example.library.author.dto.AuthorSaveRequest;
+import org.example.library.author.service.AuthorService;
 import org.example.library.library_book.dto.BulkRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,34 +24,34 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 @RequiredArgsConstructor
 public class AdminAuthorController {
 
-    private final AdminAuthorService adminAuthorService;
+    private final AuthorService authorService;
 
     @GetMapping("/{id}")
-    public AdminAuthorDto getAuthor(@PathVariable Integer id) {
-        return adminAuthorService.getAuthor(id);
+    public AuthorResponse getAuthor(@PathVariable Integer id) {
+        return authorService.getAuthorWithAllTranslations(id);
     }
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public void createAuthor(@RequestBody AdminAuthorDto dto) {
-        adminAuthorService.createAuthor(dto);
+    public AuthorResponse createAuthor(@Valid @RequestBody AuthorSaveRequest request) {
+        return authorService.saveAuthor(request);
     }
 
     @PutMapping("/{id}")
-    public void updateAuthor(@PathVariable Integer id, @RequestBody AdminAuthorDto dto) {
-        adminAuthorService.updateAuthor(id, dto);
+    public AuthorResponse updateAuthor(@PathVariable Integer id, @Valid @RequestBody AuthorSaveRequest request) {
+        return authorService.updateAuthor(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
     public void deleteAuthor(@PathVariable Integer id) {
-        adminAuthorService.deleteAuthor(id);
+        authorService.deleteAuthor(id);
     }
 
     @PostMapping("/bulk-delete")
     @ResponseStatus(NO_CONTENT)
-    public void deleteAuthors(@RequestBody BulkRequest request) {
-        adminAuthorService.deleteAuthors(request.getIds());
+    public void deleteAuthors(@Valid @RequestBody BulkRequest request) {
+        authorService.deleteAuthors(request.getIds());
     }
 
 }

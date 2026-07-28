@@ -99,8 +99,7 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
         AuthorSearchParams searchParams = new AuthorSearchParams();
         searchParams.setName("John");
 
-        Page<AuthorWithBooksCount> actual = repository.searchWithBooksCount(
-                searchParams, "en", PageRequest.of(0, 10));
+        Page<AuthorWithBooksCount> actual = repository.searchWithBooksCount(searchParams, "en", "en", PageRequest.of(0, 10));
 
         assertThat(actual.getContent()).hasSize(1);
         AuthorWithBooksCount dto = actual.getContent().get(0);
@@ -110,7 +109,21 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
     }
 
     @Test
-    void findAllCountriesWithCount_ShouldReturnCountryCounts() {
+    void searchWithBooksCount_ShouldFallbackToDefaultLanguage_WhenRequestedLanguageTranslationIsMissing() {
+        Author author = createAuthor();
+        testDbClient.saveAuthor(author);
+        AuthorSearchParams searchParams = new AuthorSearchParams();
+
+        Page<AuthorWithBooksCount> actual = repository.searchWithBooksCount(searchParams, "de", "en", PageRequest.of(0, 10));
+
+        assertThat(actual.getContent()).hasSize(1);
+        AuthorWithBooksCount dto = actual.getContent().get(0);
+        assertThat(dto.getId()).isEqualTo(author.getId());
+        assertThat(dto.getFullName()).isEqualTo("John Doe");
+    }
+
+    @Test
+    void findAllAuthorCountriesWithCount_ShouldReturnCountryCounts() {
         Author author1 = createAuthor();
         testDbClient.saveAuthor(author1);
         Author author2 = createAuthor();
@@ -118,7 +131,7 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
         author2.getTranslations().get("en").setFullName("Jane Doe");
         testDbClient.saveAuthor(author2);
 
-        List<CountryWithCount> actual = repository.findAllCountriesWithCount("en");
+        List<CountryWithCount> actual = repository.findAllAuthorCountriesWithCount("en", "en");
 
         assertThat(actual).hasSize(2);
         assertThat(actual.get(0).getCountry()).isEqualTo("UK");
@@ -154,6 +167,7 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
         Page<AuthorWithBooksCount> actual = repository.searchForUser(user.getId(),
                 searchParams,
                 "en",
+                "en",
                 PageRequest.of(0, 10));
 
         assertThat(actual.getContent()).hasSize(1);
@@ -163,7 +177,7 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
     }
 
     @Test
-    void findAllCountriesForUser_ShouldReturnCountryCountsForSpecificUser() {
+    void findAllAuthorCountriesWithCountForUser_ShouldReturnCountryCountsForSpecificUser() {
         User user = User.builder()
                 .email("user-countries@example.com")
                 .fullName("User Countries")
@@ -196,7 +210,7 @@ class AuthorRepositoryTest extends AbstractRepositoryTest<AuthorRepository> {
                 .build();
         testDbClient.saveLibraryBook(lb2);
 
-        List<CountryWithCount> actual = repository.findAllCountriesForUser(user.getId(), "en");
+        List<CountryWithCount> actual = repository.findAllAuthorCountriesWithCountForUser(user.getId(), "en", "en");
 
         assertThat(actual).hasSize(2);
         assertThat(actual.get(0).getCountry()).isEqualTo("UK");

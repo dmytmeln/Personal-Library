@@ -26,12 +26,12 @@ public class LibraryAuthorController {
     public Page<AuthorWithBooksCount> getAll(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                              PaginationParams paginationParams,
                                              AuthorSearchParams searchParams) {
-        return service.searchForUser(userPrincipal.getId(), paginationParams, searchParams);
+        return service.searchInUserLibrary(userPrincipal.getId(), paginationParams, searchParams);
     }
 
     @GetMapping("/countries")
     public List<CountryWithCount> getCountries(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return service.getCountriesForUser(userPrincipal.getId());
+        return service.getUserAuthorCountriesWithCount(userPrincipal.getId());
     }
 
 }

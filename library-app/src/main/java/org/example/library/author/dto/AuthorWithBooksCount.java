@@ -1,6 +1,7 @@
 package org.example.library.author.dto;
 
 public interface AuthorWithBooksCount {
+
     Integer getId();
 
     String getFullName();
@@ -14,4 +15,5 @@ public interface AuthorWithBooksCount {
     Long getBooksCount();
 
     Integer getPopularityCount();
+
 }

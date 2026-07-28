@@ -25,17 +25,17 @@ public class AuthorController {
     @GetMapping
     public Page<AuthorWithBooksCount> getAll(PaginationParams paginationParams,
                                              AuthorSearchParams searchParams) {
-        return service.search(paginationParams, searchParams);
+        return service.searchInCatalog(paginationParams, searchParams);
     }
 
     @GetMapping("/{authorId}")
     public AuthorDto getById(@PathVariable Integer authorId) {
-        return service.getById(authorId);
+        return service.getLocalizedAuthor(authorId);
     }
 
     @GetMapping("/countries")
-    public List<CountryWithCount> getAllCountries() {
-        return service.getAllCountries();
+    public List<CountryWithCount> getAuthorCountriesWithCount() {
+        return service.getAuthorCountriesWithCount();
     }
 
 }

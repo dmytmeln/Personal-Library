@@ -8,10 +8,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class AuthorSearchParams {
+
     private String name;
     private String country;
     private Short birthYearMin;
     private Short birthYearMax;
     private Integer booksCountMin;
     private Integer booksCountMax;
+
 }

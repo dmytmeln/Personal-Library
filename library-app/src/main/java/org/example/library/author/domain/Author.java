@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.library.author.dto.AuthorSaveRequest;
 import org.example.library.book.domain.Book;
 import org.example.library.book.domain.Book_;
 
@@ -21,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
@@ -51,7 +54,7 @@ public class Author {
     @Builder.Default
     private Integer popularityCount = 0;
 
-    @OneToMany(mappedBy = "author", cascade = ALL, fetch = LAZY)
+    @OneToMany(mappedBy = "author", cascade = ALL, fetch = LAZY, orphanRemoval = true)
     @MapKey(name = "languageCode")
     @Builder.Default
     private Map<String, AuthorTranslation> translations = new HashMap<>();
@@ -79,6 +82,38 @@ public class Author {
         }
 
         return this.translations.get(languageCode);
+    }
+
+    public AuthorTranslation getTranslationOrDefault(String requestedLang, String defaultLang) {
+        if (this.translations.isEmpty()) {
+            return null;
+        }
+
+        return Optional.ofNullable(this.translations.get(requestedLang))
+                .orElseGet(() -> this.translations.get(defaultLang));
+    }
+
+    public void syncTranslations(Map<String, AuthorSaveRequest.AuthorTranslationRequest> incomingTranslations) {
+        pruneMissingLanguages(incomingTranslations.keySet());
+        upsertTranslations(incomingTranslations);
+    }
+
+    public void upsertTranslation(String languageCode, String fullName, String country, String biography) {
+        var translation = this.translations.computeIfAbsent(languageCode, ignored -> new AuthorTranslation());
+
+        translation.setLanguageCode(languageCode);
+        translation.setAuthor(this);
+        translation.setFullName(fullName);
+        translation.setCountry(country);
+        translation.setBiography(biography);
+    }
+
+    private void pruneMissingLanguages(Set<String> targetLanguages) {
+        this.translations.keySet().retainAll(targetLanguages);
+    }
+
+    private void upsertTranslations(Map<String, AuthorSaveRequest.AuthorTranslationRequest> incomingTranslations) {
+        incomingTranslations.forEach((lang, req) -> upsertTranslation(lang, req.getFullName(), req.getCountry(), req.getBiography()));
     }
 
 }
