@@ -1,60 +1,26 @@
 package org.example.library.note.service;
 
-import org.example.library.book.domain.Book;
 import org.example.library.common.exception.NotFoundException;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.note.domain.Note;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.example.library.note.dto.NoteRequest;
-import org.example.library.user.domain.User;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.library.book.domain.BookStatus.NEW;
-import static org.example.library.library_book.domain.LibraryBookStatus.NO_TAG;
 import static org.example.library.note.domain.Note.NoteType.TEXT;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class NoteServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class NoteServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private NoteService service;
-
-    @BeforeEach
-    void cleanDbBefore() {
-        testDbClient.cleanDatabase();
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-    }
 
     @Test
     void shouldGetNoteByLibraryBookId() {
         var user = saveUser();
         var book = saveBook();
-        var libraryBook = saveLibraryBook(user, book);
-        var note = Note.builder()
-                .content("Sample Note")
-                .noteType(TEXT)
-                .libraryBook(libraryBook)
-                .build();
-        testDbClient.saveNote(note);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
+        saveNote(n -> n.libraryBook(libraryBook).content("Sample Note").noteType(TEXT));
 
         var result = service.getByLibraryBookId(libraryBook.getId(), user.getId());
 
@@ -65,7 +31,7 @@ class NoteServiceIntegrationTest {
     void shouldThrowNotFoundWhenNoteDoesNotExist() {
         var user = saveUser();
         var book = saveBook();
-        var libraryBook = saveLibraryBook(user, book);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
 
         assertThatThrownBy(() -> service.getByLibraryBookId(libraryBook.getId(), user.getId()))
                 .isInstanceOf(NotFoundException.class)
@@ -76,7 +42,7 @@ class NoteServiceIntegrationTest {
     void shouldCreateNewNote() {
         var user = saveUser();
         var book = saveBook();
-        var libraryBook = saveLibraryBook(user, book);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
         var request = new NoteRequest(libraryBook.getId(), "New Note Content");
 
         var result = service.createOrUpdate(request, user.getId());
@@ -92,13 +58,8 @@ class NoteServiceIntegrationTest {
     void shouldUpdateExistingNote() {
         var user = saveUser();
         var book = saveBook();
-        var libraryBook = saveLibraryBook(user, book);
-        var note = Note.builder()
-                .content("Old Content")
-                .noteType(TEXT)
-                .libraryBook(libraryBook)
-                .build();
-        testDbClient.saveNote(note);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
+        var note = saveNote(n -> n.libraryBook(libraryBook).content("Old Content").noteType(TEXT));
         var request = new NoteRequest(libraryBook.getId(), "Updated Content");
 
         var result = service.createOrUpdate(request, user.getId());
@@ -114,51 +75,12 @@ class NoteServiceIntegrationTest {
     void shouldDeleteNote() {
         var user = saveUser();
         var book = saveBook();
-        var libraryBook = saveLibraryBook(user, book);
-        var note = Note.builder()
-                .content("Note to delete")
-                .noteType(TEXT)
-                .libraryBook(libraryBook)
-                .build();
-        testDbClient.saveNote(note);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
+        var note = saveNote(n -> n.libraryBook(libraryBook).content("Note to delete").noteType(TEXT));
 
         service.delete(libraryBook.getId(), user.getId());
 
         assertThat(testDbClient.findNoteById(note.getId())).isNull();
-    }
-
-    private User saveUser() {
-        var user = User.builder()
-                .email("user@example.com")
-                .fullName("User")
-                .password("pass")
-                .role(USER)
-                .build();
-
-        testDbClient.saveUser(user);
-        return user;
-    }
-
-    private Book saveBook() {
-        var book = Book.builder()
-                .status(NEW)
-                .popularityCount(0)
-                .build();
-
-        testDbClient.saveBook(book);
-        return book;
-    }
-
-    private LibraryBook saveLibraryBook(User user, Book book) {
-        var libraryBook = LibraryBook.builder()
-                .user(user)
-                .book(book)
-                .title("Title")
-                .status(NO_TAG)
-                .build();
-
-        testDbClient.saveLibraryBook(libraryBook);
-        return libraryBook;
     }
 
 }

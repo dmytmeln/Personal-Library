@@ -5,73 +5,28 @@ import org.example.library.author.domain.AuthorTranslation;
 import org.example.library.author.dto.AuthorSaveRequest;
 import org.example.library.author.dto.AuthorSaveRequest.AuthorTranslationRequest;
 import org.example.library.author.dto.AuthorSearchParams;
-import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookTranslation;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
 import org.example.library.common.pagination.PaginationParams;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.user.domain.User;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.library.book.domain.BookStatus.PRELIMINARY;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class AuthorServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class AuthorServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private AuthorService service;
 
-    @BeforeAll
-    static void setUp() {
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
-    }
-
-    @BeforeEach
-    void cleanDbBefore() {
-        testDbClient.cleanDatabase();
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-        LocaleContextHolder.resetLocaleContext();
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
-    }
-
-    @AfterAll
-    static void tearDown() {
-        LocaleContextHolder.resetLocaleContext();
-    }
-
     @Test
     void shouldReturnAuthorWhenGetById() {
-        var expected = saveAuthor("John Doe", "USA");
+        var expected = saveAuthor(a -> a.fullName("John Doe").country("USA"));
 
         var result = service.getLocalizedAuthor(expected.getId());
 
@@ -90,11 +45,11 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldSearchAuthorsWithBooksCount() {
-        var author = saveAuthor("Author 1", "UK");
-        saveBook(author);
-        saveBook(author);
-        var otherAuthor = saveAuthor("Author 2", "USA");
-        saveBook(otherAuthor);
+        var author = saveAuthor(a -> a.fullName("Author 1").country("UK"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(author));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(author));
+        var otherAuthor = saveAuthor(a -> a.fullName("Author 2").country("USA"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(otherAuthor));
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -112,15 +67,15 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldSearchAuthorsByBooksCountRange() {
-        var auth1 = saveAuthor("Auth 1", "Country");
-        saveBook(auth1);
-        var auth2 = saveAuthor("Auth 2", "Country");
-        saveBook(auth2);
-        saveBook(auth2);
-        var auth3 = saveAuthor("Auth 3", "Country");
-        saveBook(auth3);
-        saveBook(auth3);
-        saveBook(auth3);
+        var auth1 = saveAuthor(a -> a.fullName("Auth 1").country("Country"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(auth1));
+        var auth2 = saveAuthor(a -> a.fullName("Auth 2").country("Country"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(auth2));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(auth2));
+        var auth3 = saveAuthor(a -> a.fullName("Auth 3").country("Country"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(auth3));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(auth3));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(auth3));
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -138,7 +93,7 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldFindAuthorWithTypo() {
-        saveAuthor("John Doe", "USA");
+        saveAuthor(a -> a.fullName("John Doe").country("USA"));
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -153,18 +108,12 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldSearchAuthorsForUser() {
-        var user = User.builder()
-                .email("test@example.com")
-                .fullName("Test User")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(user);
-        var author = saveAuthor("User Author", "USA");
-        var book1 = saveBook(author);
-        var book2 = saveBook(author);
-        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book1).title("Title 1").build());
-        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book2).title("Title 2").build());
+        var user = saveUser(u -> u.email("test@example.com"));
+        var author = saveAuthor(a -> a.fullName("User Author").country("USA"));
+        var book1 = saveBook(b -> b.title("Book").bookLanguage("English").authors(author));
+        var book2 = saveBook(b -> b.title("Book").bookLanguage("English").authors(author));
+        saveLibraryBook(lb -> lb.user(user).book(book1));
+        saveLibraryBook(lb -> lb.user(user).book(book2));
         var pagination = new PaginationParams();
         pagination.setPage(0);
         pagination.setSize(10);
@@ -180,9 +129,9 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldReturnAllCountries() {
-        saveAuthor("Auth 1", "USA");
-        saveAuthor("Auth 2", "UK");
-        saveAuthor("Auth 3", "USA");
+        saveAuthor(a -> a.fullName("Auth 1").country("USA"));
+        saveAuthor(a -> a.fullName("Auth 2").country("UK"));
+        saveAuthor(a -> a.fullName("Auth 3").country("USA"));
 
         var countries = service.getAuthorCountriesWithCount();
 
@@ -192,19 +141,13 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldReturnCountriesForUser() {
-        var user = User.builder()
-                .email("user@example.com")
-                .fullName("User")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(user);
-        var auth1 = saveAuthor("Auth 1", "USA");
-        var auth2 = saveAuthor("Auth 2", "UK");
-        var book1 = saveBook(auth1);
-        var book2 = saveBook(auth2);
-        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book1).title("T1").build());
-        testDbClient.saveLibraryBook(LibraryBook.builder().user(user).book(book2).title("T2").build());
+        var user = saveUser(u -> u.email("user@example.com").fullName("User"));
+        var auth1 = saveAuthor(a -> a.fullName("Auth 1").country("USA"));
+        var auth2 = saveAuthor(a -> a.fullName("Auth 2").country("UK"));
+        var book1 = saveBook(b -> b.title("Book").bookLanguage("English").authors(auth1));
+        var book2 = saveBook(b -> b.title("Book").bookLanguage("English").authors(auth2));
+        saveLibraryBook(lb -> lb.user(user).book(book1));
+        saveLibraryBook(lb -> lb.user(user).book(book2));
 
         var countries = service.getUserAuthorCountriesWithCount(user.getId());
 
@@ -214,7 +157,7 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldReturnAuthorResponseWhenGetAuthor() {
-        var author = saveAuthor("Author Name", "USA");
+        var author = saveAuthor(a -> a.fullName("Author Name").country("USA"));
 
         var result = service.getAuthorWithAllTranslations(author.getId());
 
@@ -270,7 +213,7 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldUpdateAuthor() {
-        var author = saveAuthor("Old Name", "USA");
+        var author = saveAuthor(a -> a.fullName("Old Name").country("USA"));
         var dto = AuthorSaveRequest.builder()
                 .birthYear(author.getBirthYear())
                 .deathYear((short) 2000)
@@ -299,7 +242,19 @@ class AuthorServiceIntegrationTest {
                 .country("США")
                 .biography("Біографія")
                 .build();
-        var author = saveAuthor("John Doe", "USA", Map.of("uk", ukTranslation));
+        var author = Author.builder()
+                .birthYear((short) 1900)
+                .build();
+        var enTranslation = AuthorTranslation.builder()
+                .languageCode("en")
+                .fullName("John Doe")
+                .country("USA")
+                .biography("Biography of John Doe")
+                .author(author)
+                .build();
+        ukTranslation.setAuthor(author);
+        author.setTranslations(new HashMap<>(Map.of("en", enTranslation, "uk", ukTranslation)));
+        testDbClient.saveAuthor(author);
         var dto = AuthorSaveRequest.builder()
                 .birthYear(author.getBirthYear())
                 .translations(Map.of("en", AuthorTranslationRequest.builder()
@@ -319,7 +274,7 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldDeleteAuthor() {
-        var author = saveAuthor("Author", "USA");
+        var author = saveAuthor(a -> a.fullName("Author").country("USA"));
 
         service.deleteAuthor(author.getId());
 
@@ -328,8 +283,8 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldThrowBadRequestWhenDeleteAuthorWithBooks() {
-        var author = saveAuthor("Author", "USA");
-        saveBook(Set.of(author));
+        var author = saveAuthor(a -> a.fullName("Author").country("USA"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(author));
         var authorId = author.getId();
 
         assertThatThrownBy(() -> service.deleteAuthor(authorId))
@@ -339,8 +294,8 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldDeleteAuthorsBulk() {
-        var a1 = saveAuthor("A1", "USA");
-        var a2 = saveAuthor("A2", "USA");
+        var a1 = saveAuthor(a -> a.fullName("A1").country("USA"));
+        var a2 = saveAuthor(a -> a.fullName("A2").country("USA"));
 
         service.deleteAuthors(List.of(a1.getId(), a2.getId()));
 
@@ -349,75 +304,14 @@ class AuthorServiceIntegrationTest {
 
     @Test
     void shouldThrowBadRequestWhenDeleteAuthorsBulkWithBooks() {
-        var a1 = saveAuthor("A1", "USA");
-        var a2 = saveAuthor("A2", "USA");
-        saveBook(Set.of(a1));
+        var a1 = saveAuthor(a -> a.fullName("A1").country("USA"));
+        var a2 = saveAuthor(a -> a.fullName("A2").country("USA"));
+        saveBook(b -> b.title("Book").bookLanguage("English").authors(a1));
         var authorIds = List.of(a1.getId(), a2.getId());
 
         assertThatThrownBy(() -> service.deleteAuthors(authorIds))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("error.author.has_books");
-    }
-
-    private Author saveAuthor(String fullName, String country) {
-        return saveAuthor(fullName, country, null);
-    }
-
-    private Author saveAuthor(String fullName, String country, Map<String, AuthorTranslation> extraTranslations) {
-        var author = Author.builder()
-                .birthYear((short) 1900)
-                .popularityCount(0)
-                .build();
-
-        var translations = new HashMap<String, AuthorTranslation>();
-        translations.put("en", AuthorTranslation.builder()
-                .languageCode("en")
-                .fullName(fullName)
-                .country(country)
-                .biography("Biography of " + fullName)
-                .author(author)
-                .build());
-
-        if (extraTranslations != null) {
-            extraTranslations.forEach((code, trans) -> {
-                trans.setAuthor(author);
-                translations.put(code, trans);
-            });
-        }
-        author.setTranslations(translations);
-
-        testDbClient.saveAuthor(author);
-        return author;
-    }
-
-    private Book saveBook(Author author) {
-        return saveBook(Set.of(author));
-    }
-
-    private Book saveBook(Set<Author> authors) {
-        var book = Book.builder()
-                .authors(authors)
-                .status(PRELIMINARY)
-                .popularityCount(0)
-                .build();
-
-        var translation = BookTranslation.builder()
-                .languageCode("en")
-                .title("Book")
-                .bookLanguage("English")
-                .description("Desc Book")
-                .book(book)
-                .build();
-        book.setTranslations(new HashMap<>(Map.of("en", translation)));
-
-        testDbClient.saveBook(book);
-        if (authors != null) {
-            for (Author author : authors) {
-                testDbClient.linkBookToAuthor(book.getId(), author.getId());
-            }
-        }
-
-        return book;
     }
 
 }

@@ -1,101 +1,41 @@
 package org.example.library.recommendation.service;
 
-import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookTranslation;
-import org.example.library.category.domain.Category;
-import org.example.library.category.domain.CategoryTranslation;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.library_book.domain.LibraryBook;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.example.library.recommendation.domain.UserProfileVector;
-import org.example.library.user.domain.User;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
-import java.time.LocalDateTime;
 import java.time.Year;
-import java.util.Locale;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.example.library.book.domain.BookStatus.NEW;
 import static org.example.library.library_book.domain.LibraryBookStatus.READING;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class RecommendationServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class RecommendationServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private RecommendationService recommendationService;
 
-    private User testUser;
-    private Category defaultCategory;
-
-    @BeforeAll
-    static void setUpAll() {
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
-    }
-
-    @BeforeEach
-    void setUp() {
-        testDbClient.cleanDatabase();
-
-        testUser = User.builder()
-                .email("test@example.com")
-                .fullName("Test User")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(testUser);
-
-        var translation = CategoryTranslation.builder()
-                .languageCode("en")
-                .name("Fiction")
-                .description("Fiction category")
-                .build();
-        defaultCategory = Category.builder()
-                .popularityCount(0)
-                .translations(Map.of("en", translation))
-                .build();
-        translation.setCategory(defaultCategory);
-
-        testDbClient.saveCategory(defaultCategory);
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-    }
-
     @Test
     void shouldReturnRecommendationsBasedOnVector() {
+        var testUser = saveUser();
         float[] userVector = new float[384];
         userVector[0] = 1.0f;
-        saveUserProfileVector(testUser.getId(), userVector);
+        testDbClient.saveUserProfileVector(UserProfileVector.builder()
+                .userId(testUser.getId())
+                .embedding(userVector)
+                .build());
 
         float[] book3Vector = new float[384];
         book3Vector[0] = 0.9f;
-        saveBook("Similar Book 2", book3Vector, (short) 2020);
+        saveBook(b -> b.title("Similar Book 2").embedding(book3Vector).publishYear((short)2020));
 
         float[] book1Vector = new float[384];
         book1Vector[0] = 0.5f;
-        saveBook("Similar Book 1", book1Vector, (short) 2020);
+        saveBook(b -> b.title("Similar Book 1").embedding(book1Vector).publishYear((short)2020));
 
         float[] book2Vector = new float[384];
         book2Vector[1] = 1.0f;
-        saveBook("Dissimilar Book", book2Vector, (short) 2020);
+        saveBook(b -> b.title("Dissimilar Book").embedding(book2Vector).publishYear((short)2020));
 
         var recommendations = recommendationService.getRecommendations(testUser.getId(), 5);
 
@@ -107,12 +47,13 @@ class RecommendationServiceIntegrationTest {
 
     @Test
     void shouldReturnSimilarBooksExcludingTheTargetBook() {
+        var testUser = saveUser();
         float[] targetVector = new float[384];
         targetVector[0] = 1.0f;
-        var targetBook = saveBook("Target Book", targetVector, (short) 2020);
+        var targetBook = saveBook(b -> b.title("Target Book").embedding(targetVector).publishYear((short)2020));
         float[] similarVector = new float[384];
         similarVector[0] = 0.9f;
-        saveBook("Similar Book", similarVector, (short) 2020);
+        saveBook(b -> b.title("Similar Book").embedding(similarVector).publishYear((short)2020));
 
         var similarBooks = recommendationService.getSimilarBooks(targetBook.getId(), testUser.getId(), 5);
 
@@ -122,8 +63,9 @@ class RecommendationServiceIntegrationTest {
 
     @Test
     void shouldReturnNewArrivalsForCurrentYear() {
-        saveBook("Old Book", new float[384], (short) 1999);
-        saveBook("New Book", new float[384], (short) Year.now().getValue());
+        var testUser = saveUser();
+        saveBook(b -> b.title("Old Book").embedding(new float[384]).publishYear((short)1999));
+        saveBook(b -> b.title("New Book").embedding(new float[384]).publishYear((short)Year.now().getValue()));
 
         var newArrivals = recommendationService.getNewArrivals(testUser.getId(), 5);
 
@@ -133,18 +75,14 @@ class RecommendationServiceIntegrationTest {
 
     @Test
     void shouldReturnPopularBooksRecently() {
-        var book1 = saveBook("Popular Book 1", new float[384], (short) 2020);
-        var book2 = saveBook("Popular Book 2", new float[384], (short) 2020);
-        var otherUser1 = User.builder().email("o1@example.com").fullName("O1").password("p").role(USER).build();
-        var otherUser2 = User.builder().email("o2@example.com").fullName("O2").password("p").role(USER).build();
-        testDbClient.saveUser(otherUser1);
-        testDbClient.saveUser(otherUser2);
-        testDbClient.saveLibraryBook(
-                LibraryBook.builder().user(otherUser1).book(book1).status(READING).title("T1").addedAt(LocalDateTime.now()).build());
-        testDbClient.saveLibraryBook(
-                LibraryBook.builder().user(otherUser2).book(book1).status(READING).title("T1").addedAt(LocalDateTime.now()).build());
-        testDbClient.saveLibraryBook(
-                LibraryBook.builder().user(otherUser1).book(book2).status(READING).title("T2").addedAt(LocalDateTime.now()).build());
+        var testUser = saveUser();
+        var book1 = saveBook(b -> b.title("Popular Book 1").embedding(new float[384]).publishYear((short)2020));
+        var book2 = saveBook(b -> b.title("Popular Book 2").embedding(new float[384]).publishYear((short)2020));
+        var otherUser1 = saveUser(u -> u.email("o1@example.com").fullName("O1").password("p"));
+        var otherUser2 = saveUser(u -> u.email("o2@example.com").fullName("O2").password("p"));
+        saveLibraryBook(lb -> lb.user(otherUser1).book(book1).status(READING));
+        saveLibraryBook(lb -> lb.user(otherUser2).book(book1).status(READING));
+        saveLibraryBook(lb -> lb.user(otherUser1).book(book2).status(READING));
 
         var popularBooks = recommendationService.getPopularBooks(testUser.getId(), 5);
 
@@ -155,15 +93,13 @@ class RecommendationServiceIntegrationTest {
 
     @Test
     void shouldReturnTrendingInFavoriteGenres() {
-        var otherCategory = Category.builder().popularityCount(0).build();
-        var ct = CategoryTranslation.builder().languageCode("en").name("Sci-Fi").description("Sci-Fi").category(otherCategory).build();
-        otherCategory.setTranslations(Map.of("en", ct));
-        testDbClient.saveCategory(otherCategory);
-        var book1 = saveBook("Fiction Book 1", new float[384], (short) 2020, defaultCategory);
-        saveBook("Fiction Book 2", new float[384], (short) 2020, defaultCategory);
-        saveBook("Sci-Fi Book", new float[384], (short) 2020, otherCategory);
-        testDbClient.saveLibraryBook(
-                LibraryBook.builder().user(testUser).book(book1).status(READING).title("FB1").addedAt(LocalDateTime.now()).build());
+        var testUser = saveUser();
+        var fictionCategory = saveCategory(c -> c.name("Fiction").description("Fiction category"));
+        var otherCategory = saveCategory(c -> c.name("Sci-Fi").description("Sci-Fi"));
+        var book1 = saveBook(b -> b.title("Fiction Book 1").embedding(new float[384]).publishYear((short)2020).category(fictionCategory));
+        saveBook(b -> b.title("Fiction Book 2").embedding(new float[384]).publishYear((short)2020).category(fictionCategory));
+        saveBook(b -> b.title("Sci-Fi Book").embedding(new float[384]).publishYear((short)2020).category(otherCategory));
+        saveLibraryBook(lb -> lb.user(testUser).book(book1).status(READING));
 
         var trending = recommendationService.getTrendingInFavoriteGenres(testUser.getId(), 5);
 
@@ -173,68 +109,31 @@ class RecommendationServiceIntegrationTest {
 
     @Test
     void shouldReturnBooksBasedOnMoodQuery() {
+        var testUser = saveUser();
         float[] vector1 = new float[384];
         vector1[0] = 0.9f;
-        saveBook("Space Adventure", vector1, (short) 2024);
+        saveBook(b -> b.title("Space Adventure").embedding(vector1).publishYear((short)2024));
 
         float[] vector2 = new float[384];
         vector2[0] = 0.8f;
-        saveBook("Galactic Journey", vector2, (short) 2023);
+        saveBook(b -> b.title("Galactic Journey").embedding(vector2).publishYear((short)2023));
 
         float[] vector3 = new float[384];
         vector3[1] = 0.9f;
-        saveBook("Historical Romance", vector3, (short) 2022);
+        saveBook(b -> b.title("Historical Romance").embedding(vector3).publishYear((short)2022));
 
         float[] vector4 = new float[384];
         vector4[1] = 0.8f;
-        saveBook("Medieval Love", vector4, (short) 2021);
+        saveBook(b -> b.title("Medieval Love").embedding(vector4).publishYear((short)2021));
 
         float[] vector5 = new float[384];
         vector5[5] = 0.9f;
-        saveBook("Cooking Basics", vector5, (short) 2020);
+        saveBook(b -> b.title("Cooking Basics").embedding(vector5).publishYear((short)2020));
 
         var results = recommendationService.searchByMood("space trip", testUser.getId(), 2);
 
         assertThat(results).isNotEmpty();
         assertThat(results.get(0).getTitle()).containsAnyOf("Space Adventure", "Galactic Journey");
-    }
-
-    private Book saveBook(String title, float[] vector, short publishYear) {
-        return saveBook(title, vector, publishYear, defaultCategory);
-    }
-
-    private Book saveBook(String title, float[] vector, short publishYear, Category category) {
-        var book = Book.builder()
-                .category(category)
-                .publishYear(publishYear)
-                .popularityCount(0)
-                .embedding(vector)
-                .status(NEW)
-                .pages((short) 100)
-                .coverImageUrl("url")
-                .build();
-
-        var translation = BookTranslation.builder()
-                .languageCode("en")
-                .title(title)
-                .bookLanguage("English")
-                .description("Description of " + title)
-                .book(book)
-                .build();
-        book.setTranslations(Map.of("en", translation));
-
-        testDbClient.saveBook(book);
-        return book;
-    }
-
-    private void saveUserProfileVector(Integer userId, float[] vector) {
-        var userProfileVector = UserProfileVector.builder()
-                .userId(userId)
-                .embedding(vector)
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        testDbClient.saveUserProfileVector(userProfileVector);
     }
 
 }

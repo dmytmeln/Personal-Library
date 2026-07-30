@@ -3,46 +3,23 @@ package org.example.library.user.service;
 import org.example.library.auth.dto.UserRegisterRequest;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.user.domain.User;
+import org.example.library.config.AbstractServiceIntegrationTest;
+import org.example.library.user.domain.Role;
 import org.example.library.user.dto.UpdateProfileRequest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class UserServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class UserServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserService userService;
-
-    @BeforeEach
-    void cleanDbBefore() {
-        testDbClient.cleanDatabase();
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-    }
 
     @Test
     void shouldRegisterUser() {
@@ -57,7 +34,7 @@ class UserServiceIntegrationTest {
         assertThat(response.getId()).isNotNull();
         assertThat(response.getEmail()).isEqualTo("newuser@example.com");
         assertThat(response.getFullName()).isEqualTo("New User");
-        assertThat(response.getRole()).isEqualTo(USER);
+        assertThat(response.getRole()).isEqualTo(Role.USER);
         var savedUser = testDbClient.findUserById(response.getId());
         assertThat(savedUser).isNotNull();
         assertThat(passwordEncoder.matches("password123", savedUser.getPassword())).isTrue();
@@ -65,13 +42,7 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldThrowBadRequestWhenRegisteringWithExistingEmail() {
-        var existingUser = User.builder()
-                .email("existing@example.com")
-                .fullName("Existing User")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(existingUser);
+        var existingUser = saveUser(u -> u.email("existing@example.com").fullName("Existing User").password("pass"));
 
         var request = UserRegisterRequest.builder()
                 .email("existing@example.com")
@@ -86,13 +57,7 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldUpdateProfile() {
-        var user = User.builder()
-                .email("user@example.com")
-                .fullName("Old Name")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(user);
+        var user = saveUser(u -> u.email("user@example.com").fullName("Old Name").password("pass"));
 
         var request = UpdateProfileRequest.builder()
                 .email("user@example.com")
@@ -110,13 +75,7 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldUpdateProfileAndIssueNewTokensWhenEmailChanges() {
-        var user = User.builder()
-                .email("old@example.com")
-                .fullName("User")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(user);
+        var user = saveUser(u -> u.email("old@example.com").fullName("User").password("pass"));
 
         var request = UpdateProfileRequest.builder()
                 .email("new@example.com")
@@ -147,20 +106,8 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldThrowBadRequestWhenUpdatingToExistingEmail() {
-        var user1 = User.builder()
-                .email("user1@example.com")
-                .fullName("User One")
-                .password("pass")
-                .role(USER)
-                .build();
-        var user2 = User.builder()
-                .email("user2@example.com")
-                .fullName("User Two")
-                .password("pass")
-                .role(USER)
-                .build();
-        testDbClient.saveUser(user1);
-        testDbClient.saveUser(user2);
+        var user1 = saveUser(u -> u.email("user1@example.com").fullName("User One").password("pass"));
+        var user2 = saveUser(u -> u.email("user2@example.com").fullName("User Two").password("pass"));
 
         var request = UpdateProfileRequest.builder()
                 .email("user2@example.com")

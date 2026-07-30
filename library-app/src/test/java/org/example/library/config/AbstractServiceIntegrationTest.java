@@ -18,8 +18,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Locale;
 import java.util.function.Consumer;
+
+import static java.util.Locale.ENGLISH;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,7 +33,7 @@ public abstract class AbstractServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         testDbClient.cleanDatabase();
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
+        LocaleContextHolder.setLocale(ENGLISH);
     }
 
     protected Author saveAuthor() {

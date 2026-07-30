@@ -3,33 +3,19 @@ package org.example.library.security.jwt;
 import org.example.library.auth.domain.RefreshToken;
 import org.example.library.auth.repository.RefreshTokenRepository;
 import org.example.library.auth.service.RefreshTokenService;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.user.domain.User;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.example.library.user.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class RefreshTokenServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class RefreshTokenServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
@@ -39,16 +25,6 @@ class RefreshTokenServiceIntegrationTest {
 
     @Autowired
     private RefreshTokenService service;
-
-    @BeforeEach
-    void cleanDbBefore() {
-        testDbClient.cleanDatabase();
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-    }
 
     @Test
     void shouldGenerateNewTokens() {
@@ -173,18 +149,6 @@ class RefreshTokenServiceIntegrationTest {
                 .first()
                 .extracting(RefreshToken::getId)
                 .isEqualTo(response.refreshTokenId());
-    }
-
-    private User saveUser() {
-        var user = User.builder()
-                .email("user@test.com")
-                .fullName("Test User")
-                .password("password")
-                .role(USER)
-                .build();
-
-        testDbClient.saveUser(user);
-        return user;
     }
 
 }

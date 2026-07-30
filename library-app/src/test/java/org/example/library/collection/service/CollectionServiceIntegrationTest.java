@@ -1,74 +1,26 @@
 package org.example.library.collection.service;
 
-import org.example.library.book.domain.Book;
-import org.example.library.collection.domain.Collection;
 import org.example.library.collection.dto.CreateCollectionRequest;
 import org.example.library.collection.dto.UpdateCollectionDto;
-import org.example.library.collection_book.domain.CollectionBook;
-import org.example.library.collection_book.domain.CollectionBookId;
 import org.example.library.common.exception.BadRequestException;
 import org.example.library.common.exception.NotFoundException;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.library_book.domain.LibraryBook;
-import org.example.library.user.domain.User;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-
-import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.library.book.domain.BookStatus.PRELIMINARY;
-import static org.example.library.library_book.domain.LibraryBookStatus.TO_READ;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class CollectionServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class CollectionServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private CollectionService service;
 
-    @BeforeAll
-    static void setUp() {
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
-    }
-
-    @BeforeEach
-    void cleanDbBefore() {
-        testDbClient.cleanDatabase();
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-        LocaleContextHolder.resetLocaleContext();
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
-    }
-
-    @AfterAll
-    static void tearDown() {
-        LocaleContextHolder.resetLocaleContext();
-    }
-
     @Test
     void shouldReturnAllCollectionsForUser() {
         var user = saveUser();
-        saveCollection("Collection 1", user);
-        saveCollection("Collection 2", user);
+        saveCollection(c -> c.user(user).name("Collection 1"));
+        saveCollection(c -> c.user(user).name("Collection 2"));
 
         var result = service.getAllCollections(user.getId(), null);
 
@@ -79,10 +31,10 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldReturnCollectionsByUserIdAndBookId() {
         var user = saveUser();
-        var collection = saveCollection("My Collection", user);
+        var collection = saveCollection(c -> c.user(user).name("My Collection"));
         var book = saveBook();
-        var libraryBook = saveLibraryBook(book, user);
-        saveCollectionBook(collection, libraryBook);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
+        saveCollectionBook(cb -> cb.collection(collection).libraryBook(libraryBook));
 
         var result = service.getAllByUserIdAndBookId(user.getId(), book.getId());
 
@@ -93,13 +45,8 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldReturnUserCollectionTree() {
         var user = saveUser();
-        var root = saveCollection("Root", user);
-        var child = Collection.builder()
-                .name("Child")
-                .user(user)
-                .parent(root)
-                .build();
-        testDbClient.saveCollection(child);
+        var root = saveCollection(c -> c.user(user).name("Root"));
+        var child = saveCollection(c -> c.user(user).name("Child").parent(root));
 
         var result = service.getUserCollectionTree(user.getId());
 
@@ -112,13 +59,8 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldReturnCollectionDetailsWithAncestors() {
         var user = saveUser();
-        var root = saveCollection("Root", user);
-        var child = Collection.builder()
-                .name("Child")
-                .user(user)
-                .parent(root)
-                .build();
-        testDbClient.saveCollection(child);
+        var root = saveCollection(c -> c.user(user).name("Root"));
+        var child = saveCollection(c -> c.user(user).name("Child").parent(root));
 
         var result = service.getCollectionDetails(child.getId(), user.getId());
 
@@ -153,7 +95,7 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldCreateSubCollection() {
         var user = saveUser();
-        var parent = saveCollection("Parent", user);
+        var parent = saveCollection(c -> c.user(user).name("Parent"));
         var request = new CreateCollectionRequest();
         request.setName("Sub");
         request.setParentId(parent.getId());
@@ -169,13 +111,10 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldThrowBadRequestWhenCreatingCollectionExceedingMaxDepth() {
         var user = saveUser();
-        var c1 = saveCollection("c1", user);
-        var c2 = Collection.builder().name("c2").user(user).parent(c1).build();
-        testDbClient.saveCollection(c2);
-        var c3 = Collection.builder().name("c3").user(user).parent(c2).build();
-        testDbClient.saveCollection(c3);
-        var c4 = Collection.builder().name("c4").user(user).parent(c3).build();
-        testDbClient.saveCollection(c4);
+        var c1 = saveCollection(c -> c.user(user).name("c1"));
+        var c2 = saveCollection(c -> c.user(user).name("c2").parent(c1));
+        var c3 = saveCollection(c -> c.user(user).name("c3").parent(c2));
+        var c4 = saveCollection(c -> c.user(user).name("c4").parent(c3));
 
         var request = new CreateCollectionRequest();
         request.setName("c5");
@@ -189,7 +128,7 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldUpdateCollection() {
         var user = saveUser();
-        var collection = saveCollection("Old Name", user);
+        var collection = saveCollection(c -> c.user(user).name("Old Name"));
         var dto = new UpdateCollectionDto();
         dto.setName("New Name");
 
@@ -204,10 +143,9 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldMoveCollection() {
         var user = saveUser();
-        var parent1 = saveCollection("Parent 1", user);
-        var parent2 = saveCollection("Parent 2", user);
-        var child = Collection.builder().name("Child").user(user).parent(parent1).build();
-        testDbClient.saveCollection(child);
+        var parent1 = saveCollection(c -> c.user(user).name("Parent 1"));
+        var parent2 = saveCollection(c -> c.user(user).name("Parent 2"));
+        var child = saveCollection(c -> c.user(user).name("Child").parent(parent1));
 
         service.moveCollection(child.getId(), parent2.getId(), user.getId());
 
@@ -219,9 +157,8 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldMakeCollectionRootWhenMovingToNullParent() {
         var user = saveUser();
-        var parent = saveCollection("Parent", user);
-        var child = Collection.builder().name("Child").user(user).parent(parent).build();
-        testDbClient.saveCollection(child);
+        var parent = saveCollection(c -> c.user(user).name("Parent"));
+        var child = saveCollection(c -> c.user(user).name("Child").parent(parent));
 
         service.moveCollection(child.getId(), null, user.getId());
 
@@ -233,7 +170,7 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldThrowBadRequestWhenMovingCollectionToItself() {
         var user = saveUser();
-        var collection = saveCollection("Collection", user);
+        var collection = saveCollection(c -> c.user(user).name("Collection"));
 
         assertThatThrownBy(() -> service.moveCollection(collection.getId(), collection.getId(), user.getId()))
                 .isInstanceOf(BadRequestException.class)
@@ -243,7 +180,7 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldDeleteCollection() {
         var user = saveUser();
-        var collection = saveCollection("To Delete", user);
+        var collection = saveCollection(c -> c.user(user).name("To Delete"));
 
         service.deleteCollection(collection.getId(), user.getId());
 
@@ -253,70 +190,16 @@ class CollectionServiceIntegrationTest {
     @Test
     void shouldMoveBookBetweenCollections() {
         var user = saveUser();
-        var source = saveCollection("Source", user);
-        var target = saveCollection("Target", user);
+        var source = saveCollection(c -> c.user(user).name("Source"));
+        var target = saveCollection(c -> c.user(user).name("Target"));
         var book = saveBook();
-        var libraryBook = saveLibraryBook(book, user);
-        saveCollectionBook(source, libraryBook);
+        var libraryBook = saveLibraryBook(lb -> lb.user(user).book(book));
+        saveCollectionBook(cb -> cb.collection(source).libraryBook(libraryBook));
 
         service.moveBook(source.getId(), target.getId(), libraryBook.getId(), user.getId());
 
         assertThat(testDbClient.findCollectionBookById(source.getId(), libraryBook.getId())).isNull();
         assertThat(testDbClient.findCollectionBookById(target.getId(), libraryBook.getId())).isNotNull();
-    }
-
-    private User saveUser() {
-        var user = User.builder()
-                .email("user@test.com")
-                .fullName("Test User")
-                .password("password")
-                .role(USER)
-                .build();
-
-        testDbClient.saveUser(user);
-        return user;
-    }
-
-    private Collection saveCollection(String name, User user) {
-        var collection = Collection.builder()
-                .name(name)
-                .user(user)
-                .build();
-
-        testDbClient.saveCollection(collection);
-        return collection;
-    }
-
-    private Book saveBook() {
-        var book = Book.builder()
-                .status(PRELIMINARY)
-                .popularityCount(0)
-                .build();
-
-        testDbClient.saveBook(book);
-        return book;
-    }
-
-    private LibraryBook saveLibraryBook(Book book, User user) {
-        var libraryBook = LibraryBook.builder()
-                .book(book)
-                .user(user)
-                .status(TO_READ)
-                .title("Test Library Book")
-                .build();
-
-        testDbClient.saveLibraryBook(libraryBook);
-        return libraryBook;
-    }
-
-    private void saveCollectionBook(Collection collection, LibraryBook libraryBook) {
-        var collectionBook = CollectionBook.builder()
-                .id(new CollectionBookId(collection.getId(), libraryBook.getId()))
-                .collection(collection)
-                .libraryBook(libraryBook)
-                .build();
-
-        testDbClient.saveCollectionBook(collectionBook);
     }
 
 }

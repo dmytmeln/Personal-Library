@@ -1,39 +1,22 @@
 package org.example.library.recommendation.service;
 
-import org.example.library.book.domain.Book;
-import org.example.library.book.domain.BookTranslation;
 import org.example.library.book.repository.BookRepository;
-import org.example.library.category.domain.Category;
-import org.example.library.category.domain.CategoryTranslation;
 import org.example.library.category.repository.CategoryRepository;
-import org.example.library.config.PostgresTestContainer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.Locale;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.example.library.book.domain.BookStatus.NEW;
 import static org.example.library.book.domain.BookStatus.SYNCED;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @TestPropertySource(properties = {
         "recommendations.trigger.count=2",
         "recommendations.rebuild.batch-size=1"
 })
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class BookEmbeddingBackfillServiceIntegrationTest {
+class BookEmbeddingBackfillServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private BookEmbeddingBackfillService bookEmbeddingBackfillService;
@@ -47,38 +30,10 @@ class BookEmbeddingBackfillServiceIntegrationTest {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
-    private Category defaultCategory;
-
-    @BeforeAll
-    static void setUpAll() {
-        LocaleContextHolder.setLocale(Locale.ENGLISH);
-    }
-
-    @BeforeEach
-    void setUp() {
-        var translation = CategoryTranslation.builder()
-                .languageCode("en")
-                .name("IT")
-                .description("IT Category")
-                .build();
-        defaultCategory = Category.builder()
-                .popularityCount(0)
-                .translations(Map.of("en", translation))
-                .build();
-        translation.setCategory(defaultCategory);
-
-        categoryRepository.save(defaultCategory);
-    }
-
-    @AfterEach
-    void tearDown() {
-        bookRepository.deleteAll();
-        categoryRepository.deleteAll();
-    }
-
     @Test
     void shouldUpdateBooksMissingEmbeddings() {
-        saveBook("Only Book", "Description");
+        var defaultCategory = saveCategory(c -> c.name("IT").description("IT Category"));
+        saveBook(b -> b.title("Only Book").bookLanguage("English").description("Description").category(defaultCategory).status(NEW));
 
         bookEmbeddingBackfillService.backfillEmbeddings();
 
@@ -91,9 +46,10 @@ class BookEmbeddingBackfillServiceIntegrationTest {
 
     @Test
     void shouldNotUpdateBooksThatAlreadyHaveEmbeddings() {
+        var defaultCategory = saveCategory(c -> c.name("IT").description("IT Category"));
         float[] existingEmbedding = new float[384];
         existingEmbedding[0] = 0.5f;
-        saveBookWithEmbedding("Existing Book", "Description", existingEmbedding);
+        saveBook(b -> b.title("Existing Book").bookLanguage("English").description("Description").embedding(existingEmbedding).category(defaultCategory).status(SYNCED));
 
         bookEmbeddingBackfillService.backfillEmbeddings();
 
@@ -104,9 +60,10 @@ class BookEmbeddingBackfillServiceIntegrationTest {
 
     @Test
     void shouldProcessMultipleBatchesCorrectly() {
-        saveBook("Book 1", "Desc 1");
-        saveBook("Book 2", "Desc 2");
-        saveBook("Book 3", "Desc 3");
+        var defaultCategory = saveCategory(c -> c.name("IT").description("IT Category"));
+        saveBook(b -> b.title("Book 1").bookLanguage("English").description("Desc 1").category(defaultCategory).status(NEW));
+        saveBook(b -> b.title("Book 2").bookLanguage("English").description("Desc 2").category(defaultCategory).status(NEW));
+        saveBook(b -> b.title("Book 3").bookLanguage("English").description("Desc 3").category(defaultCategory).status(NEW));
 
         bookEmbeddingBackfillService.backfillEmbeddings();
 
@@ -118,10 +75,11 @@ class BookEmbeddingBackfillServiceIntegrationTest {
 
     @Test
     void shouldUpdateOnlyBooksWithoutEmbeddingsInMixedScenario() {
+        var defaultCategory = saveCategory(c -> c.name("IT").description("IT Category"));
         float[] existingEmbedding = new float[384];
         existingEmbedding[0] = 0.7f;
-        saveBookWithEmbedding("Has Embedding", "Desc", existingEmbedding);
-        saveBook("No Embedding", "Desc");
+        saveBook(b -> b.title("Has Embedding").bookLanguage("English").description("Desc").embedding(existingEmbedding).category(defaultCategory).status(SYNCED));
+        saveBook(b -> b.title("No Embedding").bookLanguage("English").description("Desc").category(defaultCategory).status(NEW));
 
         bookEmbeddingBackfillService.backfillEmbeddings();
 
@@ -137,32 +95,6 @@ class BookEmbeddingBackfillServiceIntegrationTest {
             assertThat(bookWithoutEmbedding.getEmbedding()).isNotNull();
             assertThat(bookWithoutEmbedding.getStatus()).isEqualTo(SYNCED);
         });
-    }
-
-    private void saveBook(String title, String description) {
-        saveBookWithEmbedding(title, description, null);
-    }
-
-    private void saveBookWithEmbedding(String title, String description, float[] embedding) {
-        var book = Book.builder()
-                .category(defaultCategory)
-                .publishYear((short) 2020)
-                .pages((short) 100)
-                .coverImageUrl("url")
-                .popularityCount(0)
-                .status(embedding == null ? NEW : SYNCED)
-                .embedding(embedding)
-                .build();
-        var translation = BookTranslation.builder()
-                .languageCode("en")
-                .title(title)
-                .bookLanguage("English")
-                .description(description)
-                .book(book)
-                .build();
-        book.setTranslations(Map.of("en", translation));
-
-        bookRepository.save(book);
     }
 
 }

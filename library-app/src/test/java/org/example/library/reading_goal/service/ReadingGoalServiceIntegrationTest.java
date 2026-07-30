@@ -1,54 +1,23 @@
 package org.example.library.reading_goal.service;
 
 import org.example.library.common.exception.NotFoundException;
-import org.example.library.config.PostgresTestContainer;
-import org.example.library.config.TestDbClient;
-import org.example.library.reading_goal.domain.ReadingGoal;
+import org.example.library.config.AbstractServiceIntegrationTest;
 import org.example.library.reading_goal.dto.ReadingGoalDto;
-import org.example.library.user.domain.User;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.library.user.domain.Role.USER;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@ContextConfiguration(initializers = PostgresTestContainer.class)
-class ReadingGoalServiceIntegrationTest {
-
-    @Autowired
-    private TestDbClient testDbClient;
+class ReadingGoalServiceIntegrationTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private ReadingGoalService service;
 
-    @BeforeEach
-    void cleanDbBefore() {
-        testDbClient.cleanDatabase();
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        testDbClient.cleanDatabase();
-    }
-
     @Test
     void shouldGetGoal() {
         var user = saveUser();
-        var goal = ReadingGoal.builder()
-                .user(user)
-                .year(2024)
-                .targetBooks(10)
-                .targetPages(2000)
-                .build();
-        testDbClient.saveReadingGoal(goal);
+        var goal = saveReadingGoal(r -> r.user(user).year(2024).targetBooks(10).targetPages(2000));
 
         var result = service.getGoal(user.getId(), 2024);
 
@@ -89,13 +58,7 @@ class ReadingGoalServiceIntegrationTest {
     @Test
     void shouldUpdateExistingGoal() {
         var user = saveUser();
-        var goal = ReadingGoal.builder()
-                .user(user)
-                .year(2024)
-                .targetBooks(10)
-                .targetPages(2000)
-                .build();
-        testDbClient.saveReadingGoal(goal);
+        var goal = saveReadingGoal(r -> r.user(user).year(2024).targetBooks(10).targetPages(2000));
         var dto = ReadingGoalDto.builder()
                 .year(2024)
                 .targetBooks(20)
@@ -115,28 +78,11 @@ class ReadingGoalServiceIntegrationTest {
     @Test
     void shouldDeleteGoal() {
         var user = saveUser();
-        var goal = ReadingGoal.builder()
-                .user(user)
-                .year(2024)
-                .targetBooks(10)
-                .build();
-        testDbClient.saveReadingGoal(goal);
+        var goal = saveReadingGoal(r -> r.user(user).year(2024).targetBooks(10));
 
         service.delete(user.getId(), 2024);
 
         assertThat(testDbClient.findReadingGoalById(goal.getId())).isNull();
-    }
-
-    private User saveUser() {
-        var user = User.builder()
-                .email("user@example.com")
-                .fullName("User")
-                .password("pass")
-                .role(USER)
-                .build();
-
-        testDbClient.saveUser(user);
-        return user;
     }
 
 }
