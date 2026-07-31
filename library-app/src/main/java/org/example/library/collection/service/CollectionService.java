@@ -6,10 +6,10 @@ import org.example.library.collection.domain.Collection;
 import org.example.library.collection.dto.BasicCollectionDto;
 import org.example.library.collection.dto.CollectionDetailsDto;
 import org.example.library.collection.dto.CollectionNodeDto;
-import org.example.library.collection.dto.CollectionTreeProjection;
 import org.example.library.collection.dto.CollectionValidationProjection;
 import org.example.library.collection.dto.CreateCollectionRequest;
 import org.example.library.collection.dto.UpdateCollectionDto;
+import org.example.library.collection.mapper.CollectionHierarchyAssembler;
 import org.example.library.collection.mapper.CollectionMapper;
 import org.example.library.collection.repository.CollectionRepository;
 import org.example.library.collection.repository.CollectionSpecification;
@@ -23,14 +23,8 @@ import org.example.library.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
@@ -46,15 +40,13 @@ public class CollectionService {
     private static final String ERROR_BOOK_ALREADY_IN_TARGET_MSG = "error.collection.book_already_in_target";
     private static final String ERROR_LIBRARY_BOOK_NOT_FOUND_MSG = "error.library_book.not_found";
     private static final int MAX_ALLOWED_HIERARCHY_LEVELS = 4;
-    private static final Comparator<CollectionNodeDto> COLLECTION_NODE_NAME_ORDER = Comparator
-            .comparing(CollectionNodeDto::getName, CASE_INSENSITIVE_ORDER)
-            .thenComparing(CollectionNodeDto::getId);
 
     private final CollectionRepository collectionRepository;
     private final CollectionBookRepository collectionBookRepository;
     private final LibraryBookRepository libraryBookRepository;
     private final UserRepository userRepository;
     private final CollectionMapper collectionMapper;
+    private final CollectionHierarchyAssembler hierarchyAssembler = new CollectionHierarchyAssembler();
 
     @Transactional(readOnly = true)
     public List<BasicCollectionDto> getCollectionsContainingLibraryBook(Integer userId, Integer libraryBookId) {
@@ -66,28 +58,10 @@ public class CollectionService {
 
     @Transactional(readOnly = true)
     public List<CollectionNodeDto> getUserCollectionHierarchy(Integer userId) {
-        var projections = collectionRepository.findCollectionTreeProjectionsByUserId(userId);
-        var nodeByCollectionId = projections.stream()
-                .collect(toMap(CollectionTreeProjection::id, collectionMapper::toNodeDto));
+        var projections = collectionRepository.findCollectionHierarchyProjectionsByUserId(userId);
+        var nodes = collectionMapper.toNodeDto(projections);
 
-        var topLevelNodes = new ArrayList<CollectionNodeDto>();
-        for (var projection : projections) {
-            var node = nodeByCollectionId.get(projection.id());
-            var parentId = projection.parentId();
-            if (parentId == null) {
-                topLevelNodes.add(node);
-            } else {
-                var parentNode = nodeByCollectionId.get(parentId);
-                if (parentNode == null) {
-                    throw new IllegalStateException(format("Collection %s references parent %s which is not fetched",
-                            projection.id(), parentId));
-                }
-                parentNode.getChildren().add(node);
-            }
-        }
-
-        sortHierarchy(topLevelNodes);
-        return topLevelNodes;
+        return hierarchyAssembler.assemble(nodes);
     }
 
     @Transactional(readOnly = true)
@@ -256,13 +230,6 @@ public class CollectionService {
     private boolean moveWouldExceedMaxLevels(CollectionValidationProjection validation) {
         var deepestDescendantLevel = validation.getNewParentLevel() + validation.getMovedDescendantLevels();
         return deepestDescendantLevel > MAX_ALLOWED_HIERARCHY_LEVELS;
-    }
-
-    private void sortHierarchy(List<CollectionNodeDto> nodes) {
-        nodes.sort(COLLECTION_NODE_NAME_ORDER);
-        for (var node : nodes) {
-            sortHierarchy(node.getChildren());
-        }
     }
 
 }

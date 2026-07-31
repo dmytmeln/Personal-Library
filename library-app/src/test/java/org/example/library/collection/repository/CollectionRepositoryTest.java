@@ -2,7 +2,7 @@ package org.example.library.collection.repository;
 
 import org.example.library.book.domain.Book;
 import org.example.library.collection.domain.Collection;
-import org.example.library.collection.dto.CollectionTreeProjection;
+import org.example.library.collection.dto.CollectionHierarchyProjection;
 import org.example.library.collection.dto.CollectionValidationProjection;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
@@ -148,7 +148,7 @@ class CollectionRepositoryTest extends AbstractRepositoryTest<CollectionReposito
     }
 
     @Test
-    void findCollectionTreeProjectionsByUserId_ShouldReturnIdNameAndParentId() {
+    void findCollectionHierarchyProjectionsByUserId_ShouldReturnIdNameAndParentId() {
         User owner = createUser();
         testDbClient.saveUser(owner);
         Collection root = createCollection(owner, "Root");
@@ -158,10 +158,10 @@ class CollectionRepositoryTest extends AbstractRepositoryTest<CollectionReposito
         child.setUser(owner);
         testDbClient.saveCollection(child);
 
-        List<CollectionTreeProjection> actual = repository.findCollectionTreeProjectionsByUserId(owner.getId());
+        List<CollectionHierarchyProjection> actual = repository.findCollectionHierarchyProjectionsByUserId(owner.getId());
 
         assertThat(actual).hasSize(2);
-        assertThat(actual).extracting(CollectionTreeProjection::name).containsExactlyInAnyOrder("Root", "Child");
+        assertThat(actual).extracting(CollectionHierarchyProjection::name).containsExactlyInAnyOrder("Root", "Child");
         assertThat(actual).filteredOn(projection -> projection.name().equals("Root"))
                 .singleElement()
                 .satisfies(projection -> {

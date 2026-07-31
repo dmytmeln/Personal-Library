@@ -1,7 +1,7 @@
 package org.example.library.collection.repository;
 
 import org.example.library.collection.domain.Collection;
-import org.example.library.collection.dto.CollectionTreeProjection;
+import org.example.library.collection.dto.CollectionHierarchyProjection;
 import org.example.library.collection.dto.CollectionValidationProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -14,11 +14,11 @@ import java.util.Optional;
 public interface CollectionRepository extends JpaRepository<Collection, Integer>, JpaSpecificationExecutor<Collection> {
 
     @Query("""
-            SELECT new org.example.library.collection.dto.CollectionTreeProjection(c.id, c.name, c.parent.id)
+            SELECT new org.example.library.collection.dto.CollectionHierarchyProjection(c.id, c.name, c.parent.id)
             FROM Collection c
             WHERE c.user.id = :userId
             """)
-    List<CollectionTreeProjection> findCollectionTreeProjectionsByUserId(Integer userId);
+    List<CollectionHierarchyProjection> findCollectionHierarchyProjectionsByUserId(Integer userId);
 
     @Query(value = """
             WITH RECURSIVE collection_path AS (
