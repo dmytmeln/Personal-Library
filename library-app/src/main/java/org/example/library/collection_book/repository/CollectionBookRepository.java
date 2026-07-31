@@ -43,4 +43,6 @@ public interface CollectionBookRepository extends JpaRepository<CollectionBook, 
     @Query("DELETE FROM CollectionBook cb WHERE cb.id.libraryBookId = :bookId AND cb.id.collectionId = :collectionId")
     int deleteByLibraryBookIdAndCollectionId(Integer bookId, Integer collectionId);
 
+    boolean existsByLibraryBookIdAndCollectionId(Integer libraryBookId, Integer collectionId);
+
 }

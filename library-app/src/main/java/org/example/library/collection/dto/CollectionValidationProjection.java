@@ -1,9 +1,11 @@
 package org.example.library.collection.dto;
 
 public interface CollectionValidationProjection {
-    Integer getSubtreeDepth();
 
-    Integer getParentRootDepth();
+    Integer getNewParentLevel();
 
-    Boolean getIsCircular();
+    Integer getMovedDescendantLevels();
+
+    boolean isCircular();
+
 }

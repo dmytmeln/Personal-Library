@@ -2,6 +2,7 @@ package org.example.library.collection.repository;
 
 import org.example.library.book.domain.Book;
 import org.example.library.collection.domain.Collection;
+import org.example.library.collection.dto.CollectionTreeProjection;
 import org.example.library.collection.dto.CollectionValidationProjection;
 import org.example.library.collection_book.domain.CollectionBook;
 import org.example.library.collection_book.domain.CollectionBookId;
@@ -147,36 +148,32 @@ class CollectionRepositoryTest extends AbstractRepositoryTest<CollectionReposito
     }
 
     @Test
-    void findAllByUserId_ShouldReturnCollections_WhenUserHasCollections() {
+    void findCollectionTreeProjectionsByUserId_ShouldReturnIdNameAndParentId() {
         User owner = createUser();
         testDbClient.saveUser(owner);
-        Collection collection1 = createCollection(owner, "Favorites");
-        Collection collection2 = createCollection(owner, "To Read");
-        testDbClient.saveCollection(collection1);
-        testDbClient.saveCollection(collection2);
+        Collection root = createCollection(owner, "Root");
+        testDbClient.saveCollection(root);
+        Collection child = createCollection(owner, "Child");
+        child.setParent(root);
+        child.setUser(owner);
+        testDbClient.saveCollection(child);
 
-        List<Collection> actual = repository.findAllByUserId(owner.getId());
+        List<CollectionTreeProjection> actual = repository.findCollectionTreeProjectionsByUserId(owner.getId());
 
         assertThat(actual).hasSize(2);
-    }
-
-    @Test
-    void findAllByUserIdAndBookId_ShouldReturnCollections_WhenUserAndBookMatch() {
-        User owner = createUser();
-        testDbClient.saveUser(owner);
-        Book book = createBook();
-        testDbClient.saveBook(book);
-        LibraryBook libraryBook = createLibraryBook(book, owner);
-        testDbClient.saveLibraryBook(libraryBook);
-        Collection collection = createCollection(owner, "My Collection");
-        testDbClient.saveCollection(collection);
-        testDbClient.saveCollectionBook(CollectionBook.builder()
-                .id(new CollectionBookId(collection.getId(), libraryBook.getId()))
-                .build());
-
-        List<Collection> actual = repository.findAllByUserIdAndBookId(owner.getId(), book.getId());
-
-        assertThat(actual).hasSize(1);
+        assertThat(actual).extracting(CollectionTreeProjection::name).containsExactlyInAnyOrder("Root", "Child");
+        assertThat(actual).filteredOn(projection -> projection.name().equals("Root"))
+                .singleElement()
+                .satisfies(projection -> {
+                    assertThat(projection.id()).isEqualTo(root.getId());
+                    assertThat(projection.parentId()).isNull();
+                });
+        assertThat(actual).filteredOn(projection -> projection.name().equals("Child"))
+                .singleElement()
+                .satisfies(projection -> {
+                    assertThat(projection.id()).isEqualTo(child.getId());
+                    assertThat(projection.parentId()).isEqualTo(root.getId());
+                });
     }
 
     @Test
@@ -223,9 +220,9 @@ class CollectionRepositoryTest extends AbstractRepositoryTest<CollectionReposito
         CollectionValidationProjection actual = repository.getValidationData(toMove.getId(), parent.getId());
 
         assertThat(actual).isNotNull();
-        assertThat(actual.getSubtreeDepth()).isEqualTo(2);
-        assertThat(actual.getParentRootDepth()).isEqualTo(2);
-        assertThat(actual.getIsCircular()).isFalse();
+        assertThat(actual.getMovedDescendantLevels()).isEqualTo(2);
+        assertThat(actual.getNewParentLevel()).isEqualTo(2);
+        assertThat(actual.isCircular()).isFalse();
     }
 
     @Test
@@ -246,11 +243,11 @@ class CollectionRepositoryTest extends AbstractRepositoryTest<CollectionReposito
         CollectionValidationProjection actual = repository.getValidationData(parent.getId(), toMove.getId());
 
         assertThat(actual).isNotNull();
-        assertThat(actual.getIsCircular()).isTrue();
+        assertThat(actual.isCircular()).isTrue();
     }
 
     @Test
-    void getDepth_ShouldReturnCorrectDepth() {
+    void getHierarchyLevel_ShouldReturnHierarchyLevel() {
         User owner = createUser();
         testDbClient.saveUser(owner);
         Collection root = createCollection(owner, "Root");
@@ -264,27 +261,13 @@ class CollectionRepositoryTest extends AbstractRepositoryTest<CollectionReposito
         grandchild.setUser(owner);
         testDbClient.saveCollection(grandchild);
 
-        int rootDepth = repository.getDepth(root.getId());
-        int childDepth = repository.getDepth(child.getId());
-        int grandchildDepth = repository.getDepth(grandchild.getId());
+        int rootLevel = repository.getHierarchyLevel(root.getId());
+        int childLevel = repository.getHierarchyLevel(child.getId());
+        int grandchildLevel = repository.getHierarchyLevel(grandchild.getId());
 
-        assertThat(rootDepth).isEqualTo(1);
-        assertThat(childDepth).isGreaterThan(rootDepth);
-        assertThat(grandchildDepth).isGreaterThan(childDepth);
-    }
-
-    @Test
-    void countByUserIdAndIds_ShouldReturnCount() {
-        User owner = createUser();
-        testDbClient.saveUser(owner);
-        Collection collection1 = createCollection(owner, "C1");
-        Collection collection2 = createCollection(owner, "C2");
-        testDbClient.saveCollection(collection1);
-        testDbClient.saveCollection(collection2);
-
-        long actual = repository.countByUserIdAndIds(owner.getId(), collection1.getId(), collection2.getId());
-
-        assertThat(actual).isEqualTo(2L);
+        assertThat(rootLevel).isEqualTo(1);
+        assertThat(childLevel).isEqualTo(2);
+        assertThat(grandchildLevel).isEqualTo(3);
     }
 
     @Test

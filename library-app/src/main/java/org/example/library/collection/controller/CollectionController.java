@@ -39,14 +39,14 @@ public class CollectionController {
     @GetMapping("/tree")
     @ResponseStatus(HttpStatus.OK)
     public List<CollectionNodeDto> getTree(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return service.getUserCollectionTree(userPrincipal.getId());
+        return service.getUserCollectionHierarchy(userPrincipal.getId());
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<BasicCollectionDto> getAll(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                            @RequestParam Integer libraryBookId) {
-        return service.getAllCollections(userPrincipal.getId(), libraryBookId);
+        return service.getCollectionsContainingLibraryBook(userPrincipal.getId(), libraryBookId);
     }
 
     @GetMapping("/{collectionId}")

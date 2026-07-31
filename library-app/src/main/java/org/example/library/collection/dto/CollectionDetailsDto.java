@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class CollectionDetailsDto {
+
     private Integer id;
     private String name;
     private String description;
@@ -16,4 +17,5 @@ public class CollectionDetailsDto {
     private LocalDateTime createdAt;
     private List<BasicCollectionDto> ancestors;
     private List<BasicCollectionDto> children;
+
 }

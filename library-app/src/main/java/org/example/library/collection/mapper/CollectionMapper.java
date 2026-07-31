@@ -5,6 +5,7 @@ import org.example.library.collection.domain.Collection;
 import org.example.library.collection.dto.BasicCollectionDto;
 import org.example.library.collection.dto.CollectionDetailsDto;
 import org.example.library.collection.dto.CollectionNodeDto;
+import org.example.library.collection.dto.CollectionTreeProjection;
 import org.example.library.collection.dto.CreateCollectionRequest;
 import org.example.library.collection.dto.UpdateCollectionDto;
 import org.mapstruct.Mapper;
@@ -23,9 +24,8 @@ public interface CollectionMapper {
 
     List<BasicCollectionDto> toBasicDto(List<Collection> collections);
 
-    @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "children", ignore = true)
-    CollectionNodeDto toNodeDto(Collection collection);
+    CollectionNodeDto toNodeDto(CollectionTreeProjection projection);
 
     @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "ancestors", ignore = true)

@@ -8,8 +8,10 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class BasicCollectionDto {
+
     private Integer id;
     private String name;
     private Integer parentId;
     private LocalDateTime updatedAt;
+
 }

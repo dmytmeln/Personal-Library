@@ -1,6 +1,7 @@
 package org.example.library.library_book.repository;
 
 import jakarta.persistence.criteria.JoinType;
+import lombok.NoArgsConstructor;
 import org.example.library.author.domain.Author_;
 import org.example.library.library_book.domain.LibraryBookStatus;
 import org.example.library.library_book.domain.LibraryBookView;
@@ -10,6 +11,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public class LibraryBookViewSpecification {
 
     public static Specification<LibraryBookView> fromSearchCriteria(Integer userId, String lang, LibraryBookSearchCriteria criteria) {

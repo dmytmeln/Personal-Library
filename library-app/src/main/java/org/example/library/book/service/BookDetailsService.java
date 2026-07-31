@@ -42,7 +42,7 @@ public class BookDetailsService {
         }
 
         var libraryBook = libraryBookMapper.toDto(libraryBookViewOpt.get());
-        var collectionsContainingLibraryBook = collectionService.getAllCollections(userId, libraryBook.getId());
+        var collectionsContainingLibraryBook = collectionService.getCollectionsContainingLibraryBook(userId, libraryBook.getId());
 
         return LibraryBookDetails.from(libraryBook, bookRatingSummary, collectionsContainingLibraryBook);
     }

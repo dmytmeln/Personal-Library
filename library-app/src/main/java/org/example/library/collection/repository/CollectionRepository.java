@@ -1,6 +1,7 @@
 package org.example.library.collection.repository;
 
 import org.example.library.collection.domain.Collection;
+import org.example.library.collection.dto.CollectionTreeProjection;
 import org.example.library.collection.dto.CollectionValidationProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,16 +13,12 @@ import java.util.Optional;
 
 public interface CollectionRepository extends JpaRepository<Collection, Integer>, JpaSpecificationExecutor<Collection> {
 
-    List<Collection> findAllByUserId(Integer userId);
-
-    @Query(value = """
-            SELECT c.collection_id, c.user_id, c.parent_id, c.name, c.description, c.created_at, c.updated_at
-            FROM collections c
-            JOIN collection_books cb ON cb.collection_id = c.collection_id
-            JOIN library_books lb ON lb.library_book_id = cb.library_book_id
-            WHERE lb.user_id = :userId AND lb.book_id = :bookId
-            """, nativeQuery = true)
-    List<Collection> findAllByUserIdAndBookId(Integer userId, Integer bookId);
+    @Query("""
+            SELECT new org.example.library.collection.dto.CollectionTreeProjection(c.id, c.name, c.parent.id)
+            FROM Collection c
+            WHERE c.user.id = :userId
+            """)
+    List<CollectionTreeProjection> findCollectionTreeProjectionsByUserId(Integer userId);
 
     @Query(value = """
             WITH RECURSIVE collection_path AS (
@@ -43,22 +40,22 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
 
     @Query(value = """
             WITH RECURSIVE
-            subtree AS (
+            descendants AS (
                 SELECT collection_id, 1 AS level FROM collections WHERE collection_id = :toMoveId
                 UNION ALL
-                SELECT c.collection_id, s.level + 1 FROM collections c
-                JOIN subtree s ON c.parent_id = s.collection_id
+                SELECT c.collection_id, d.level + 1 FROM collections c
+                JOIN descendants d ON c.parent_id = d.collection_id
             ),
-            parent_path AS (
+            ancestors AS (
                 SELECT collection_id, parent_id, 1 AS level FROM collections WHERE collection_id = :newParentId
                 UNION ALL
-                SELECT c.collection_id, c.parent_id, p.level + 1 FROM collections c
-                JOIN parent_path p ON c.collection_id = p.parent_id
+                SELECT c.collection_id, c.parent_id, a.level + 1 FROM collections c
+                JOIN ancestors a ON c.collection_id = a.parent_id
             )
             SELECT
-                (SELECT COALESCE(MAX(level), 0) FROM subtree) AS subtreeDepth,
-                (SELECT COALESCE(MAX(level), 0) FROM parent_path) AS parentRootDepth,
-                (SELECT EXISTS (SELECT 1 FROM parent_path WHERE collection_id = :toMoveId)) AS isCircular
+                (SELECT COALESCE(MAX(level), 0) FROM descendants) AS movedDescendantLevels,
+                (SELECT COALESCE(MAX(level), 0) FROM ancestors) AS newParentLevel,
+                (SELECT EXISTS (SELECT 1 FROM ancestors WHERE collection_id = :toMoveId)) AS circular
             """, nativeQuery = true)
     CollectionValidationProjection getValidationData(Integer toMoveId, Integer newParentId);
 
@@ -71,10 +68,7 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
             )
             SELECT COALESCE(MAX(level), 0) FROM path
             """, nativeQuery = true)
-    int getDepth(Integer id);
-
-    @Query("SELECT COUNT(c) FROM Collection c WHERE c.user.id = :userId AND c.id IN (:sourceId, :targetId)")
-    long countByUserIdAndIds(Integer userId, Integer sourceId, Integer targetId);
+    int getHierarchyLevel(Integer id);
 
     @Query("SELECT c FROM Collection c LEFT JOIN FETCH c.children WHERE c.id = :id AND c.user.id = :userId")
     Optional<Collection> findByIdAndUserIdWithChildren(Integer id, Integer userId);
